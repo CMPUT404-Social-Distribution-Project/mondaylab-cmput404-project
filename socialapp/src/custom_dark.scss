@@ -1,0 +1,16 @@
+// overwrite theme variables
+$theme-colors: (
+    "teal": #BFEFE9,
+    "orange": #FFC271,
+    "dark-blue": #242A37,
+    "slightly-darker-blue": #1C212B,
+    "darker-blue": #1A1C1E,
+    "even-darker-blue": #17191B,
+    "white-teal": #ECFAF8
+);
+
+
+
+@import "node_modules/bootstrap/scss/bootstrap.scss";
+
+

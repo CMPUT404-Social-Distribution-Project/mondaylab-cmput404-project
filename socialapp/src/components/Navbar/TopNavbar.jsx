@@ -3,7 +3,7 @@ import {Container, Nav, Navbar} from "react-bootstrap";
 
 function TopNavbar() {
     return (
-        <Navbar bg="dark" variant="dark">
+        <Navbar bg="dark-blue" variant="dark">
             <Container fluid classname=".me-1">
                 <Navbar.Brand className="me-auto">Social Distrubtion</Navbar.Brand>
                 <Nav className="ml-auto">
