@@ -24,18 +24,9 @@ class PostApiView(GenericAPIView):
         post_id = get_post_id(request)
         if user_id is None:
             post = Post.objects.all()
-            print(post[1].id)
             result = self.serializer_class(post, many=True)
             return response.Response(result, status=status.HTTP_200_OK)
         else:
-            # try:
-            #     author_id = get_author_id(request)
-            #     print("0---------0", author_id)
-
-            #     author = Author.objects.get(id = author_id)
-            #     print("0------1-----------0", author)
-            # except Exception as e:
-            #     return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
             if post_id is not None:
                 try:
 
@@ -129,7 +120,7 @@ class PostsApiView(GenericAPIView):
 
     def get(self, request, user_id):
         # Just a test case
-        #print(request, request.data, request.get_host(), request.get_port(), request.get_full_path_info(), user_id)
+       
         if user_id is None:
             post = Post.objects.all()
             result = self.serializer_class(post, many=True)
@@ -138,8 +129,6 @@ class PostsApiView(GenericAPIView):
             try:
                 author_id= get_author_id(request)
                 author = Author.objects.get(id = author_id)
-                
-                print(author)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
             if author is not None:
@@ -176,13 +165,10 @@ def get_author_id(request):
     if "posts" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
         yy = xx[1].split("/posts")
-        print("xx")
-        print("yy", yy)
         author_id= xx[0]+yy[0]
         return author_id
     else:
         xx=request.build_absolute_uri()[:-7].split('service/')
-        print("3xx3", xx)
         author_id= xx[0]+xx[1]
         return author_id
 

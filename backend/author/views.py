@@ -16,8 +16,7 @@ class AuthorApiView(GenericAPIView):
 
 
     def post(self, request,):
-        try:
-            
+        try: 
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
                 host = request.data['host']
