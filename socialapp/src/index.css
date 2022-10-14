@@ -1,6 +1,27 @@
+@font-face {
+  font-family: 'Readex Pro';
+  src: local('Readex Pro'), url(./des/fonts/ReadexPro-Regular.tff) format('truetype');
+}
+
+@font-face {
+  font-family: 'Readex Pro Light';
+  src: local('Readex Pro Light'), url(./des/fonts/ReadexPro-Light.tff) format('truetype');
+}
+
+@font-face {
+  font-family: 'Readex Pro Medium';
+  src: local('Readex Pro Medium'), url(./des/fonts/ReadexPro-Medium.tff) format('truetype');
+}
+
+@font-face {
+  font-family: 'Readex Pro Bold';
+  src: local('Readex Pro Bold'), url(./des/fonts/ReadexPro-Bold.tff) format('truetype');
+}
+
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: -apple-system, BlinkMacSystemFont, 'Readex Pro', 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
