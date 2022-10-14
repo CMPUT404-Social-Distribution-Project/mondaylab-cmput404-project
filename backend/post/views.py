@@ -57,11 +57,9 @@ class PostApiView(GenericAPIView):
         try:
             post =Post.objects.get(id = post_id)
         except Exception as e:
-            
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
         try:
-            
             post.id = post_id
             post.title = request.data["title"]
             post.source = request.data['source']
@@ -73,11 +71,10 @@ class PostApiView(GenericAPIView):
             post.categories = request.data["categories"]
             #post.comments = request.data['comments']
             post.visibility = request.data["visibility"]
-            post.unlisted = request.data["unlisted"]
             if 'unlisted' not in request.data:
                 post.unlisted = False
             else:
-                post.unlisted = bool(request.data["unlisted"])
+                post.unlisted = True
             try:
                 post.save()
                 result = self.serializer_class(post, many=False)
@@ -86,7 +83,27 @@ class PostApiView(GenericAPIView):
                 return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, user_id):
+        
+        try: 
+            author_id = get_author_id(request) 
+            post_id =get_post_id(request)
+            exist = Post.objects.get(id=post_id)
+            if exist:
+                return response.Response(f"Error: Post id exist!", status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
+        try:
+            serialize = self.serializer_class(data=request.data)
+            if serialize.is_valid():
+                serialize.save(id =post_id )
+
+                # post.save()
+                # result = self.serializer_class(post, many=False)
+                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
     def delete(self, request, user_id):
         post_id = get_post_id(request)
         if user_id is None:
@@ -137,39 +154,22 @@ class PostsApiView(GenericAPIView):
         
         try: 
             author_id = get_author_id(request) 
-            author = Author.objects.get(id=author_id)
         except:
             e="Author is not found!"
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
         try:
-            post = Post.objects.create(author=author)
-            post.id = author_id+'/'+'posts/'+str(uuid4())
-            post.type= "post"
-            post.title = request.data["title"]
-            post.source = request.data['source']
-            post.origin = request.data['origin']
-            post.description = request.data["description"]
-            post.contentType=request.data['contentType']
-            post.content = request.data["content"]
-            post.categories = request.data["categories"]
-            #post.comments = request.data['comments']
-            post.visibility = request.data["visibility"]
-            if 'unlisted' not in request.data:
-                post.unlisted = False
-            else:
-                post.unlisted = bool(request.data["unlisted"])
-            
+            serialize = self.serializer_class(data=request.data)
+            if serialize.is_valid():
+                serialize.save(id =author_id+'/'+'posts/'+str(uuid4())  )
 
-            try:
-                post.save()
-                result = self.serializer_class(post, many=False)
-                return response.Response(result.data, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
-        
+                # post.save()
+                # result = self.serializer_class(post, many=False)
+                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 def get_author_id(request):
