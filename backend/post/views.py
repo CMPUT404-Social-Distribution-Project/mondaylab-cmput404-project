@@ -7,6 +7,7 @@ from rest_framework.authentication import BasicAuthentication
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer
 from uuid import uuid4
+from django.db.models import Q
 # Create your views here.
 class PostApiView(GenericAPIView):
     """
@@ -73,7 +74,10 @@ class PostApiView(GenericAPIView):
             #post.comments = request.data['comments']
             post.visibility = request.data["visibility"]
             post.unlisted = request.data["unlisted"]
-            post.unlisted = bool(request.data["unlisted"])
+            if 'unlisted' not in request.data:
+                post.unlisted = False
+            else:
+                post.unlisted = bool(request.data["unlisted"])
             try:
                 post.save()
                 result = self.serializer_class(post, many=False)
@@ -150,7 +154,10 @@ class PostsApiView(GenericAPIView):
             post.categories = request.data["categories"]
             #post.comments = request.data['comments']
             post.visibility = request.data["visibility"]
-            post.unlisted = bool(request.data["unlisted"])
+            if 'unlisted' not in request.data:
+                post.unlisted = False
+            else:
+                post.unlisted = bool(request.data["unlisted"])
             
 
             try:
@@ -185,3 +192,6 @@ def get_post_id(request):
     xx=request.build_absolute_uri().split('service/')
     author_id= xx[0]+xx[1]
     return author_id
+
+
+    
