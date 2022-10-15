@@ -210,7 +210,7 @@ class ImagePostsApiView(GenericAPIView):
             img = decodeDesignImage(request.data['image'])
             img_io = io.BytesIO()
             img.save(img_io, format='JPEG')
-            image = InMemoryUploadedFile(img_io, field_name=None, name=post_id+'/'+ str(uuid4())".jpg", content_type='image/jpeg', size=img_io.tell, charset=None)
+            image = InMemoryUploadedFile(img_io, field_name=None, name=post_id+'/'+ str(uuid4())+".jpg", content_type='image/jpeg', size=img_io.tell, charset=None)
 
             if serialize.is_valid():
                 serialize.save(id =author_id+'/'+'posts/'+str(uuid4()) , image= image)
