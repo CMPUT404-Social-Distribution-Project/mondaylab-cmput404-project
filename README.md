@@ -1,5 +1,5 @@
 # SocialDistribution: a social media app by Team01 
-## Created in CMPUT-404 Fall 2022 course 
+***Created in CMPUT-404 Fall 2022 course***
 
 Be sure to run this in a virtual environment:
 ```
