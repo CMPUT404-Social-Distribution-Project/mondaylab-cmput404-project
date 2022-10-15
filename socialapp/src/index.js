@@ -5,12 +5,14 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TopNavBar from './components/Navbar/TopNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import SideNavbar from './components/Navbar/SideNavBar';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <TopNavBar />
     <App />
+    <SideNavbar />
   </React.StrictMode>
   
 );
