@@ -2,7 +2,6 @@ import React from "react";
 import {Container, Nav, Navbar} from "react-bootstrap";
 import Logo from "../../des/logos/logo.svg";
 import LogoText from "../../des/logos/logo-text.svg";
-import { ReactComponent as SDLogo } from "../../des/logos/logo.svg";
 
 function TopNavbar() {
     return (
