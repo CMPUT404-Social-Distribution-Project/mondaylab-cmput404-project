@@ -1,7 +1,7 @@
 from django.utils.timezone import now
 from django.utils import dateparse
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
-ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField
+ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, ImageField
 )
 from author.models import Author
 # Create your models here.
@@ -24,6 +24,7 @@ class Post(Model):
     description = CharField( blank=True, null=True, max_length=300)
     contentType = CharField(default=ContentType.plain, blank=False, null=False, choices=ContentType.choices, max_length=200)
     content = TextField(blank=True, null=True)
+    image = ImageField(upload_to='images/',blank=True, null=True)
     author = ForeignKey(Author, blank=False, null=False, on_delete=CASCADE)
     categories = TextField(null=True)
     #see this to send categories
