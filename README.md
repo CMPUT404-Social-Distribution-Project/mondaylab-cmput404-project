@@ -1,5 +1,13 @@
 # SocialDistribution: a social media app by Team01 
 ***Created in CMPUT-404 Fall 2022 course***
+##  Team Members  
+  
+| <img src="https://avatars.githubusercontent.com/u/49131259?v=4" width="200">| <img src="https://avatars.githubusercontent.com/u/57372321?v=4" width="200"> | <img src="https://avatars.githubusercontent.com/u/66976914?v=4" width="200"> | <img src="https://avatars.githubusercontent.com/u/77299977?v=4" width="200"> | <img src="https://avatars.githubusercontent.com/u/98789620?v=4" width="200"> |
+:---: | :---: | :---: | :---: | :---:
+|[happycat33](https://github.com/happycat33)|[jackie174](https://github.com/jackie174)|[TruongGiangPham-1](https://github.com/TruongGiangPham-1)|[rmo1ualberta](https://github.com/rmo1ualberta)|[em1i](https://github.com/em1i)|
+
+---
+### For devs:
 
 Be sure to run this in a virtual environment:
 ```
