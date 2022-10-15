@@ -4,7 +4,7 @@ import './custom_dark.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TopNavBar from './components/Navbar/TopNavbar';
-import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -12,6 +12,7 @@ root.render(
     <TopNavBar />
     <App />
   </React.StrictMode>
+  
 );
 
 // If you want to start measuring performance in your app, pass a function
