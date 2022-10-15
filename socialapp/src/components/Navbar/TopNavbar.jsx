@@ -3,6 +3,7 @@ import {Container, Nav, Navbar} from "react-bootstrap";
 import Logo from "../../des/logos/logo.svg";
 import LogoText from "../../des/logos/logo-text.svg";
 import {FaBell, FaCog} from "react-icons/fa"
+
 function TopNavbar() {
     return (
         <Navbar bg="teal-alt" variant="dark">
@@ -20,8 +21,8 @@ function TopNavbar() {
                     />
                 </Navbar.Brand>
                 <Nav className="ml-auto">
-                    <Nav.Link href="#home"><FaBell/></Nav.Link>
-                    <Nav.Link href="#features"><FaCog/></Nav.Link>
+                    <Nav.Link href="#home"><FaBell size={30}/>&emsp; </Nav.Link>
+                    <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link>
                     <Nav.Link href="#pricing">ProfilePic</Nav.Link>
                 </Nav>
             </Container>
