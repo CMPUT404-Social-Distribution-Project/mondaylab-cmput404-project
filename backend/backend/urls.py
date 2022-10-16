@@ -25,7 +25,3 @@ urlpatterns = [
     path('service/authors/<str:author_id>/posts/<str:post_id>', include("post.urls")),
 
 ]
-from django.conf import settings
-from django.conf.urls.static import static
-if settings.DEBUG:
-     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

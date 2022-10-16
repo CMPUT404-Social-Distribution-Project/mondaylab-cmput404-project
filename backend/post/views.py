@@ -8,12 +8,6 @@ from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer
 from uuid import uuid4
 from django.db.models import Q
-
-import base64
-import io
-from PIL import Image
-from django.core.files.uploadedfile import InMemoryUploadedFile
-
 # Create your views here.
 class PostApiView(GenericAPIView):
     """
@@ -167,60 +161,6 @@ class PostsApiView(GenericAPIView):
 
 
 
-class ImagePostsApiView(GenericAPIView):
-    """
-    Creation URL ://service/authors/{AUTHOR_ID}/posts/
-    GET [local, remote] get the recent posts from author AUTHOR_ID (paginated)
-    POST [local] create a new post but generate a new id
-    """
-    #authentication_classes = [BasicAuthentication]
-    serializer_class = PostSerializer
-
-    def get(self, request, author_id):
-        # Just a test case
-        print(request.data, request.build_absolute_uri(), author_id)
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            try:
-                author_id= get_author_id(request)
-                author = Author.objects.get(id = author_id)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-            if author is not None:
-                try:
-                    post = Post.objects.filter(author = author).order_by("published")
-                    result = {"items": self.serializer_class(post, many=True).data}
-                    return response.Response(result, status=status.HTTP_200_OK)
-                except Exception as e:
-                    return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-            else:
-                return response.Response(status=status.HTTP_404_NOT_FOUND)
-
-    def post(self, request, author_id):
-
-        author_id = get_author_id(request) 
-        post_id = get_post_id(request)
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
-
-        try:
-            serialize = self.serializer_class(data=request.data)
-            #https://issuecloser.com/blog/how-to-save-base64-encoded-image-to-django-imagefield
-            img = decodeDesignImage(request.data['image'])
-            img_io = io.BytesIO()
-            img.save(img_io, format='JPEG')
-            image = InMemoryUploadedFile(img_io, field_name=None, name=post_id+'/'+ str(uuid4())+".jpg", content_type='image/jpeg', size=img_io.tell, charset=None)
-
-            if serialize.is_valid():
-                serialize.save(id =author_id+'/'+'posts/'+str(uuid4()) , image= image)
-                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
 def get_author_id(request):
     if "posts" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
@@ -245,11 +185,3 @@ def check_author_id(request):
     print(author.exists())
     return author.exists()
 
-def decodeDesignImage(data):
-    try:
-        data = base64.b64decode(data.encode('UTF-8'))
-        buf = io.BytesIO(data)
-        img = Image.open(buf)
-        return img
-    except:
-        return None
