@@ -1,0 +1,7 @@
+Orange = FFC271
+Teal = BFEFE9
+Dark Blue = 242A37
+Slightly Darker Blue = 1C212B
+Darker Blue = 1A1C1E
+Even Darker Blue = 17191B
+Very light teal = ECFAF8

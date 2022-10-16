@@ -1,17 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './custom_dark.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TopNavBar from './components/Navbar/TopNavbar';
-import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import SideNavbar from './components/Navbar/SideNavBar';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <TopNavBar />
     <App />
+    <SideNavbar />
   </React.StrictMode>
+  
 );
 
 // If you want to start measuring performance in your app, pass a function
