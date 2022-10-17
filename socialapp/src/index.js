@@ -11,19 +11,25 @@ import StreamHome from './pages/StreamHome';
 import Inbox from './pages/Inbox';
 import Explore from './pages/Explore';
 import Profile from './pages/Profile';
+import Auth from "./Auth"
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <div className="root-container">
+    <Router>
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+      </Routes>
+    </Router>
+    {/* <div className="root-container">
       <TopNavBar />
       <div className="main">
         <Router>
           <SideNavBar />
           <div class="main-content-container">
             <Routes>
-              <Route path='/' element={<StreamHome/>} />
+              <Route path='/stream' element={<StreamHome/>} />
               <Route path='/inbox' element={<Inbox/>} />
               <Route path='/explore' element={<Explore/>} />
               <Route path='/profile' element={<Profile/>} />
@@ -32,7 +38,7 @@ root.render(
           </div>
         </Router>
       </div>
-    </div>
+    </div> */}
   </React.StrictMode>
   
 );
