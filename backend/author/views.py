@@ -19,8 +19,8 @@ class AuthorApiView(GenericAPIView):
         try: 
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                host = request.data['host']
-                id =str(host) +'authors/'+ str(uuid4())
+                host = request.build_absolute_uri('/')[:-1]
+                id =str(host) +'/authors/'+ str(uuid4())
                 serializer.save(id = id, url =id)
                 return response.Response(serializer.data, status=status.HTTP_200_OK)
 
