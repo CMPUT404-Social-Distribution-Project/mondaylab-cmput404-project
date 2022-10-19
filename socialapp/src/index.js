@@ -5,14 +5,40 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TopNavBar from './components/Navbar/TopNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import SideNavbar from './components/Navbar/SideNavBar';
+import SideNavBar from './components/Navbar/SideNavBar';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import StreamHome from './pages/StreamHome';
+import Inbox from './pages/Inbox';
+import Explore from './pages/Explore';
+import Profile from './pages/Profile';
+import Auth from "./Auth"
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <TopNavBar />
-    <App />
-    <SideNavbar />
+    <Router>
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+      </Routes>
+    </Router>
+    {/* <div className="root-container">
+      <TopNavBar />
+      <div className="main">
+        <Router>
+          <SideNavBar />
+          <div class="main-content-container">
+            <Routes>
+              <Route path='/stream' element={<StreamHome/>} />
+              <Route path='/inbox' element={<Inbox/>} />
+              <Route path='/explore' element={<Explore/>} />
+              <Route path='/profile' element={<Profile/>} />
+
+            </Routes>
+          </div>
+        </Router>
+      </div>
+    </div> */}
   </React.StrictMode>
   
 );

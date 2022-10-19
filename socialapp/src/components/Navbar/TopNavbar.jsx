@@ -3,10 +3,11 @@ import {Container, Nav, Navbar} from "react-bootstrap";
 import Logo from "../../des/logos/logo.svg";
 import LogoText from "../../des/logos/logo-text.svg";
 import {FaBell, FaCog} from "react-icons/fa"
+import "./TopNavbar.css"
 
 function TopNavbar() {
     return (
-        <Navbar bg="teal-alt" variant="dark">
+        <Navbar id="topnav" bg="teal-alt" variant="dark">
             <Container fluid classname=".me-1">
                 <Navbar.Brand className="me-auto">
                     <img
