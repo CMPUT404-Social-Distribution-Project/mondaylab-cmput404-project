@@ -32,10 +32,14 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request':request})
         serializer.is_valid(raise_exception=True)
+
+        # add in host, id, url from here since we can't access request object from the model
         host = request.build_absolute_uri('/')[:-1]
         id =str(host) +'/authors/'+ str(uuid4())
         serializer.validated_data['host'] = host
         serializer.validated_data['id'] = id
+        serializer.validated_data['url'] = id
+
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
         res = {

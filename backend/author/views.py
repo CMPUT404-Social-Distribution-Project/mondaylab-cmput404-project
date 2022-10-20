@@ -20,20 +20,20 @@ class AuthorApiView(GenericAPIView):
         except Exception as e:
             return response.Response(status=status.HTTP_404_NOT_FOUND)
 
+    # TODO: probably deprecated, using RegisterSerializer + AuthorManager to create authors instead
+    # def post(self, request,):
+    #     try: 
+    #         serializer = self.serializer_class(data=request.data)
+    #         if serializer.is_valid():
+    #             host = request.build_absolute_uri('/')[:-1]
+    #             id =str(host) +'/authors/'+ str(uuid4())
+    #             serializer.save(id = id, url =id)
+    #             return response.Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request,):
-        try: 
-            serializer = self.serializer_class(data=request.data)
-            if serializer.is_valid():
-                host = request.build_absolute_uri('/')[:-1]
-                id =str(host) +'/authors/'+ str(uuid4())
-                serializer.save(id = id, url =id)
-                return response.Response(serializer.data, status=status.HTTP_200_OK)
-
-            else:
-                return response.Response(f"Error: Data is valid", status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+    #         else:
+    #             return response.Response(f"Error: Data is valid", status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
 class AuthorsApiView(GenericAPIView):
     serializer_class = AuthorSerializer
