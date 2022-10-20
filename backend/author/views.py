@@ -12,9 +12,12 @@ from rest_framework import filters
 
 class AuthorApiView(GenericAPIView):
     serializer_class = AuthorSerializer
-    def get(self, request):
+    def get(self, request, author_id):
         try:
-            user = Author.objects.get(id=request.data.id)
+            host = request.build_absolute_uri('/')[:-1]
+            id =str(host) +'/authors/'+ author_id
+            print(id)
+            user = Author.objects.get(id=id)
             result = self.serializer_class(user, many=False)
             return response.Response(result.data, status=status.HTTP_200_OK)
         except Exception as e:
