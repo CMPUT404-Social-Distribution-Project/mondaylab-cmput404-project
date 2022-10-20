@@ -30,4 +30,4 @@ npm install
 
 https://supertokens.com/blog/building-a-login-screen-with-react-and-bootstrap
 
-
+https://dev.to/koladev/django-rest-authentication-cmh
