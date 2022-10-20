@@ -24,7 +24,7 @@ function TopNavbar() {
                 <Nav className="ml-auto">
                     <Nav.Link href="#home"><FaBell size={30}/>&emsp; </Nav.Link>
                     <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link>
-                    <Nav.Link href="#pricing">ProfilePic</Nav.Link>
+                    <Nav.Link href="#profile">ProfilePic</Nav.Link>
                 </Nav>
             </Container>
         </Navbar>

@@ -17,12 +17,15 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from post import views
+from author.views import UserViewSet
+from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('service/authors/', include("author.urls")),
     path('service/authors/<str:author_id>/posts/', include("post.urls")),
     path('service/authors/<str:author_id>/posts/<str:post_id>', include("post.urls")),
+    path('service/', include(('backend.routers', 'backend'), namespace='backend-api')),
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/', include("comments.urls")),
 
 
