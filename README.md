@@ -31,3 +31,5 @@ npm install
 https://supertokens.com/blog/building-a-login-screen-with-react-and-bootstrap
 
 https://dev.to/koladev/django-rest-authentication-cmh
+
+https://sushil-kamble.medium.com/django-rest-framework-react-authentication-workflow-2022-part-1-a21f22b3f358
