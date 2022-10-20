@@ -1,0 +1,129 @@
+
+.index {
+  background-color: white;
+}
+
+.Auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--dark-blue);
+  padding-right: 2rem;
+  background-image: url("../../des/logos/backdrop.png"), url("../../des/logos/outline.svg");
+  background-repeat: no-repeat;
+  background-size: 120% , 250%;
+  background-position: center, 25%;
+  background-position-x: right;
+}
+
+
+
+/* intro text and logo */
+.Logo-container {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  padding-right: 2rem;
+  margin-bottom: 1rem;
+}
+
+#intro-text {
+  width: 50vw;
+  font-size: 1vw;
+  color: var(--white-teal);
+}
+
+.introduction {
+  width: 50vw;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 3rem;
+  padding-right: 1rem;
+}
+
+/* for signup form */
+#reg-login {
+  cursor: pointer;
+  color: var(--orange) !important;
+}
+
+
+
+.form {
+  scale: 0.9;
+  width: 420px;
+  min-width: 20vw;
+  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 11px;
+  background-color: var(--slightly-darker-blue);
+  color: var(--white-teal);
+}
+
+.Auth-form-title {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 24px;
+  color: var(--white-teal);
+  font-family: "Readex Pro Bold";
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white-teal);
+}
+
+#forgot {
+  font-size: 14px;
+  padding-bottom: 1em;
+}
+
+#password {
+  color: var(--teal);
+}
+
+.err-validate-mes {
+  color: var(--orange);
+  position: absolute;
+  font-size: 0.6rem;
+  padding-top: 0.5rem;
+  align-self: right;
+}
+
+#submit-button {
+  margin-top: 1.5rem;
+  color: var(--slightly-darker-blue);
+  background-color: var(--teal);
+  border-radius: 55rem;
+  font-size: 14px;
+  height: 2.5rem;
+  width: 100%;
+}
+
+#signup-button {
+  color: var(--slightly-darker-blue);
+  background-color: var(--orange);
+  border-radius: 55rem;
+  font-size: 14px;
+  height: 2.5rem;
+}
+
+.form-control {
+  background-color: var(--dark-blue);
+  color: var(--white-teal);
+  border:rgb(0 0 0 / 0%);
+  border-radius: 11px;
+}
+
+.form-control:focus {
+  background-color: var(--darker-blue);
+  color: var(--white-teal);
+  
+}

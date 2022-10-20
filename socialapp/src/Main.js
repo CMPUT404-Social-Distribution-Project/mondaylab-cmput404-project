@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import StreamHome from './pages/StreamHome';
-import Inbox from './pages/Inbox';
-import Explore from './pages/Explore';
-import Profile from './pages/Profile';
 import SideNavBar from './components/Navbar/SideNavBar';
 import TopNavBar from './components/Navbar/TopNavbar';
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
+import { BrowserRouter as Route, Outlet} from 'react-router-dom'
 import './custom_dark.scss';
 import useAxios from "./utils/useAxios";
 
@@ -27,14 +23,16 @@ export default function Main() {
 
   return (
     <div className="root-container">
-    <TopNavBar />
-    <div className="main">
+      <TopNavBar />
+      <div className="main">
 
-        <SideNavBar />
-        <div class="main-content-container">
-        </div>
+          <SideNavBar />
+          <div class="main-content-container">
+            <Outlet />
+          </div>
 
-    </div>
+      </div>
+      
   </div>
   )
 }

@@ -1,21 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './custom_dark.scss';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
-import TopNavBar from './components/Navbar/TopNavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import SideNavBar from './components/Navbar/SideNavBar';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import StreamHome from './pages/StreamHome';
 import Inbox from './pages/Inbox';
 import Explore from './pages/Explore';
 import Profile from './pages/Profile';
-import PrivateRoute from "./utils/PrivateRoute";
 import { AuthProvider } from "./context/AuthContext";
-import Auth from "./Auth"
-import Main from "./Main"
-import Login from "./Login"
+import Main from "./Main";
+import Login from "./pages/authentication/Login";
+import Register from "./pages/authentication/Register"
+import AuthLayout from "./utils/AuthLayout";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -23,31 +20,19 @@ root.render(
     <Router>
       <AuthProvider>
         <Routes>
+          <Route element={<AuthLayout />}>
+            <Route path="/" element={<Main />}>
+              <Route path='stream' element={<StreamHome/>} />
+              <Route path='inbox' element={<Inbox/>} />
+              <Route path='explore' element={<Explore/>} />
+              <Route path='profile' element={<Profile/>} />
+            </Route>
+          </Route>
           <Route path="/login" element={<Login />} />
-          <PrivateRoute path="/" element={<Main />} />
-
+          <Route path="/register" element={<Register />} />
         </Routes>
       </AuthProvider>
-
-    
-
     </Router>
-    {/* <div className="root-container">
-      <TopNavBar />
-      <div className="main">
-        <Router>
-          <SideNavBar />
-          <div class="main-content-container">
-            <Routes>
-              <Route path='/stream' element={<StreamHome/>} />
-              <Route path='/inbox' element={<Inbox/>} />
-              <Route path='/explore' element={<Explore/>} />
-              <Route path='/profile' element={<Profile/>} />
-            </Routes>
-          </div>
-        </Router>
-      </div>
-    </div> */}
   </React.StrictMode>
 );
 
