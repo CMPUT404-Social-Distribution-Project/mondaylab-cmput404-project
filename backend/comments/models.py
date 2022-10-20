@@ -1,3 +1,4 @@
+from unittest.util import _MAX_LENGTH
 from django.db import models
 from django.utils.timezone import now
 from django.utils import dateparse
@@ -23,7 +24,7 @@ class Comment(Model):
     # when all row in author is deleted, this comment will be too
     author = models.ForeignKey(Author,blank=False, null=False, on_delete=CASCADE)
     contentType = CharField(default=ContentType.markdown, blank=False, null=False, choices=ContentType.choices, max_length=200)
-    published = CharField(blank=True)
+    published = CharField(blank=True, max_length=200)
 
 
 
