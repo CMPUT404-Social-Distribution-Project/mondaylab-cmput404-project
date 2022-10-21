@@ -18,11 +18,12 @@ export const AuthProvider = ({ children }) => {
       : null
   );
   const [loading, setLoading] = useState(true);
+  const baseURL = "http://127.0.0.1:8000/service";
 
   const navigate = useNavigate();
 
   const loginUser = async (displayName, password) => {
-    const response = await fetch("http://127.0.0.1:8000/service/auth/login/", {
+    const response = await fetch(baseURL + "/auth/login/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -33,7 +34,6 @@ export const AuthProvider = ({ children }) => {
       })
       
     });
-    console.log(response);
     const data = await response.json();
 
     if (response.status === 200) {
@@ -42,12 +42,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("authTokens", JSON.stringify(data));
       navigate("/stream");
     } else {
-      alert("Something went wrong!");
+      alert("ERROR:" + data["detail"]);
     }
   };
   
   const registerUser = async (displayName, password, github) => {
-    const response = await fetch("http://127.0.0.1:8000/service/auth/register/", {
+    const response = await fetch(baseURL + "/auth/register/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -57,12 +57,15 @@ export const AuthProvider = ({ children }) => {
         password,
         github,
 
-      })
+      }) 
     });
+
+    const data = await response.json();
+    
     if (response.status === 201) {
       navigate("/login");
     } else {
-      alert("Something went wrong!");
+      alert("ERROR:" + data["detail"]);
     }
   };
 
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem("authTokens");
+    localStorage.removeItem("user_id");
     navigate("/");
   };
 
@@ -80,12 +84,14 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    baseURL
   };
 
   useEffect(() => {
     if (authTokens) {
       setUser(jwt_decode(authTokens.access));
+      localStorage.setItem("user_id", user.user_id.split("/").pop());
     }
     setLoading(false);
   }, [authTokens, loading]);
