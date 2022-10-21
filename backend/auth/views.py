@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status, viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
@@ -28,18 +28,21 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
     serializer_class = RegisterSerializer
     permission_classes = (AllowAny,)
     http_method_names = ['post']
+    # for now allow anyone to register an author. Need to change this later on to only allow local
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request':request})
         serializer.is_valid(raise_exception=True)
 
-        # add in host, id, url from here since we can't access request object from the model
+        # add in host, id, url, uuid from here since we can't access request object from the model
         host = request.build_absolute_uri('/')[:-1]
-        id =str(host) +'/authors/'+ str(uuid4())
-        serializer.validated_data['host'] = host
-        serializer.validated_data['id'] = id
-        serializer.validated_data['url'] = id
-
+        uuid = str(uuid4())
+        url =str(host) +'/authors/'+ uuid
+        serializer.validated_data['host'] = host+'/'
+        serializer.validated_data['url'] = url
+        serializer.validated_data['id'] = url
+        serializer.validated_data['uuid'] = uuid
+        
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
         res = {
