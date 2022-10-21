@@ -30,9 +30,7 @@ export default function Main() {
           <div class="main-content-container">
             <Outlet />
           </div>
-
       </div>
-      
   </div>
   )
 }

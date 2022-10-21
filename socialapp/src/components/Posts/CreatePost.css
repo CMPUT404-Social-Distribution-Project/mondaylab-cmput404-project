@@ -1,0 +1,75 @@
+.btn-close-white {
+    margin-right: 3em;
+}
+
+.modal-content {
+    background-color: #1C212B;
+    min-width: 60em;
+    min-height: 15em;
+    margin-top: 5em;
+    margin-left: -10em;
+}
+
+.modal-footer {
+    min-height: 5em;
+}
+
+.modal-body {
+    height: 200%;
+    width: auto;
+    padding: 15px;
+}
+
+.modal-title {
+    font-size: 200%;
+    color: #BFEFE9;
+}
+
+.title {
+    font-size: 100em;
+    margin-bottom: 1.5%;
+}
+
+.body {
+    font-size: 110%;
+    padding-bottom: 15em;
+    text-align: left;
+}
+
+
+.unlist {
+    background: transparent;
+    border: none;
+    color: #BFEFE9;
+    margin-right: 2em;
+    font-size: 100%;
+}
+
+.header {
+    margin: 0px auto;
+    width: 60%;
+}
+
+.header1 {
+    width: 55%;
+    font-size: 100%;
+    margin-right: 3em;
+}
+
+.option {
+    font-size: 100%;
+    background-color: white;
+    color: white; 
+}
+
+.image {
+    font-size: 1.5em;
+    color: white;
+}
+
+.link {
+    margin-left: 0.5em;
+    font-size: 1.5em;
+    margin-right: auto;
+    color: white;
+}
