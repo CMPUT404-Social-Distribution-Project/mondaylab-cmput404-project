@@ -67,9 +67,9 @@ export default function Sidebar() {
                     </a>
                 </Link>
             </li>
+            <hr class="solid" />
             <div className="signout">
                 <FaSignOutAlt 
-                    color="white"
                     onClick={() => logoutUser()}
                 />
             </div>

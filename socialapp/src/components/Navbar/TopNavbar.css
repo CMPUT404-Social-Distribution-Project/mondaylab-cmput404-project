@@ -4,3 +4,28 @@
     top:0;
     box-shadow: 0px 4px 5px #17191B;
 }
+
+#profilePicContainer {
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    outline: solid var(--orange) 3px;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    place-content: center;
+}
+
+#profilePicContainer:hover {
+    outline: solid var(--teal) 5px;
+}
+
+#profilePicContainer img {
+    align-self: center;
+    width: 40px;
+    height: 40px;
+}
+
+.navbar-expand .navbar-nav .nav-link {
+    align-self: center;
+}
