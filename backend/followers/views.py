@@ -128,11 +128,11 @@ class TrueFriendApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/friends
     GET [local, remote] get all true friend of AUTHOR_ID
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 author_id = get_author_id(request)
