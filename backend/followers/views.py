@@ -16,8 +16,6 @@ class FollowersApiView(GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
                 author_id = get_author_id(request)
