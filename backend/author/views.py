@@ -15,44 +15,6 @@ from django.shortcuts import get_list_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 JWT_authenticator = JWTAuthentication()
 
-# TODO: probably deprecated, UserViewSet will handle the end points
-
-# class AuthorApiView(GenericAPIView):
-#     serializer_class = AuthorSerializer
-#     def get(self, request, author_id):
-#         try:
-#             user = Author.objects.get(uuid=author_id)
-#             result = self.serializer_class(user, many=False)
-#             return response.Response(result.data, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return response.Response(status=status.HTTP_404_NOT_FOUND)
-
-
-    # def post(self, request,):
-    #     try: 
-    #         serializer = self.serializer_class(data=request.data)
-    #         if serializer.is_valid():
-    #             host = request.build_absolute_uri('/')[:-1]
-    #             id =str(host) +'/authors/'+ str(uuid4())
-    #             serializer.save(id = id, url =id)
-    #             return response.Response(serializer.data, status=status.HTTP_200_OK)
-
-    #         else:
-    #             return response.Response(f"Error: Data is valid", status=status.HTTP_400_BAD_REQUEST)
-    #     except Exception as e:
-    #         return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
-# class AuthorsApiView(GenericAPIView):
-#     serializer_class = AuthorSerializer
-#     def get(self, request):
-#         try:
-#             authors = Author.objects.all()
-#             result = self.serializer_class(authors, many=True)
-#             result= {"type": 'authors',"items":result.data}
-#             return response.Response(result, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return response.Response(status=status.HTTP_404_NOT_FOUND)
-
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch']
@@ -63,12 +25,6 @@ class UserViewSet(viewsets.ModelViewSet):
     # ordering_fields = ['updated']
     # ordering = ['-updated']
 
-    # override permission class so we can have specific permissions for each method
-    def get_permissions(self):
-        if self.action == "get_queryset" or self.action == "get_object":
-            self.permission_classes = (AllowAny,)
-        return super().get_permissions()
-
     def list(self, request, pk=None):
         ''' Returns a queryset of all authors in the database
             Use: Send a GET to
@@ -76,9 +32,10 @@ class UserViewSet(viewsets.ModelViewSet):
         '''
         try:
             serializer = self.serializer_class(self.queryset, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            serializer = {"type": 'authors',"items":serializer.data}
+            return Response(serializer, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
     def retrieve(self, request, pk=None):
         ''' Returns the requested author, given the UUID
@@ -90,8 +47,7 @@ class UserViewSet(viewsets.ModelViewSet):
             UUID(pk)
             obj = Author.objects.get(uuid=pk)
             serializer = self.serializer_class(obj)
-            serializer = {"type": 'authors',"items":serializer.data}
-            return Response(serializer, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
