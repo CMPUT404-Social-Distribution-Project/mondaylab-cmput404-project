@@ -11,6 +11,7 @@ from author.serializers import AuthorSerializer
 from uuid import uuid4
 from django.db.models import Q
 from .models import Comment
+from datetime import date
 # Create your views here.
 
 
@@ -27,13 +28,17 @@ class CommentsApiView(GenericAPIView):
     """
     def get(self, request, author_id, post_id):
         # Just a test case
-        post_id = get_post_id(request)
+        author_id_full_path = get_author_id(request)
+
+        post_id_full_path = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(data="you are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        elif check_post_id(request) == False:
+            return response.Response(data="invalid post id ", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
-                post = Post.objects.filter(Q(id = post_id) & Q(visibility='PUBLIC')).order_by("published")
-                result = {"items": self.serializer_class(post, many=True).data}
+                comments = Comment.objects.filter(Q(id = post_id_full_path) & Q(visibility='PUBLIC')).order_by("published")
+                result = {"items": self.serializer_class(comments, many=True).data}
                 return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -74,9 +79,10 @@ class CommentsApiView(GenericAPIView):
 
                 authorObj = Author.objects.get(id=author_id_full_path)
                 commentId = author_id_full_path + '/' + "posts/" + post_id + "/comments/" + str(uuid4())
-
+                #TODO: use correct format for published date
+                publishedDate = date.today().strftime('%Y-%m-%d %H:%M:%S')
                 print("comment id is ", commentId)
-                serialize.save(id=commentId, author=authorObj)  # save to db with additional field injected
+                serialize.save(id=commentId, author=authorObj, published=publishedDate)  # save to db with additional field injected
                 print("serializer data is ", serialize.data)
                 return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:
