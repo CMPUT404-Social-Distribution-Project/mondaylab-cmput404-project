@@ -53,9 +53,8 @@ class CommentsApiView(GenericAPIView):
                 result = {"type":"comments", 
                            "page":1, "size":5,
                            "post": post_id_full_path,
-                           "id": post_id_full_path + "/comments"
-                           ""
-                "comments": self.serializer_class(comments, many=True).data}
+                           "id": post_id_full_path + "/comments",
+                           "comments": self.serializer_class(comments, many=True).data}
                 return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -110,7 +109,6 @@ class CommentsApiView(GenericAPIView):
 
 
 
-    def put(self, request, author_id, post_id):
 
 
 
