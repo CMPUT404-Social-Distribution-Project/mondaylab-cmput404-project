@@ -19,11 +19,12 @@ from datetime import date
 class CommentsApiView(GenericAPIView):
     serializer_class = CommentsSerializer
     """
-    
+    get all the comment from this post    
     GET 
     http://host/service/authors/{author_id}/posts/{post_id}/comments/
 
     serialize.save(id =author_id+'/'+'posts/'+str(uuid4())  )
+    
     TODO: problem pos
     """
     def get(self, request, author_id, post_id):
@@ -39,10 +40,12 @@ class CommentsApiView(GenericAPIView):
             try: 
                 """
                 We get all the comments with its id field contain post_id
-
+                
+                @post_id VARCHAR(50) = post_id
+                
                 Query:
                 SELECT * from comments_comment as commentTable
-                WHERE commentTable.id LIKE %post_id%
+                WHERE commentTable.id LIKE "%"+ @post_id + "%"
                 ORDER_BY commentTable.published
                 """
                 comments = Comment.objects.filter(id__contains = post_id).order_by("published")
@@ -57,6 +60,8 @@ class CommentsApiView(GenericAPIView):
 
     def post(self, request, author_id, post_id):
         """
+        create a comment
+
         URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments
         POST [local] if you post an object of “type”:”comment”,
          it will add your comment to the post whose id is POST_ID
