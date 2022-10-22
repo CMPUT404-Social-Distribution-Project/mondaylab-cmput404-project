@@ -7,7 +7,7 @@ from post.models import Post
 from author.models import Author
 from like.models import Like
 from django.db.models import Q
-from like.Serializers import LikePostSerializer
+from like.Serializers import LikePostSerializer, LikeAuthorSerializer
 # Create your views here.
 
 
@@ -35,7 +35,7 @@ class LikesPostApiView(GenericAPIView):
 
 class LikesAuthorApiView(GenericAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class=LikePostSerializer
+    serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
         if check_author_id(request) == False:
             return response.Response(status=status.HTTP_401_UNAUTHORIZED)
