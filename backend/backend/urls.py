@@ -32,5 +32,5 @@ urlpatterns = [
     path('service/authors/<str:author_id>/followers/', include("followers.urls")),
     path('service/authors/<str:author_id>/friends/<str:foreign_author_id>', TrueFriendApiView.as_view(), name = "check if true friends"),
     path('service/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostApiView.as_view(), name="post like"),
-    path('service/authors/<str:author_id>/likes/', LikesAuthorApiView.as_view(), name="author like"),
+    path('service/authors/<str:author_id>/liked/', LikesAuthorApiView.as_view(), name="author like"),
 ]
