@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework import response, status
 from post.views import get_author_id, get_post_id, check_author_id
 from post.models import Post
@@ -12,12 +12,12 @@ from like.Serializers import LikePostSerializer, LikeAuthorSerializer
 
 
 class LikesPostApiView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class=LikePostSerializer
     def get(self, request, author_id, post_id):
         post_id = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             author_id = get_author_id(request)
             author = Author.objects.get(id = author_id)
@@ -34,11 +34,11 @@ class LikesPostApiView(GenericAPIView):
 
 
 class LikesAuthorApiView(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             author_id = get_author_id(request)
             author = Author.objects.get(id = author_id)
