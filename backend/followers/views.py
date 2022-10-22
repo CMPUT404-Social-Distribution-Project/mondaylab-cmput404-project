@@ -13,7 +13,7 @@ class FollowersApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
         else:
