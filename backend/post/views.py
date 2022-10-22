@@ -21,6 +21,7 @@ class PostApiView(GenericAPIView):
     PUT [local] create a post where its id is POST_ID
     """
     #authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
     
     def get(self, request, author_id, post_id):
