@@ -3,7 +3,7 @@ from author.models import Author
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
 from post.views import check_author_id, get_author_id, get_foreign_id, get_friend_id
