@@ -167,11 +167,27 @@ def get_author_id(request):
         yy = xx[1].split("/posts")
         author_id= xx[0]+yy[0]
         return author_id
+    if "followers" in request.build_absolute_uri():
+        xx=request.build_absolute_uri().split('service/')
+        print(xx)
+        yy = xx[1].split("/followers")
+        print(yy)
+        author_id= xx[0]+yy[0]
+        print("---", author_id)
+        return author_id
     else:
         xx=request.build_absolute_uri()[:-7].split('service/')
         author_id= xx[0]+xx[1]
         return author_id
 
+def get_foreign_id(request):
+    xx=request.build_absolute_uri().split('service/')
+    print(xx)
+    yy = xx[1].split("/followers")
+    print(yy)
+    author_id= xx[0]+'authors'+yy[1]
+    print("-11--", author_id)
+    return author_id
 
     
 def get_post_id(request):
@@ -182,6 +198,5 @@ def get_post_id(request):
 def check_author_id(request):
     author_id= get_author_id(request)
     author = Author.objects.filter(id = author_id)
-    print(author.exists())
     return author.exists()
 

@@ -27,6 +27,6 @@ urlpatterns = [
     path('service/authors/<str:author_id>/posts/<str:post_id>', include("post.urls")),
     path('service/', include(('backend.routers', 'backend'), namespace='backend-api')),
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/', include("comments.urls")),
-
+    path('service/authors/<str:author_id>/followers/', include("followers.urls")),
 
 ]
