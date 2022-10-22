@@ -19,7 +19,7 @@ from rest_framework import routers
 from post import views
 from author.views import UserViewSet
 from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
-
+from followers.views import TrueFriendApiView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('service/authors/', include("author.urls")),
@@ -28,5 +28,6 @@ urlpatterns = [
     path('service/', include(('backend.routers', 'backend'), namespace='backend-api')),
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/', include("comments.urls")),
     path('service/authors/<str:author_id>/followers/', include("followers.urls")),
+    path('service/authors/<str:author_id>/friends/<str:foreign_author_id>', TrueFriendApiView.as_view(), name = "check if true friends"),
 
 ]

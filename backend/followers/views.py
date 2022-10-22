@@ -6,7 +6,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from post.views import check_author_id, get_author_id, get_foreign_id
+from post.views import check_author_id, get_author_id, get_foreign_id, get_friend_id
 
 class FollowersApiView(GenericAPIView):
     """
@@ -115,3 +115,48 @@ class FollowersForeignApiView(GenericAPIView):
 
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
+class TrueFriendApiView(GenericAPIView):
+    """
+    URL: ://service/authors/{AUTHOR_ID}/friends
+    GET [local, remote] get all true friend of AUTHOR_ID
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = FollowerSerializer
+    def get(self, request, author_id, foreign_author_id):
+        if check_author_id(request) == False:
+            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                author_id = get_author_id(request)
+                friend_id = get_friend_id(request)
+                current_author = Author.objects.get(id = author_id)
+                print("----friend_id-", friend_id)
+                print("----auth_id-", author_id)
+                followers = current_author.followers.get(id = friend_id)
+                print("-----", followers)
+                result = check_friend(author_id, friend_id)
+                print("[[",result)
+                if result ==True:
+                    followers = self.serializer_class(followers)
+                    return response.Response({'result': "Be True Friend", "detail":followers.data}, status=status.HTTP_200_OK)
+                else:
+                    return response.Response({'result': "Not be friend"}, status=status.HTTP_200_OK)
+            
+
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+   
+
+def check_friend(author_id, foreign_id):
+    try:
+        current_author = Author.objects.get(id = author_id)
+        foreign_author = Author.objects.get(id = foreign_id)
+        followers = current_author.followers.get(id = foreign_id)
+        friends = foreign_author.followers.get(id = author_id)
+        if followers and friends:
+            return True
+        else:
+            return False
+    except:
+        return False
