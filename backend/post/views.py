@@ -8,6 +8,7 @@ from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer
 from uuid import uuid4
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 class PostApiView(GenericAPIView):
     """
@@ -121,6 +122,7 @@ class PostsApiView(GenericAPIView):
     POST [local] create a new post but generate a new id
     """
     #authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
 
     def get(self, request, author_id):
@@ -145,19 +147,47 @@ class PostsApiView(GenericAPIView):
                 return response.Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, author_id):
-
-        author_id = get_author_id(request) 
         if check_author_id(request) == False:
             return response.Response(status=status.HTTP_401_UNAUTHORIZED)
-
+        else:
+            try: 
+                author_id = get_author_id(request)
+                author = Author.objects.get(id=author_id)
+                print(author.id)
+            except Exception as e:
+                print("e")
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
         try:
-            serialize = self.serializer_class(data=request.data)
-            if serialize.is_valid():
-                serialize.save(id =author_id+'/'+'posts/'+str(uuid4())  )
-                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
+            post =Post.objects.create(id = author_id+'/'+'posts/'+str(uuid4()), author = author)
+       
+            if post:
+                try:
+                    post.title = request.data["title"]
+                    post.source = request.data['source']
+                    post.origin = request.data['origin']
+                    post.description = request.data["description"]
+                    #post.contentType=request.data['contentType']
+                    post.content = request.data["content"]
+                    post.categories = request.data["categories"]
+                    #post.comments = request.data['comments']
+                    post.visibility = request.data["visibility"]
+                    if 'unlisted' not in request.data:
+                        post.unlisted = False
+                    else:
+                        post.unlisted = True
+                    try:
+                        post.save()
+                        result = self.serializer_class(post, many=False)
+                        return response.Response(result.data, status=status.HTTP_201_CREATED)
+                    except Exception as e:
+                        return response.Response(f"1Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return response.Response(f"2Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+            else:
+                e = "Post id not found!"
+                return response.Response(f"3Error: {e}", status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
+            return response.Response(f"4Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
 
