@@ -1,4 +1,5 @@
 
+
 from post.models import Post
 from author.models import Author
 from rest_framework import response, status
@@ -8,7 +9,9 @@ from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer
 from uuid import uuid4
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
+
 class PostApiView(GenericAPIView):
     """
     URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}
@@ -18,13 +21,14 @@ class PostApiView(GenericAPIView):
     PUT [local] create a post where its id is POST_ID
     """
     #authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
     
     def get(self, request, author_id, post_id):
         # Just a test case
         post_id = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 post = Post.objects.filter(Q(id = post_id) & Q(visibility='PUBLIC')).order_by("published")
@@ -37,7 +41,7 @@ class PostApiView(GenericAPIView):
         post_id = get_post_id(request)
 
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
                 author_id = get_author_id(request)
@@ -81,7 +85,7 @@ class PostApiView(GenericAPIView):
         
     def put(self, request, author_id, post_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
                 post_id =get_post_id(request)
@@ -103,7 +107,7 @@ class PostApiView(GenericAPIView):
     def delete(self, request, author_id, post_id):
         post_id = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
             try:
@@ -121,13 +125,14 @@ class PostsApiView(GenericAPIView):
     POST [local] create a new post but generate a new id
     """
     #authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = PostSerializer
 
     def get(self, request, author_id):
         # Just a test case
         print(request.data, request.build_absolute_uri(), author_id)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 author_id= get_author_id(request)
@@ -145,19 +150,47 @@ class PostsApiView(GenericAPIView):
                 return response.Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, author_id):
-
-        author_id = get_author_id(request) 
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
-
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            try: 
+                author_id = get_author_id(request)
+                author = Author.objects.get(id=author_id)
+                print(author.id)
+            except Exception as e:
+                print("e")
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
         try:
-            serialize = self.serializer_class(data=request.data)
-            if serialize.is_valid():
-                serialize.save(id =author_id+'/'+'posts/'+str(uuid4())  )
-                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
+            post =Post.objects.create(id = author_id+'/'+'posts/'+str(uuid4()), author = author)
+       
+            if post:
+                try:
+                    post.title = request.data["title"]
+                    post.source = request.data['source']
+                    post.origin = request.data['origin']
+                    post.description = request.data["description"]
+                    #post.contentType=request.data['contentType']
+                    post.content = request.data["content"]
+                    post.categories = request.data["categories"]
+                    #post.comments = request.data['comments']
+                    post.visibility = request.data["visibility"]
+                    if 'unlisted' not in request.data:
+                        post.unlisted = False
+                    else:
+                        post.unlisted = True
+                    try:
+                        post.save()
+                        result = self.serializer_class(post, many=False)
+                        return response.Response(result.data, status=status.HTTP_201_CREATED)
+                    except Exception as e:
+                        return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+            else:
+                e = "Post id not found!"
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
 
@@ -167,21 +200,45 @@ def get_author_id(request):
         yy = xx[1].split("/posts")
         author_id= xx[0]+yy[0]
         return author_id
+    if "followers" in request.build_absolute_uri():
+        xx=request.build_absolute_uri().split('service/')
+        yy = xx[1].split("/followers")
+        author_id= xx[0]+yy[0]
+        return author_id
+    if "friends" in request.build_absolute_uri():
+        xx=request.build_absolute_uri().split('service/')
+        yy = xx[1].split("/friends")
+        author_id= xx[0]+yy[0]
+        return author_id
     else:
         xx=request.build_absolute_uri()[:-7].split('service/')
         author_id= xx[0]+xx[1]
         return author_id
 
-
-    
-def get_post_id(request):
+def get_foreign_id(request):
     xx=request.build_absolute_uri().split('service/')
-    author_id= xx[0]+xx[1]
+    yy = xx[1].split("/followers")
+    author_id= xx[0]+'authors'+yy[1]
     return author_id
+
+def get_friend_id(request):
+    xx=request.build_absolute_uri().split('service/')
+    yy = xx[1].split("/friends")
+    author_id= xx[0]+'authors'+yy[1]
+    return author_id    
+def get_post_id(request):
+    if "likes" in request.build_absolute_uri():
+        xx=request.build_absolute_uri().split('service/')
+        yy = xx[1].split("/likes")
+        author_id= xx[0]+yy[0]
+        return author_id
+    else:
+        xx=request.build_absolute_uri().split('service/')
+        author_id= xx[0]+xx[1]
+        return author_id
 
 def check_author_id(request):
     author_id= get_author_id(request)
     author = Author.objects.filter(id = author_id)
-    print(author.exists())
     return author.exists()
 

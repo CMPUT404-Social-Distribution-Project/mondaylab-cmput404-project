@@ -1,6 +1,6 @@
 
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
-ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField
+ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, ManyToManyField
 )
 from django.forms import ImageField
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
@@ -44,6 +44,7 @@ class Author(AbstractBaseUser, PermissionsMixin):
     url = URLField(blank=True)
     github = URLField( blank=True)
     profileImage = URLField(blank=True, default='')
+    followers = ManyToManyField('self', blank=True)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)
