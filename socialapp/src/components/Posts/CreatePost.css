@@ -1,0 +1,94 @@
+.modal-content {
+    background-color: #1C212B;
+    min-width: 60em;
+    min-height: 15em;
+    margin-top: 5em;
+    margin-left: -6em;
+}
+
+.modal-footer {
+    min-height: 5em;
+}
+
+.modal-body {
+    height: 200%;
+    width: auto;
+    padding: 15px;
+}
+
+.modal-title {
+    font-size: 200%;
+    color: #BFEFE9;
+}
+
+.title {
+    font-size: 100em;
+    margin-bottom: 1.5%;
+}
+
+.body {
+    font-size: 110%;
+    padding-bottom: 15em;
+    text-align: left;
+}
+
+
+.unlist {
+    background: transparent;
+    border: none;
+    color: #BFEFE9;
+    margin-left: 1%;
+    margin-right: 1%;
+    font-size: 110%;
+}
+
+.header {
+    margin: 0px auto;
+    width: 65%;
+}
+
+.header1 {
+    width: 60%;
+    font-size: 110%;
+    margin-top: 0.5%;
+    margin-right: 5%;
+}
+
+.option:focus {
+        background: #BFEFE9;
+        color: black;
+}
+.option {
+    background: transparent;
+    border: none;
+    color: #BFEFE9;
+    font-size: 110%;
+    margin-right: 1%;
+}
+
+.radio input {
+    display: none;
+}
+
+.option input[name="view"]:checked{
+    background-color: green;
+}
+
+.image {
+    font-size: 200%;
+    color: white;
+}
+
+.link {
+    margin-left: 0.5em;
+    font-size: 200%;
+    margin-right: auto;
+    color: white;
+}
+
+.postButton {
+    border-radius: 15px;    
+    font-size: 150%;
+    color: black;
+    background-color: #BFEFE9;
+}
