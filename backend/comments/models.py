@@ -22,7 +22,7 @@ class Comment(Model):
     type =  CharField(blank=False, null=False, default="comment", max_length=200)
     id = URLField(primary_key=True, blank=True, null=False)
     # when all row in author is deleted, this comment will be too
-    author = models.ForeignKey(Author,blank=False, null=False, on_delete=CASCADE)
+    author = models.ForeignKey(Author,blank=False, null=True, on_delete=CASCADE)
     contentType = CharField(default=ContentType.markdown, blank=False, null=False, choices=ContentType.choices, max_length=200)
     published = CharField(blank=True, max_length=200)
 
