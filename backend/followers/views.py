@@ -6,7 +6,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from post.views import check_author_id, get_author_id, get_foreign_id, get_friend_id
+from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
 
 class FollowersApiView(GenericAPIView):
     """
@@ -18,7 +18,7 @@ class FollowersApiView(GenericAPIView):
     def get(self, request, author_id):
 
         try:
-            author_id = get_author_id(request)
+            author_id = get_author_url_id(request)
             current_author = Author.objects.get(id = author_id)
             followers = current_author.followers.all()
             if followers.exists():
@@ -50,7 +50,7 @@ class FollowersForeignApiView(GenericAPIView):
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         try:
-            author_id = get_author_id(request)
+            author_id = get_author_url_id(request)
             foreign_id = get_foreign_id(request)
             
             current_author = Author.objects.get(id = author_id)
@@ -77,7 +77,7 @@ class FollowersForeignApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
-                author_id = get_author_id(request)
+                author_id = get_author_url_id(request)
                 foreign_id = get_foreign_id(request)
                 
                 current_author = Author.objects.get(id = author_id)
@@ -102,7 +102,7 @@ class FollowersForeignApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
-                author_id = get_author_id(request)
+                author_id = get_author_url_id(request)
                 foreign_id = get_foreign_id(request)
                 
                 current_author = Author.objects.get(id = author_id)
@@ -135,7 +135,7 @@ class TrueFriendApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
-                author_id = get_author_id(request)
+                author_id = get_author_url_id(request)
                 friend_id = get_friend_id(request)
                 current_author = Author.objects.get(id = author_id)
                 followers = current_author.followers.get(id = friend_id)
