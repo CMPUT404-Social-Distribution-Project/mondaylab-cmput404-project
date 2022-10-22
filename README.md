@@ -50,7 +50,7 @@ npm install
 `/service/authors/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
-| ***GET*** | Retrieves all the authors on the server |  | 
+| ***GET***(paginated) | Retrieves all the authors on the server |  | 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
 `/service/authors/<author_id>/`
@@ -68,13 +68,47 @@ npm install
 | ***POST🔶*** | Creates a post for author with UUID <author_id>, id auto generated |  | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **visibility:** choose from [friends, public] <br/> **unlisted:** *boolean*
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
-`/service/authors/<author_id>/posts/<post_id>/`
+`/service/authors/<author_id>/posts/<post_id>`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Gets the public post of author <author_id >at <post_id> | | 
 | ***POST🔶*** | Updates the post <post_uid> from author with UUID <author_id> |  | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **visibility:** choose from [friends, public] <br/> **unlisted:** *boolean*
 | ***PUT🔶*** | Creates a post for author with UUID <author_id>, id generated from the post_id specified in the request URL. e.g. `PUT http://localhost//service/authors/asgkljg/posts/asd/` generates a post with id=asd. ****NOTE: the ID MUST BE A UUID4!!!**** |  | same as above
 | ***DELETE🔶*** | Deletes the post <post_id> from author <author_id> | | 
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+
+`/service/authors/<author_id>/posts/<post_id>/comments`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET***(paginated) | Gets the comments of post <post_id> of author <author_id> | | 
+| ***POST🔶*** | Adds a comment to post <post_id> of author <author_id > | | **comment:** *max 200 char*  
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+
+`/service/authors/<author_id>/posts/<post_id>/likes`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET*** | Gets the list of likes from other authors of post <post_id> of author <author_id> | | 
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+
+`/service/authors/<author_id>/liked`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET*** | Lists the like objects of public posts that <author_id> liked  | | 
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+
+`/service/authors/<author_id>/followers/`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET*** | Gets the followers of author <author_id > | | 
+
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+
+`/service/authors/<author_id>/followers/<foreign_author_id>`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET*** | Checks if <foreign_author_id> is a follower of <author_id> | | 
+| ***PUT🔶*** | Adds <foreign_author_id> as a follower of <author_id>. Both ends to to verify authentication | | 
+| ***DELETE🔶*** | Removes <foreign_author_id> as a follower of <author_id> | | 
 
 ## References
 
