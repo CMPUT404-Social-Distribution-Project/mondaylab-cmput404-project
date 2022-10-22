@@ -16,28 +16,28 @@ class FollowersApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
-        else:
-            try:
-                author_id = get_author_id(request)
-                current_author = Author.objects.get(id = author_id)
-                followers = current_author.followers.all()
-                if followers.exists():
-                    followers = current_author.followers.all().order_by('displayName')
-                    followers_serializer = self.serializer_class(followers, many=True)
-                    followers_serializer_list = {
-                        "type": "followers",
-                        "items": followers_serializer.data
-                    }
-                    return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
-                else:
-                    followers_serializer_list = {
-                    "type": "followers",
-                    "items": []
-                    }
-                    return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
 
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+        try:
+            author_id = get_author_id(request)
+            current_author = Author.objects.get(id = author_id)
+            followers = current_author.followers.all()
+            if followers.exists():
+                followers = current_author.followers.all().order_by('displayName')
+                followers_serializer = self.serializer_class(followers, many=True)
+                followers_serializer_list = {
+                    "type": "followers",
+                    "items": followers_serializer.data
+                }
+                return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
+            else:
+                followers_serializer_list = {
+                "type": "followers",
+                "items": []
+                }
+                return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 class FollowersForeignApiView(GenericAPIView):
     """
@@ -49,32 +49,32 @@ class FollowersForeignApiView(GenericAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
-          try:
-              author_id = get_author_id(request)
-              foreign_id = get_foreign_id(request)
-              
-              current_author = Author.objects.get(id = author_id)
-              followers = current_author.followers.all()
-              if followers.exists():
-                  followers = current_author.followers.all().order_by('displayName')
-                  followers_serializer = self.serializer_class(followers, many=True)
-                  followers_serializer_list = {
-                      "type": "followers",
-                      "items": followers_serializer.data
-                  }
-                  return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
-              else:
-                  followers_serializer_list = {
-                  "type": "followers",
-                  "items": []
-                  }
-                  return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
+        try:
+            author_id = get_author_id(request)
+            foreign_id = get_foreign_id(request)
+            
+            current_author = Author.objects.get(id = author_id)
+            followers = current_author.followers.all()
+            if followers.exists():
+                followers = current_author.followers.all().order_by('displayName')
+                followers_serializer = self.serializer_class(followers, many=True)
+                followers_serializer_list = {
+                    "type": "followers",
+                    "items": followers_serializer.data
+                }
+                return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
+            else:
+                followers_serializer_list = {
+                "type": "followers",
+                "items": []
+                }
+                return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
 
-          except Exception as e:
-              return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
     def put(self, request, author_id, foreign_author_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 author_id = get_author_id(request)
@@ -99,7 +99,7 @@ class FollowersForeignApiView(GenericAPIView):
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
     def delete(self, request, author_id, foreign_author_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 author_id = get_author_id(request)
@@ -138,12 +138,8 @@ class TrueFriendApiView(GenericAPIView):
                 author_id = get_author_id(request)
                 friend_id = get_friend_id(request)
                 current_author = Author.objects.get(id = author_id)
-                print("----friend_id-", friend_id)
-                print("----auth_id-", author_id)
                 followers = current_author.followers.get(id = friend_id)
-                print("-----", followers)
                 result = check_friend(author_id, friend_id)
-                print("[[",result)
                 if result ==True:
                     followers = self.serializer_class(followers)
                     return response.Response({'result': "Be True Friend", "detail":followers.data}, status=status.HTTP_200_OK)
