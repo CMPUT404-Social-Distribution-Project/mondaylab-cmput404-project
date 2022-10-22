@@ -25,6 +25,7 @@ class Comment(Model):
     author = models.ForeignKey(Author,blank=False, null=True, on_delete=CASCADE)
     contentType = CharField(default=ContentType.markdown, blank=False, null=False, choices=ContentType.choices, max_length=200)
     published = CharField(blank=True, max_length=200)
+    comment = CharField(blank=True, null=True,  max_length=200, default="empty comment")
 
 
 

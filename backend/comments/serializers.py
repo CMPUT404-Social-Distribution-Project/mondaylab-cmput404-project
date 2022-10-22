@@ -11,5 +11,5 @@ class CommentsSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'type': {'read_only': True},
             'id': {'read_only': True},
-            'published': {'read_only': True}
+            'published': {'read_only': True},
         }

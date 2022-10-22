@@ -10,6 +10,7 @@ from .serializers import CommentsSerializer
 from author.serializers import AuthorSerializer
 from uuid import uuid4
 from django.db.models import Q
+from .models import Comment
 # Create your views here.
 
 
@@ -61,7 +62,8 @@ class CommentsApiView(GenericAPIView):
         if check_post_id(request) == False:
             return response.Response(data = "invalid post id ", status=status.HTTP_401_UNAUTHORIZED)
 
-
+        print("request data is ", request.data)
+        print("comment table fields are ", [f.name for f in Comment._meta.get_fields()])
         try:
             serialize = self.serializer_class(data=request.data)  # converts request.data to jsonlike object
             # chekc if the request.body contains valid key-value pair and satisty table constrain
@@ -75,10 +77,10 @@ class CommentsApiView(GenericAPIView):
 
                 print("comment id is ", commentId)
                 serialize.save(id=commentId, author=authorObj)  # save to db with additional field injected
+                print("serializer data is ", serialize.data)
                 return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
