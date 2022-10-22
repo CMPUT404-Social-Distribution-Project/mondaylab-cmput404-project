@@ -30,7 +30,7 @@ class CommentsApiView(GenericAPIView):
     def get(self, request, author_id, post_id):
         # Just a test case
         author_id_full_path = get_author_id(request)
-
+        size = 5
         post_id_full_path = get_post_id(request)
         if check_author_id(request) == False:
             return response.Response(data="you are not the author", status=status.HTTP_401_UNAUTHORIZED)
@@ -48,8 +48,14 @@ class CommentsApiView(GenericAPIView):
                 WHERE commentTable.id LIKE "%"+ @post_id + "%"
                 ORDER_BY commentTable.published
                 """
+
                 comments = Comment.objects.filter(id__contains = post_id).order_by("published")
-                result = {"items": self.serializer_class(comments, many=True).data}
+                result = {"type":"comments", 
+                           "page":1, "size":5,
+                           "post": post_id_full_path,
+                           "id": post_id_full_path + "/comments"
+                           ""
+                "comments": self.serializer_class(comments, many=True).data}
                 return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -101,6 +107,10 @@ class CommentsApiView(GenericAPIView):
                 return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    def put(self, request, author_id, post_id):
 
 
 
