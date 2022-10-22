@@ -12,8 +12,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
-from rest_framework_simplejwt.authentication import JWTAuthentication
-JWT_authenticator = JWTAuthentication()
+from auth.utils import isUUID, isAuthorized
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -57,24 +56,20 @@ class UserViewSet(viewsets.ModelViewSet):
             Use: Send a POST to
                 /service/authors/<author_uuid>/
         '''
-        res = JWT_authenticator.authenticate(request)
-        if res is not None:
-            user, token = res;
-            requesterUUID = token.payload.get('user_id').split('/')[-1]
-
-            # if the requester is not what they say they are (aren't the actual author)
-            if requesterUUID != pk:
-                return Response(data="You are not the author, cannot modify.", status=status.HTTP_401_UNAUTHORIZED)
-            
-            obj = Author.objects.get(uuid=pk)
-            serializer = self.serializer_class(obj, data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-            else:
-                return Response(data="Error validating data", status=status.HTTP_400_BAD_REQUEST)
+        if not isAuthorized(request, pk): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
-            return Response(data="No token was provided in the headers", status=status.HTTP_400_BAD_REQUEST)
+            try:
+                obj = Author.objects.get(uuid=pk)
+                serializer = self.serializer_class(obj, data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+                else:
+                    return Response(data="Error validating data", status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
 
     def partial_update(self, request, pk=None):
         ''' Partially updates an author's fields with the requested given field(s)
@@ -82,16 +77,9 @@ class UserViewSet(viewsets.ModelViewSet):
             Use: Send a PATCH to
                 /service/authors/<author_uuid>/
         '''
-        # check if requester is actual author
-        res = JWT_authenticator.authenticate(request)
-        if res is not None:
-            user, token = res;
-            requesterUUID = token.payload.get('user_id').split('/')[-1]
-
-            # if the requester is not what they say they are (aren't the actual author)
-            if requesterUUID != pk:
-                return Response(data="You are not the author, cannot modify.", status=status.HTTP_401_UNAUTHORIZED)
-
+        if not isAuthorized(request, pk): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
             # check if the requested field(s) to change exists
             for key in request.data.keys():
                 print([f.name for f in Author._meta.get_fields()])
@@ -107,7 +95,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
             else:
                 return Response(data="Error validating data", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response(data="No token was provided in the headers", status=status.HTTP_400_BAD_REQUEST)
+
 
 

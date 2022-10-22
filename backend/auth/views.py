@@ -43,6 +43,7 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
         serializer.validated_data['uuid'] = uuid
         
         user = serializer.save()
+        
         refresh = RefreshToken.for_user(user)
         res = {
             "refresh": str(refresh),

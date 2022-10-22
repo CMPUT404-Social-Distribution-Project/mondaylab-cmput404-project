@@ -8,8 +8,9 @@ from rest_framework.authentication import BasicAuthentication
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer
 from uuid import uuid4, UUID
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
+from auth.utils import isUUID, isAuthorized
 
 class PostApiView(GenericAPIView):
     """
@@ -36,25 +37,26 @@ class PostApiView(GenericAPIView):
         ''' Updates the post at post_id (UUID)
             Requires authentication with JWT.
         '''
-        try: 
-            authorObj = Author.objects.get(uuid=author_id)
-            postObj = Post.objects.get(uuid = post_id, author=authorObj)
-            serializer = self.serializer_class(postObj, data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                serializer.save()
-                return response.Response(serializer.validated_data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-       
-
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try: 
+                authorObj = Author.objects.get(uuid=author_id)
+                postObj = Post.objects.get(uuid = post_id, author=authorObj)
+                serializer = self.serializer_class(postObj, data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    return response.Response(serializer.validated_data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
  
     def put(self, request, author_id, post_id):
         ''' Creates a post with post_id. 
             Requires authentication with JWT.
             NOTE: Requester must generate uuid themselves.
         '''
-        if not isUUID(post_id):
-            return response.Response("post ID must be a UUID4", status=status.HTTP_400_BAD_REQUEST)
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try: 
                 exist = Post.objects.filter(uuid=post_id).first()
@@ -86,17 +88,19 @@ class PostApiView(GenericAPIView):
                     except Exception as e:
                         return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
-
     def delete(self, request, author_id, post_id):
         ''' Deletes a post with post_id (UUID)
             Requires authentication with JWT.
         '''
-        try:
-            post = Post.objects.get(uuid=post_id)
-            post.delete()
-            return response.Response("Deleted Successfully", status.HTTP_200_OK)
-        except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                post = Post.objects.get(uuid=post_id)
+                post.delete()
+                return response.Response("Deleted Successfully", status.HTTP_200_OK)
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
 class PostsApiView(GenericAPIView):
     """
@@ -134,34 +138,34 @@ class PostsApiView(GenericAPIView):
                 origin,
                 source
         '''
-        try:
-            # serialize data to turn it to a post
-            serialize = self.serializer_class(data=request.data)
-            if serialize.is_valid(raise_exception=True):
-                # get author obj to be saved in author field of post
-                authorObj = Author.objects.get(uuid=author_id)
-                # create post ID and origin and source
-                postUUID = str(uuid4())
-                postId = request.build_absolute_uri() + postUUID
-                origin = authorObj.host + '/posts/' + postUUID
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                # serialize data to turn it to a post
+                serialize = self.serializer_class(data=request.data)
+                if serialize.is_valid(raise_exception=True):
+                    # get author obj to be saved in author field of post
+                    authorObj = Author.objects.get(uuid=author_id)
+                    # create post ID and origin and source
+                    postUUID = str(uuid4())
+                    postId = request.build_absolute_uri() + postUUID
+                    origin = authorObj.host + '/posts/' + postUUID
 
-                serialize.save(
-                    id=postId,
-                    uuid=postUUID,
-                    author=authorObj,
-                    count=0,
-                    comments=postId+'/comments',
-                    origin=origin,
-                    source=origin,
-                    )
-                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
+                    serialize.save(
+                        id=postId,
+                        uuid=postUUID,
+                        author=authorObj,
+                        count=0,
+                        comments=postId+'/comments',
+                        origin=origin,
+                        source=origin,
+                        )
+                    return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 
-        except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
-
-
-    
 def get_post_id(request):
     xx=request.build_absolute_uri().split('service/')
     author_id= xx[0]+xx[1]
@@ -216,10 +220,5 @@ def check_author_id(request):
     author = Author.objects.filter(id = author_url_id)
     return author.exists()
 
-def isUUID(val):
-    try:
-        UUID(val)
-        return True
-    except:
-        return False
+
       

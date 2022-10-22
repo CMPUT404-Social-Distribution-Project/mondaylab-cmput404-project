@@ -17,7 +17,7 @@ class LikesPostApiView(GenericAPIView):
     def get(self, request, author_id, post_id):
         post_id = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
+            return response.Response("Author not found", status=status.HTTP_404_NOT_FOUND)
         else:
             author_url_id = get_author_url_id(request)
             try:
@@ -33,12 +33,12 @@ class LikesPostApiView(GenericAPIView):
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
-class LikesAuthorApiView(GenericAPIView):
+class AuthorLikedApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
+            return response.Response("Author not found", status=status.HTTP_404_NOT_FOUND)
         else:
             author_url_id = get_author_url_id(request)
             
