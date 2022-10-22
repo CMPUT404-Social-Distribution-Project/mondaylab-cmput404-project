@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'followers',
+    'like',
     'rest_framework',
     'author',
     'post',

@@ -13,19 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import imp
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from post import views
 from author.views import UserViewSet
 from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
-
+from followers.views import TrueFriendApiView
+from like.views import LikesPostApiView, LikesAuthorApiView
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('service/authors/', include("author.urls")),
     path('service/authors/<str:author_id>/posts/', include("post.urls")),
     path('service/', include(('backend.routers', 'backend'), namespace='backend-api')),
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/', include("comments.urls")),
-
-
+    path('service/authors/<str:author_id>/followers/', include("followers.urls")),
+    path('service/authors/<str:author_id>/friends/<str:foreign_author_id>', TrueFriendApiView.as_view(), name = "check if true friends"),
+    path('service/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostApiView.as_view(), name="post like"),
+    path('service/authors/<str:author_id>/liked/', LikesAuthorApiView.as_view(), name="author like"),
 ]

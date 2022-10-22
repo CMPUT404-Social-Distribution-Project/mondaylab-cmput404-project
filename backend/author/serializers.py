@@ -11,4 +11,14 @@ class AuthorSerializer(serializers.ModelSerializer):
             'id': {'read_only': True},
             'uuid': {'read_only': True},
             'is_superuser': {'read_only': True},
+            'published': {'read_only': True},
         }
+
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+            model = Author
+            fields = ['type', 'id', 'url', 'host','displayName', 'github', 'profileImage']
+            extra_kwargs = {
+                'type': {'read_only': True},
+                'id': {'read_only': True},
+            }
