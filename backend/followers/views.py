@@ -89,10 +89,16 @@ class FollowersForeignApiView(GenericAPIView):
                 foreign_author = Author.objects.get(id = foreign_id)
                 if foreign_author is not None:
                     current_author.followers.add(foreign_author)
+                    followers = current_author.followers.all().order_by('displayName')
+                    followers_serializer = self.serializer_class(followers, many=True)
+                    result = {
+                        'result': "Foreign author add successfully",
+                        'followers': followers_serializer.data
+                    }
                 else:
                     return response.Response("Error: Foreign author do not found", status=status.HTTP_404_NOT_FOUND)
                
-                return response.Response("Foreign author add successfully", status=status.HTTP_200_OK)
+                return response.Response(result, status=status.HTTP_200_OK)
 
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -108,10 +114,16 @@ class FollowersForeignApiView(GenericAPIView):
                 foreign_author = Author.objects.get(id = foreign_id)
                 if foreign_author is not None:
                     current_author.followers.remove(foreign_author)
+                    followers = current_author.followers.all().order_by('displayName')
+                    followers_serializer = self.serializer_class(followers, many=True)
+                    result = {
+                        'result': "Foreign author delete successfully",
+                        'followers': followers_serializer.data
+                    }
                 else:
                     return response.Response("Error: Foreign author do not found", status=status.HTTP_404_NOT_FOUND)
                
-                return response.Response("Foreign author delete successfully", status=status.HTTP_200_OK)
+                return response.Response(result, status=status.HTTP_200_OK)
 
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
