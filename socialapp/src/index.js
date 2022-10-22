@@ -13,6 +13,7 @@ import Main from "./Main";
 import Login from "./pages/authentication/Login";
 import Register from "./pages/authentication/Register"
 import AuthLayout from "./utils/AuthLayout";
+import CreatePost from './components/Posts/CreatePost';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -22,6 +23,7 @@ root.render(
         <Routes>
           <Route element={<AuthLayout />}>
             <Route path="/" element={<Main />}>
+              <Route path='post' element={<CreatePost/>} />
               <Route path='stream' element={<StreamHome/>} />
               <Route path='inbox' element={<Inbox/>} />
               <Route path='explore' element={<Explore/>} />
