@@ -19,7 +19,18 @@ from rest_framework import routers
 from post import views
 from author.views import UserViewSet
 from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
-
+#################swagger start####################
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Cmput 404 peoject",
+        default_version="v1.0.0", 
+        description="temp",  
+    ),
+    public=True,
+)
+#################swagger end ####################
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('service/authors/', include("author.urls")),
@@ -27,6 +38,8 @@ urlpatterns = [
     path('service/authors/<str:author_id>/posts/<str:post_id>', include("post.urls")),
     path('service/', include(('backend.routers', 'backend'), namespace='backend-api')),
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/', include("comments.urls")),
-
-
+    ##############swagger start###########
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    #################swagger end ####################
 ]
