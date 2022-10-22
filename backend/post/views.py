@@ -44,8 +44,8 @@ class PostApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
-                author_id = get_author_id(request)
-                author = Author.objects.get(id=author_id)
+                author_url_id = get_author_url_id(request)
+                author = Author.objects.get(id=author_url_id)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
         
@@ -129,14 +129,13 @@ class PostsApiView(GenericAPIView):
     serializer_class = PostSerializer
 
     def get(self, request, author_id):
-        # Just a test case
-        print(request.data, request.build_absolute_uri(), author_id)
+
         if check_author_id(request) == False:
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
-                author_id= get_author_id(request)
-                author = Author.objects.get(id = author_id)
+                author_url_id= get_author_url_id(request)
+                author = Author.objects.get(id = author_url_id)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
             if author is not None:
@@ -154,14 +153,14 @@ class PostsApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
-                author_id = get_author_id(request)
-                author = Author.objects.get(id=author_id)
+                author_url_id = get_author_url_id(request)
+                author = Author.objects.get(id=author_url_id)
                 print(author.id)
             except Exception as e:
                 print("e")
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
         try:
-            post =Post.objects.create(id = author_id+'/'+'posts/'+str(uuid4()), author = author)
+            post =Post.objects.create(id = author_url_id+'/'+'posts/'+str(uuid4()), author = author)
        
             if post:
                 try:
@@ -194,51 +193,51 @@ class PostsApiView(GenericAPIView):
 
 
 
-def get_author_id(request):
+def get_author_url_id(request):
     if "posts" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
         yy = xx[1].split("/posts")
-        author_id= xx[0]+yy[0]
-        return author_id
+        author_url_id= xx[0]+yy[0]
+        return author_url_id
     if "followers" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
         yy = xx[1].split("/followers")
-        author_id= xx[0]+yy[0]
-        return author_id
+        author_url_id= xx[0]+yy[0]
+        return author_url_id
     if "friends" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
         yy = xx[1].split("/friends")
-        author_id= xx[0]+yy[0]
-        return author_id
+        author_url_id= xx[0]+yy[0]
+        return author_url_id
     else:
         xx=request.build_absolute_uri()[:-7].split('service/')
-        author_id= xx[0]+xx[1]
-        return author_id
+        author_url_id= xx[0]+xx[1]
+        return author_url_id
 
 def get_foreign_id(request):
     xx=request.build_absolute_uri().split('service/')
     yy = xx[1].split("/followers")
-    author_id= xx[0]+'authors'+yy[1]
-    return author_id
+    author_url_id= xx[0]+'authors'+yy[1]
+    return author_url_id
 
 def get_friend_id(request):
     xx=request.build_absolute_uri().split('service/')
     yy = xx[1].split("/friends")
-    author_id= xx[0]+'authors'+yy[1]
-    return author_id    
+    author_url_id= xx[0]+'authors'+yy[1]
+    return author_url_id    
 def get_post_id(request):
     if "likes" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
         yy = xx[1].split("/likes")
-        author_id= xx[0]+yy[0]
-        return author_id
+        author_url_id= xx[0]+yy[0]
+        return author_url_id
     else:
         xx=request.build_absolute_uri().split('service/')
-        author_id= xx[0]+xx[1]
-        return author_id
+        author_url_id= xx[0]+xx[1]
+        return author_url_id
 
 def check_author_id(request):
-    author_id= get_author_id(request)
-    author = Author.objects.filter(id = author_id)
+    author_url_id= get_author_url_id(request)
+    author = Author.objects.filter(id = author_url_id)
     return author.exists()
 
