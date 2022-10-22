@@ -41,9 +41,9 @@ class LikesAuthorApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             author_id = get_author_id(request)
-            author = Author.objects.get(id = author_id)
-            try:
             
+            try:
+                author = Author.objects.get(id = author_id)
                 post_like = Like.objects.filter(author = author)
                 post_likes = self.serializer_class(post_like, many=True)
                 result = {"type": "liked", "items": post_likes.data}
