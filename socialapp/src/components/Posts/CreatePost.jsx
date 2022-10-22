@@ -6,6 +6,7 @@ import { FaImage, FaLink } from "react-icons/fa";
 
 export default function Example() {
     const [show, setShow] = useState(true);
+    const [unlist, setUnlist] = useState(false);
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -18,6 +19,14 @@ export default function Example() {
         visibility: "",
         unlisted: "",
     })
+
+    const unlisted = () => {
+    }
+
+
+    const sendPost = () => {
+
+    }
 
     const closePost = () => {
         setShow(false)
@@ -34,28 +43,52 @@ export default function Example() {
                     <Modal.Title className='header'>Make a Post | </Modal.Title>
                     <Modal.Title className="header1">Who can see this post?</Modal.Title>
                     <InputGroup>
-                        <Button value="Everyone" className='option'name="view" />Everyone
-                        <Button value="Friends" className='option' name="view"/>Friends-Only
-                        <Button value="Private" className='option' name="view" />Private
+                        <Button type="radio" value="Everyone" className='option' name="view" onClick={(e) => {
+                            setPost({
+                                ...post,
+                                visibility: "Everyone",
+                            });
+                        }}>Everyone </Button>
+                        <Button type="radio" value="Friends" className='option' name="view" onClick={(e) => {
+                            setPost({
+                                ...post,
+                                visibility: "Friends",
+                            });
+                            }}>Friends-Only </Button>
+                        <Button type="radio" value="Private" className='option' name="view" onClick={(e) => {
+                            setPost({
+                                ...post,
+                                visibility: "Private",
+                            });
+                            }}>Private </Button>
                     </InputGroup>
-                    <Button className="unlist"> Unlisted </Button>
-                    <CloseButton variant="white" onClick={closePost} />
+                    <Button className="unlist" onClick={unlisted()}> Unlisted </Button>
+                    <CloseButton className='me-2' variant="white" onClick={closePost} />
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <InputGroup className="title">
-                            <Form.Control type="title" placeholder="Title" />
+                            <Form.Control type="title" placeholder="Title"/>
                         </InputGroup>
-
                         <InputGroup>
-                            <Form.Control className="body" type="content" placeholder="Write you Post..." />
+                            <Form.Control className="body" type="content" placeholder="Write you Post..."/>
                         </InputGroup>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <FaImage className="image" />
-                    <FaLink className="link" />
-                    <Button class="postButton" onClick={closePost}>
+                    <FaImage className="image" onClick={(e) => {
+                        setPost({
+                            ...post,
+                            contentType: "image",
+                        });
+                    }} />
+                    <FaLink className="link" onClick={(e) => {
+                        setPost({
+                            ...post,
+                            contentType: "link",
+                        });
+                    }} />
+                    <Button className="postButton" onClick={sendPost}>
                         Post
                     </Button>
                 </Modal.Footer>

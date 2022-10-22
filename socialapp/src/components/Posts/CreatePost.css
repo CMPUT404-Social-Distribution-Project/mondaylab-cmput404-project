@@ -1,13 +1,9 @@
-.btn-close-white {
-    margin-right: 3em;
-}
-
 .modal-content {
     background-color: #1C212B;
     min-width: 60em;
     min-height: 15em;
     margin-top: 5em;
-    margin-left: -10em;
+    margin-left: -6em;
 }
 
 .modal-footer {
@@ -41,8 +37,9 @@
     background: transparent;
     border: none;
     color: #BFEFE9;
-    margin-right: 2em;
-    font-size: 100%;
+    margin-left: -3%;
+    margin-right: 1%;
+    font-size: 110%;
 }
 
 .header {
@@ -51,25 +48,35 @@
 }
 
 .header1 {
-    width: 55%;
-    font-size: 100%;
-    margin-right: 3em;
+    width: 60%;
+    font-size: 110%;
+    margin-top: 0.5%;
+    margin-right: 5%;
 }
 
 .option {
-    font-size: 100%;
-    background-color: white;
-    color: white; 
+    background: transparent;
+    border: none;
+    color: #BFEFE9;
+    font-size: 110%;
+    margin-right: 1%;
 }
 
 .image {
-    font-size: 1.5em;
+    font-size: 200%;
     color: white;
 }
 
 .link {
     margin-left: 0.5em;
-    font-size: 1.5em;
+    font-size: 200%;
     margin-right: auto;
     color: white;
+}
+
+.postButton {
+    border-radius: 15px;    
+    font-size: 150%;
+    color: black;
+    background-color: #BFEFE9;
 }
