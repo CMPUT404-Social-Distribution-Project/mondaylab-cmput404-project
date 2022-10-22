@@ -28,7 +28,7 @@ class PostApiView(GenericAPIView):
         # Just a test case
         post_id = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 post = Post.objects.filter(Q(id = post_id) & Q(visibility='PUBLIC')).order_by("published")
@@ -41,7 +41,7 @@ class PostApiView(GenericAPIView):
         post_id = get_post_id(request)
 
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
                 author_id = get_author_id(request)
@@ -85,7 +85,7 @@ class PostApiView(GenericAPIView):
         
     def put(self, request, author_id, post_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
                 post_id =get_post_id(request)
@@ -107,7 +107,7 @@ class PostApiView(GenericAPIView):
     def delete(self, request, author_id, post_id):
         post_id = get_post_id(request)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
 
         else:
             try:
@@ -132,7 +132,7 @@ class PostsApiView(GenericAPIView):
         # Just a test case
         print(request.data, request.build_absolute_uri(), author_id)
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try:
                 author_id= get_author_id(request)
@@ -151,7 +151,7 @@ class PostsApiView(GenericAPIView):
 
     def post(self, request, author_id):
         if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             try: 
                 author_id = get_author_id(request)
