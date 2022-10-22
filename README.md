@@ -65,14 +65,14 @@ npm install
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Retrieves all the posts of the author with UUID <author_id> | | 
-| ***POST🔶*** | Creates a post for author with UUID <author_id>, id auto generated |  | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **visibility:** choose from [friends, public] <br/> **unlisted:** *boolean*
+| ***POST🔶*** | Creates a post for author with UUID <author_id>, id auto generated |  | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **visibility:** choose from [FRIENDS, PUBLIC] <br/> **unlisted:** *boolean*
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
 `/service/authors/<author_id>/posts/<post_id>`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Gets the public post of author <author_id >at <post_id> | | 
-| ***POST🔶*** | Updates the post <post_uid> from author with UUID <author_id> |  | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **visibility:** choose from [friends, public] <br/> **unlisted:** *boolean*
+| ***POST🔶*** | Updates the post <post_uid> from author with UUID <author_id> |  | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **visibility:** choose from [FRIENDS, PUBLIC] <br/> **unlisted:** *boolean*
 | ***PUT🔶*** | Creates a post for author with UUID <author_id>, id generated from the post_id specified in the request URL. e.g. `PUT http://localhost//service/authors/asgkljg/posts/asd/` generates a post with id=asd. ****NOTE: the ID MUST BE A UUID4!!!**** |  | same as above
 | ***DELETE🔶*** | Deletes the post <post_id> from author <author_id> | | 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
