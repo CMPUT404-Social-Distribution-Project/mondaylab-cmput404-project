@@ -31,7 +31,7 @@ $theme-colors: (
     "dark-blue": #242A37,
     "slightly-darker-blue": #1C212B,
     "darker-blue": #1A1C1E,
-    "even-darker-blue": #17191B,
+    "even-darker-blue": #111418,
     "white-teal": #ECFAF8
 );
 
@@ -42,7 +42,7 @@ $theme-colors: (
   --dark-blue: #242A37;
   --slightly-darker-blue: #1C212B;
   --darker-blue: #14181f;
-  --even-darker-blue: #17191B;
+  --even-darker-blue: #0e1016;
   --white-teal: #ECFAF8;
 }
 
@@ -68,7 +68,7 @@ $font-family-base: "Readex Pro" !important;
 //*************** Side bar edits ***************//
 //----------------------------------------------//
 .main #sidebar {
-  background-color: var(--darker-blue);
+  background-color: var(--slightly-darker-blue);
 }
 
 .main .nav-pills {

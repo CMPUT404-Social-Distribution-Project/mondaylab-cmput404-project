@@ -12,8 +12,12 @@ import { useNavigate } from "react-router-dom";
 export default function Register() {
     const validate = Yup.object().shape({
         username: Yup.string().required('Required').max(26, 'Invalid username'),
-        password: Yup.string().required(),
+        password: Yup.string().required('Required').min(8, 'Must be at least 8 characters'),
+        confirmPass: Yup.string().required('Required').min(8, 'Must be at least 8 characters')
+            .oneOf([Yup.ref('password'), null], 'Passwords must match'),
+        github: Yup.string().url(),
         });
+        
 
     const { registerUser } = useContext(AuthContext);
     
@@ -23,9 +27,10 @@ export default function Register() {
     <div className="Auth-form-container">
     <div className="introduction">
         <div className="Logo-container">
-            <img src={Logo} />
+            <img src={Logo} alt="logo"/>
             <img 
             id="logo-text"
+            alt="logo-text"
             src={LogoText} 
             />
         </div>
@@ -37,6 +42,7 @@ export default function Register() {
             initialValues={{
                 username: '',
                 password: '',
+                confirmPass: '',
                 github: '',
             }}
             validationSchema={validate}
@@ -45,7 +51,7 @@ export default function Register() {
                 const username = values.username;
                 const password = values.password;
                 const github = values.github;
-                registerUser(username, password);
+                registerUser(username, password, github);
             }}
         >
             {formik => (

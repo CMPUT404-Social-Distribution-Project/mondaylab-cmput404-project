@@ -1,6 +1,6 @@
 
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
-ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, ManyToManyField
+ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, ManyToManyField, UUIDField
 )
 from django.forms import ImageField
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
@@ -38,21 +38,22 @@ class AuthorManager(BaseUserManager):
 
 class Author(AbstractBaseUser, PermissionsMixin):
     type =CharField(blank=False, null=False, default="author", max_length=200,)
-    id = URLField(primary_key=True, editable=False)
-    host = URLField(blank=True)
+    uuid = UUIDField(primary_key=True, blank=True, default=str(uuid4()), editable=False)
+    id = URLField(blank=True, null=True, editable=False)
+    host = URLField(blank=True, null=True)
     displayName = CharField(max_length=200, blank=False, null=False, unique=True)
     url = URLField(blank=True)
     github = URLField( blank=True)
     profileImage = URLField(blank=True, default='')
     followers = ManyToManyField('self', blank=True)
     is_active = BooleanField(default=True)
-    is_staff = BooleanField(default=False)
-    is_superuser = BooleanField(default=False)
-
+    is_staff = BooleanField(default=False, editable=False)
+    is_superuser = BooleanField(default=False, editable=False)
 
     objects = AuthorManager()
 
     USERNAME_FIELD = 'displayName'
-
+    
     def __str__(self):
         return self.displayName
+
