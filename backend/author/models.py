@@ -46,8 +46,8 @@ class Author(AbstractBaseUser, PermissionsMixin):
     github = URLField( blank=True)
     profileImage = URLField(blank=True, default='')
     is_active = BooleanField(default=True)
-    is_staff = BooleanField(default=False)
-    is_superuser = BooleanField(default=False)
+    is_staff = BooleanField(default=False, editable=False)
+    is_superuser = BooleanField(default=False, editable=False)
 
     objects = AuthorManager()
 

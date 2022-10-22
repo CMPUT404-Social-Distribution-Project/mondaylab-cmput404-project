@@ -30,7 +30,7 @@ class PostApiView(GenericAPIView):
         try:
             authorObj = Author.objects.get(uuid=author_id)
             postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
-            result = {"items": self.serializer_class(post).data}
+            result = {"items": self.serializer_class(postObj).data}
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -94,7 +94,6 @@ class PostApiView(GenericAPIView):
                             return response.Response(serialize.data, status=status.HTTP_201_CREATED)
                     except Exception as e:
                         return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-
 
 
     def delete(self, request, author_id, post_id):
@@ -186,25 +185,6 @@ class PostsApiView(GenericAPIView):
         else:
             return response.Response(data="No token was provided in the headers", status=status.HTTP_400_BAD_REQUEST)
 
-
-def get_author_id(request):
-    if "posts" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/posts")
-        author_id= xx[0]+yy[0]
-        return author_id
-    else:
-        xx=request.build_absolute_uri()[:-7].split('service/')
-        author_id= xx[0]+xx[1]
-        return author_id
-
-
-    
-def get_post_id(request):
-    xx=request.build_absolute_uri().split('service/')
-    author_id= xx[0]+xx[1]
-    return author_id
-
 def hasAuthorization(request):
     '''Checks if the request has an Authorization header'''
     res = JWT_authenticator.authenticate(request)
@@ -212,11 +192,6 @@ def hasAuthorization(request):
         return True
     else:
         return False
-    # author_id= get_author_id(request)
-    # author = Author.objects.filter(id = author_id)
-    # print(author.exists())
-    # return author.exists()
-
 
 def isAuthorized(request, pk):
     ''' Checks if the requester is authorized to do whatever method that's requested.
@@ -231,7 +206,6 @@ def isAuthorized(request, pk):
         if requesterUUID != pk:
             return False
         return True
-
 
 def isUUID(val):
     try:

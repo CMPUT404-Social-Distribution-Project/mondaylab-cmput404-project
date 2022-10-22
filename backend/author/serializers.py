@@ -10,4 +10,5 @@ class AuthorSerializer(serializers.ModelSerializer):
             'type': {'read_only': True},
             'id': {'read_only': True},
             'uuid': {'read_only': True},
+            'is_superuser': {'read_only': True},
         }

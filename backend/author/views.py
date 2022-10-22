@@ -17,7 +17,7 @@ JWT_authenticator = JWTAuthentication()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    http_method_names = ['get', 'patch']
+    http_method_names = ['get', 'patch', 'post']
     serializer_class = AuthorSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Author.objects.all()

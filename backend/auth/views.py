@@ -28,7 +28,6 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
     serializer_class = RegisterSerializer
     permission_classes = (AllowAny,)
     http_method_names = ['post']
-    # for now allow anyone to register an author. Need to change this later on to only allow local
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request':request})
