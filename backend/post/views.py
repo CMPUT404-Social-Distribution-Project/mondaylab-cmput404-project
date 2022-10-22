@@ -180,14 +180,14 @@ class PostsApiView(GenericAPIView):
                         result = self.serializer_class(post, many=False)
                         return response.Response(result.data, status=status.HTTP_201_CREATED)
                     except Exception as e:
-                        return response.Response(f"1Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+                        return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
                 except Exception as e:
-                    return response.Response(f"2Error: {e}", status=status.HTTP_400_BAD_REQUEST)
+                    return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
             else:
                 e = "Post id not found!"
-                return response.Response(f"3Error: {e}", status=status.HTTP_404_NOT_FOUND)
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return response.Response(f"4Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
 
