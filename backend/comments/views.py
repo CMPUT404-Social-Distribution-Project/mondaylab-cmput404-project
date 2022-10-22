@@ -36,8 +36,16 @@ class CommentsApiView(GenericAPIView):
         elif check_post_id(request) == False:
             return response.Response(data="invalid post id ", status=status.HTTP_401_UNAUTHORIZED)
         else:
-            try:
-                comments = Comment.objects.filter(Q(id = post_id_full_path) & Q(visibility='PUBLIC')).order_by("published")
+            try: 
+                """
+                We get all the comments with its id field contain post_id
+
+                Query:
+                SELECT * from comments_comment as commentTable
+                WHERE commentTable.id LIKE %post_id%
+                ORDER_BY commentTable.published
+                """
+                comments = Comment.objects.filter(id__contains = post_id).order_by("published")
                 result = {"items": self.serializer_class(comments, many=True).data}
                 return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
@@ -81,6 +89,7 @@ class CommentsApiView(GenericAPIView):
                 commentId = author_id_full_path + '/' + "posts/" + post_id + "/comments/" + str(uuid4())
                 #TODO: use correct format for published date
                 publishedDate = date.today().strftime('%Y-%m-%d %H:%M:%S')
+                
                 print("comment id is ", commentId)
                 serialize.save(id=commentId, author=authorObj, published=publishedDate)  # save to db with additional field injected
                 print("serializer data is ", serialize.data)
