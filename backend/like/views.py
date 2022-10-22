@@ -20,8 +20,8 @@ class LikesPostApiView(GenericAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         else:
             author_id = get_author_id(request)
-            author = Author.objects.get(id = author_id)
             try:
+                author = Author.objects.get(id = author_id)
                 post = Post.objects.get(id = post_id, author=author)
                 if post ==None:
                     return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
