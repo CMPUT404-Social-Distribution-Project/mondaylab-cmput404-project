@@ -26,7 +26,7 @@ class Comment(Model):
     uuid = UUIDField(primary_key=True, default=uuid4, editable=False)
     # when all row in author is deleted, this comment will be too
     author = models.ForeignKey(Author,blank=False, null=True, on_delete=CASCADE)
-    contentType = CharField(default=ContentType.plain, blank=False, null=False, choices=ContentType.choices, max_length=200)
+    contentType = CharField(default='text/markdown', blank=False, null=False, max_length=200)
     published = CharField(blank=True, max_length=200)
     comment = CharField(blank=True, null=True,  max_length=200, default="empty comment")
 
