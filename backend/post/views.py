@@ -218,6 +218,7 @@ def check_author_id(request):
     return author.exists()
 
 def get_post_url(request, author_id):
+    "Delete <service> in url, return post url without post uuid"
     xx=request.build_absolute_uri().split('service/')
     author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
     return str(author_url_id)
