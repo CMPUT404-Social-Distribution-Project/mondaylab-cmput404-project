@@ -72,8 +72,8 @@ class PostApiView(GenericAPIView):
                             # get author obj to be saved in author field of post
                             authorObj = Author.objects.get(uuid=author_id)
                             # create post ID and origin and source
-                            postId = request.build_absolute_uri() + post_id
-                            origin = authorObj.host + '/posts/' + post_id
+                            postId = get_post_url(request, author_id)+ post_id
+                            origin = authorObj.host + 'posts/' + post_id
             
                             serialize.save(
                                 id=postId,
@@ -149,8 +149,8 @@ class PostsApiView(GenericAPIView):
                     authorObj = Author.objects.get(uuid=author_id)
                     # create post ID and origin and source
                     postUUID = str(uuid4())
-                    postId = request.build_absolute_uri() + postUUID
-                    origin = authorObj.host + '/posts/' + postUUID
+                    postId = get_post_url(request, author_id)+ postUUID
+                    origin = authorObj.host + 'posts/' + postUUID
 
                     serialize.save(
                         id=postId,
@@ -166,10 +166,7 @@ class PostsApiView(GenericAPIView):
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
-def get_post_id(request):
-    xx=request.build_absolute_uri().split('service/')
-    author_id= xx[0]+xx[1]
-    return author_id
+
 
 def get_author_url_id(request):
     if "posts" in request.build_absolute_uri():
@@ -220,5 +217,13 @@ def check_author_id(request):
     author = Author.objects.filter(id = author_url_id)
     return author.exists()
 
+def get_post_url(request, author_id):
+    """
+    Delete <service> in url, return post url without post uuid
+    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
+    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
+    """
 
-      
+    xx=request.build_absolute_uri().split('service/')
+    author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
+    return str(author_url_id)
