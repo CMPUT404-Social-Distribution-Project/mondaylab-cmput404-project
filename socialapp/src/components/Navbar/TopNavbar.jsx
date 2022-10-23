@@ -6,7 +6,7 @@ import {FaBell, FaCog} from "react-icons/fa"
 import axios from "axios";
 import AuthContext from "../../context/AuthContext";
 import "./TopNavbar.css"
-import default_profile_pic from "../../des/default_profile_pic.jpg";
+import { Link } from "react-router-dom";
 
 function TopNavbar() {
     const [res, setRes] = useState("");
@@ -49,9 +49,13 @@ function TopNavbar() {
                 <Nav className="ml-auto">
                     <Nav.Link href="#home"><FaBell size={30}/>&emsp; </Nav.Link>
                     <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link>
-                    <Nav.Link id="profilePicContainer" href="/profile">
-                        <img id="profilePic" src={default_profile_pic} alt="profilepic"/>
-                    </Nav.Link>
+                    <Link id="profilePicContainer" to={{
+                        pathname: `/authors/${user_id}`,
+                        state: { users: res}
+                    }}
+                    >
+                        <img id="profilePic" src={res.profileImage} alt="profilepic"/>
+                    </Link>
                 </Nav>
             </Container>
         </Navbar>

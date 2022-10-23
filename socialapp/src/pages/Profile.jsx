@@ -5,23 +5,22 @@ import AuthContext from "../context/AuthContext";
 import axios from 'axios';
 import "./Profile.css";
 import default_profile_pic from "../des/default_profile_pic.jpg";
-
+import FollowButton from "../components/FollowButton";
+import { useParams } from "react-router-dom";
 
 export default function Profile() {
   const [res, setRes] = useState("");
   const api = useAxios();
-  const { user } = useContext(AuthContext);
-  // const user_id = user.user_id.split("/").pop();
+  const { baseURL } = useContext(AuthContext);
   const user_id = localStorage.getItem("user_id");
-
+  const { id } = useParams();   // gets the author id in the url
 
   // Called after rendering. Fetches data
   useEffect(() => {
     const fetchData = async () => {
-      axios
-        .get(`http://127.0.0.1:8000/service/authors/${user_id}/`)
+      await axios
+        .get(`${baseURL}/authors/${id}/`)
         .then((response) => {
-          console.log(response.data);
           setRes(response.data);
         })
         .catch((error) => {
@@ -34,22 +33,28 @@ export default function Profile() {
   return (
     <div className="profileContainer">
       <div className="profileHeader">
-        <div className="profilePicPage">
-          <img id="profilePicPage" src={default_profile_pic} alt="profilePic"/>
+        <div className="profilePicWithFollowButton">
+          <div className="profilePicPage">
+            <img id="profilePicPage" src={res.profileImage} alt="profilePic"/>
+          </div>
+          <FollowButton id={id}/>
         </div>
+
         <div className="profileInfo">
           <div className="profileName">{res.displayName}</div>
           <div className="profileStats">
             <div id="statContainer" className="followers">
-              <text>Followers:</text>
-              <div className="infoNum">100000000</div>
+              <span>Followers:</span>
+              {/* Issue with data not becoming fully available due to async operations;
+              So just do 0 until we get the full info */}
+              <div className="infoNum">{typeof res.followers === 'undefined' ? 0 : res.followers.length}</div>
             </div>
             <div id="statContainer" className="following">
-              <text>Following:</text>
+              <span>Following:</span>
               <div className="infoNum">100000000</div>
             </div>
             <div id="statContainer" className="friends">
-              <text>Friends:</text>
+              <span>Friends:</span>
               <div className="infoNum">100000000</div>
             </div>
           </div>
