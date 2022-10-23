@@ -3,8 +3,10 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils import dateparse
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
-ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField
+ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, UUIDField
 )
+
+from uuid import uuid4
 # Create your models here.
 
 from author.models import Author # import autuhor table 
@@ -20,10 +22,11 @@ class Visibility(TextChoices):
 
 class Comment(Model):
     type =  CharField(blank=False, null=False, default="comment", max_length=200)
-    id = URLField(primary_key=True, blank=True, null=False)
+    id = URLField(blank=True, null=False)
+    uuid = UUIDField(primary_key=True, default=uuid4, editable=False)
     # when all row in author is deleted, this comment will be too
     author = models.ForeignKey(Author,blank=False, null=True, on_delete=CASCADE)
-    contentType = CharField(default=ContentType.markdown, blank=False, null=False, choices=ContentType.choices, max_length=200)
+    contentType = CharField(default=ContentType.plain, blank=False, null=False, choices=ContentType.choices, max_length=200)
     published = CharField(blank=True, max_length=200)
     comment = CharField(blank=True, null=True,  max_length=200, default="empty comment")
 
