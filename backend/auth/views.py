@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from auth.serializers import LoginSerializer, RegisterSerializer
 from uuid import uuid4
+from author.models import Author
 
 class LoginViewSet(ModelViewSet, TokenObtainPairView):
     serializer_class = LoginSerializer
@@ -31,6 +32,13 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request':request})
+
+        # check if displayName already exists, if not return error
+        requestedDisplayName = request.data.get("displayName")
+        authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
+        if authorExists != None:
+            return Response(data=f"Author with displayName = {requestedDisplayName} already exists!", status=status.HTTP_400_BAD_REQUEST)
+
         serializer.is_valid(raise_exception=True)
 
         # add in host, id, url, uuid from here since we can't access request object from the model
