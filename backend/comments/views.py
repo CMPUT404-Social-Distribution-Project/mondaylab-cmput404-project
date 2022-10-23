@@ -82,10 +82,10 @@ class CommentsApiView(GenericAPIView):
         author_id_full_path = get_author_id(request)
         post_id_full_path = get_post_id(request)
         print("post id we got back is ", post_id)
-        if check_author_id(request) == False:
-            return response.Response(data = "You are not the author, cannot create post.", status=status.HTTP_401_UNAUTHORIZED)
-        if check_post_id(request) == False:
-            return response.Response(data = "invalid post id ", status=status.HTTP_401_UNAUTHORIZED)
+        #if check_author_id(request) == False:
+        #    return response.Response(data = "You are not the author, cannot create post.", status=status.HTTP_401_UNAUTHORIZED)
+        #if check_post_id(request) == False:
+        #    return response.Response(data = "invalid post id ", status=status.HTTP_401_UNAUTHORIZED)
 
 
 
