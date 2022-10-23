@@ -38,7 +38,7 @@ class AuthorManager(BaseUserManager):
 
 class Author(AbstractBaseUser, PermissionsMixin):
     type =CharField(blank=False, null=False, default="author", max_length=200,)
-    uuid = UUIDField(primary_key=True, blank=True, default=str(uuid4()), editable=False)
+    uuid = UUIDField(primary_key=True, blank=True, default=str(uuid4), editable=False)
     id = URLField(blank=True, null=True, editable=False)
     host = URLField(blank=True, null=True)
     displayName = CharField(max_length=200, blank=False, null=False, unique=True)
