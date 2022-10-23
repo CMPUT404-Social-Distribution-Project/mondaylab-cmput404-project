@@ -15,6 +15,9 @@ const useAxios = () => {
   });
 
   axiosInstance.interceptors.request.use(async req => {
+    // intercepts the outgoing request and checks if the 
+    // token is still valid (i.e. not expired)
+    // if expired, refreshes it before letting the request continue
     const user = jwt_decode(authTokens.access);
     const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
 
