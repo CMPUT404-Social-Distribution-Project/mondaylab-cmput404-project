@@ -11,7 +11,6 @@ import { Link } from "react-router-dom";
 function TopNavbar() {
     const [res, setRes] = useState("");
     const { baseURL } = useContext(AuthContext);
-    // const user_id = user.user_id.split("/").pop();
     const user_id = localStorage.getItem("user_id");
   
   
@@ -50,8 +49,7 @@ function TopNavbar() {
                     <Nav.Link href="#home"><FaBell size={30}/>&emsp; </Nav.Link>
                     <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link>
                     <Link id="profilePicContainer" to={{
-                        pathname: `/authors/${user_id}`,
-                        state: { users: res}
+                        pathname: `/authors/${user_id}`
                     }}
                     >
                         <img id="profilePic" src={res.profileImage} alt="profilepic"/>

@@ -9,11 +9,10 @@ import FollowButton from "../components/FollowButton";
 import { useParams } from "react-router-dom";
 
 export default function Profile() {
-  const [res, setRes] = useState("");
-  const api = useAxios();
-  const { baseURL } = useContext(AuthContext);
-  const user_id = localStorage.getItem("user_id");
-  const { id } = useParams();   // gets the author id in the url
+  const [res, setRes] = useState("");               // the response object we get (Author object)   
+  const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
+  const user_id = localStorage.getItem("user_id");  // the currently logged in author
+  const { id } = useParams();                       // gets the author id in the url
 
   // Called after rendering. Fetches data
   useEffect(() => {
