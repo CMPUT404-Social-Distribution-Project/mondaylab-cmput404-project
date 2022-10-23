@@ -6,7 +6,6 @@ from django.forms import ImageField
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
 from uuid import uuid4
 
-
 class AuthorManager(BaseUserManager):
     def create_user(self, displayName,  password=None, **extra_fields):
         """Create and return a User with a username and password."""
@@ -20,26 +19,39 @@ class AuthorManager(BaseUserManager):
 
         return user
 
+    def create_user_uuid(self, displayName,  password=None, uuid=None):
+        """Create an author with the provided display name, password, and uuid"""
+        if displayName is None:
+            raise TypeError('Users must have a username')
+        
+
+        user = self.model(displayName=displayName, uuid=uuid)
+        user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
     def create_superuser(self, displayName, password):
         """
         Create and return a `User` with superuser (admin) permissions.
         """
-
-        #TODO: Need to find a way to get host URL of the current server that this backend is being hosted on..
-        # we can't just use 127.0.0.1, as we'll eventually have to host this on heroku or whatever.
-        # Why do we need the host URL? so the super user (server admin) can have an Author that they can
-        # use regularly, but will have additional powers for server administration needs. 
-        user = self.create_user(displayName, password)
+        host = 'http://127.0.0.1:8000/'         # temporary solution...need to figure out a way to get host later on
+        uuid = uuid4()
+        url = host + 'authors/' + str(uuid)
+        user = self.create_user_uuid(displayName, password, uuid)
         user.is_staff = True
         user.is_superuser = True
+        user.host = host
+        user.url = url
+        user.id = url
         user.save(using=self._db)
 
         return user
 
 class Author(AbstractBaseUser, PermissionsMixin):
     type =CharField(blank=False, null=False, default="author", max_length=200,)
-    uuid = UUIDField(primary_key=True, blank=True, default=str(uuid4), editable=False)
-    id = URLField(blank=True, null=True, editable=False)
+    uuid = UUIDField(primary_key=True, blank=True, default=uuid4)
+    id = URLField(blank=True, null=True)
     host = URLField(blank=True, null=True)
     displayName = CharField(max_length=200, blank=False, null=False, unique=True)
     url = URLField(blank=True)
@@ -47,8 +59,8 @@ class Author(AbstractBaseUser, PermissionsMixin):
     profileImage = URLField(blank=True, default='')
     followers = ManyToManyField('self', blank=True)
     is_active = BooleanField(default=True)
-    is_staff = BooleanField(default=False, editable=False)
-    is_superuser = BooleanField(default=False, editable=False)
+    is_staff = BooleanField(default=False)
+    is_superuser = BooleanField(default=False)
 
     objects = AuthorManager()
 
@@ -56,4 +68,3 @@ class Author(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.displayName
-
