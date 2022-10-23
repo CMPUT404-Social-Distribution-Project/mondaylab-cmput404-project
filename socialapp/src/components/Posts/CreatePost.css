@@ -55,9 +55,10 @@
 }
 
 .option:focus {
-        background: #BFEFE9;
-        color: black;
+    background: #BFEFE9;
+    color: black;
 }
+
 .option {
     background: transparent;
     border: none;
@@ -70,13 +71,14 @@
     display: none;
 }
 
-.option input[name="view"]:checked{
+.option input[name="view"]:checked {
     background-color: green;
 }
 
 .image {
     font-size: 200%;
     color: white;
+    margin-left: 1%;
 }
 
 .link {
@@ -87,8 +89,24 @@
 }
 
 .postButton {
-    border-radius: 15px;    
+    border-radius: 15px;
     font-size: 150%;
     color: black;
     background-color: #BFEFE9;
+}
+
+.sendTo {
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: -2%;
+    font-size: 110%;
+}
+
+.dropdown-toggle.btn.btn-primary {
+    background-color: #242a37;
+    margin-left: 50%;
+    height: 65%;
+    width: 500%;
+    padding-bottom: 50%;
+    text-align: left;
 }
