@@ -17,6 +17,14 @@ class LoginViewSet(ModelViewSet, TokenObtainPairView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
+        # check if author needs to wait for admin to accept their signup request
+        requestedDisplayName = request.data.get("displayName")
+        authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
+        if authorExists == None:
+            return Response(f"Author doesn't exist", status=status.HTTP_400_BAD_REQUEST)
+        elif authorExists.is_active == False:
+            return Response(f"Author needs to be approved by server admin", status=status.HTTP_400_BAD_REQUEST)
+
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
