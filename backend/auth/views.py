@@ -8,6 +8,7 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from auth.serializers import LoginSerializer, RegisterSerializer
 from uuid import uuid4
 from author.models import Author
+from server.models import Server
 
 class LoginViewSet(ModelViewSet, TokenObtainPairView):
     serializer_class = LoginSerializer
@@ -39,14 +40,14 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
     http_method_names = ['post']
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request':request})
-
         # check if displayName already exists, if not return error
         requestedDisplayName = request.data.get("displayName")
         authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
         if authorExists != None:
             return Response(data=f"Author with displayName = {requestedDisplayName} already exists!", status=status.HTTP_400_BAD_REQUEST)
-
+        
+        # Serialize requested data 
+        serializer = self.get_serializer(data=request.data, context={'request':request})
         serializer.is_valid(raise_exception=True)
 
         # add in host, id, url, uuid from here since we can't access request object from the model
@@ -57,6 +58,11 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
         serializer.validated_data['url'] = url
         serializer.validated_data['id'] = url
         serializer.validated_data['uuid'] = uuid
+
+        # check if server admin requires author to wait for approval to login, change is_active accordingly
+        serverSetting = Server.objects.filter(pk=1).first()
+        if serverSetting.requireLoginPermission:
+            serializer.validated_data['is_active'] = False
         
         user = serializer.save()
         
