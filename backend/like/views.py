@@ -12,6 +12,16 @@ from like.Serializers import LikePostSerializer, LikeAuthorSerializer
 from auth.utils import isUUID, isAuthorized
 
 class LikesPostApiView(GenericAPIView):
+    """
+    You can like posts and comments
+    Send them to the inbox of the author of the post or comment
+    URL: ://service/authors/{AUTHOR_ID}/inbox/
+    POST [local, remote]: send a like object to AUTHOR_ID
+    URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/likes
+    GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID
+    URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments/{COMMENT_ID}/likes
+    GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID comment COMMENT_ID
+    """
     permission_classes = [AllowAny]
     serializer_class=LikePostSerializer
     def get(self, request, author_id, post_id):
@@ -35,6 +45,12 @@ class LikesPostApiView(GenericAPIView):
 
 
 class AuthorLikedApiView(GenericAPIView):
+    """
+    URL: ://service/authors/{AUTHOR_ID}/liked
+    GET [local, remote] list what public things AUTHOR_ID liked.
+    It’s a list of of likes originating from this author
+    Note: be careful here private information could be disclosed.
+    """
     permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
