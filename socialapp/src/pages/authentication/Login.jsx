@@ -24,8 +24,8 @@ export default function Login() {
         <div className="Auth-form-container">
             <div className="introduction">
                 <div className="Logo-container">
-                    <img src={Logo} />
-                    <img id="logo-text" src={LogoText} />
+                    <img src={Logo} alt="logo"/>
+                    <img id="logo-text" src={LogoText} alt="logo-text"/>
                 </div>
                 <div id="intro-text" className="text-left">
                     Welcome to SocialDistribution,
@@ -68,7 +68,7 @@ export default function Login() {
                                     Submit
                                 </button>
                             </div>
-                            <p
+                            {/* <p
                                 id="forgot"
                                 className="forgot-password text-right mt-2"
                             >
@@ -76,9 +76,9 @@ export default function Login() {
                                 <a id="password" href="#">
                                     password?
                                 </a>
-                            </p>
+                            </p> */}
 
-                            <div className="text-center">
+                            <div id="new-to" className="text-center">
                                 New to SocialDistribution?
                             </div>
                             <div className="d-grid gap-2 mt-3">

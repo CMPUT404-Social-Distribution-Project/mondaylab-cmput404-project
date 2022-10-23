@@ -10,5 +10,7 @@ class PostSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'type': {'read_only': True},
             'id': {'read_only': True},
-            'published': {'read_only': True}
+            'published': {'read_only': True},
+            'author': {'read_only': True},
+            'comments': {'read_only': True},
         }

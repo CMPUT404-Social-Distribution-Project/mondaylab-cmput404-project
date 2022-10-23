@@ -7,10 +7,10 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer
-from uuid import uuid4
+from uuid import uuid4, UUID
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from rest_framework.permissions import IsAuthenticated
-# Create your views here.
+from auth.utils import isUUID, isAuthorized
 
 class PostApiView(GenericAPIView):
     """
@@ -20,103 +20,87 @@ class PostApiView(GenericAPIView):
     DELETE [local] remove the post whose id is POST_ID
     PUT [local] create a post where its id is POST_ID
     """
-    #authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = PostSerializer
     
     def get(self, request, author_id, post_id):
-        # Just a test case
-        post_id = get_post_id(request)
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            try:
-                post = Post.objects.filter(Q(id = post_id) & Q(visibility='PUBLIC')).order_by("published")
-                result = {"items": self.serializer_class(post, many=True).data}
-                return response.Response(result, status=status.HTTP_200_OK)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-
-    def post(self, request, author_id, post_id):
-        post_id = get_post_id(request)
-
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            try: 
-                author_url_id = get_author_url_id(request)
-                author = Author.objects.get(id=author_url_id)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-        
+        ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
-            post =Post.objects.get(id = post_id)
-            if post:
-                try:
-                    post.id = post_id
-                    post.title = request.data["title"]
-                    post.source = request.data['source']
-                    post.origin = request.data['origin']
-                    post.description = request.data["description"]
-                    #post.contentType=request.data['contentType']
-                    post.content = request.data["content"]
-                    post.author = author
-                    post.categories = request.data["categories"]
-                    #post.comments = request.data['comments']
-                    post.visibility = request.data["visibility"]
-                    if 'unlisted' not in request.data:
-                        post.unlisted = False
-                    else:
-                        post.unlisted = True
-                    try:
-                        post.save()
-                        result = self.serializer_class(post, many=False)
-                        return response.Response(result.data, status=status.HTTP_201_CREATED)
-                    except Exception as e:
-                        return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-                except Exception as e:
-                    return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-            else:
-                e = "Post id not found!"
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            authorObj = Author.objects.get(uuid=author_id)
+            postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
+            result = {"items": self.serializer_class(postObj).data}
+            return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-        
-    def put(self, request, author_id, post_id):
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
+    def post(self, request, author_id, post_id):
+        ''' Updates the post at post_id (UUID)
+            Requires authentication with JWT.
+        '''
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try: 
-                post_id =get_post_id(request)
-                exist = Post.objects.get(id=post_id)
+                authorObj = Author.objects.get(uuid=author_id)
+                postObj = Post.objects.get(uuid = post_id, author=authorObj)
+                serializer = self.serializer_class(postObj, data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    return response.Response(serializer.validated_data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+ 
+    def put(self, request, author_id, post_id):
+        ''' Creates a post with post_id. 
+            Requires authentication with JWT.
+            NOTE: Requester must generate uuid themselves.
+        '''
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try: 
+                exist = Post.objects.filter(uuid=post_id).first()
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            finally:
                 if exist:
-                    return response.Response(f"Error: Post id exist! Use POST method to modify it!", status=status.HTTP_404_NOT_FOUND)
+                    return response.Response(f"Error: Post id exist! Use POST method to modify it!", status=status.HTTP_400_BAD_REQUEST)
                 else:
                     try:
                         serialize = self.serializer_class(data=request.data)
-                        if serialize.is_valid():
-                            serialize.save(id =post_id)
+                        if serialize.is_valid(raise_exception=True):
+                            # get author obj to be saved in author field of post
+                            authorObj = Author.objects.get(uuid=author_id)
+                            # create post ID and origin and source
+                            postId = get_post_url(request, author_id)+ post_id
+                            origin = authorObj.host + 'posts/' + post_id
+            
+                            serialize.save(
+                                id=postId,
+                                uuid=post_id,
+                                author=authorObj,
+                                count=0,
+                                comments=postId+'/comments',
+                                origin=origin,
+                                source=origin,
+                                )
                             return response.Response(serialize.data, status=status.HTTP_201_CREATED)
                     except Exception as e:
                         return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-            
     def delete(self, request, author_id, post_id):
-        post_id = get_post_id(request)
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
-
+        ''' Deletes a post with post_id (UUID)
+            Requires authentication with JWT.
+        '''
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
-                post = Post.objects.get(id=post_id)
+                post = Post.objects.get(uuid=post_id)
                 post.delete()
                 return response.Response("Deleted Successfully", status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-    
 
 class PostsApiView(GenericAPIView):
     """
@@ -124,72 +108,63 @@ class PostsApiView(GenericAPIView):
     GET [local, remote] get the recent posts from author AUTHOR_ID (paginated)
     POST [local] create a new post but generate a new id
     """
-    #authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly,]
     serializer_class = PostSerializer
 
     def get(self, request, author_id):
-
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            try:
-                author_url_id= get_author_url_id(request)
-                author = Author.objects.get(id = author_url_id)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-            if author is not None:
-                try:
-                    post = Post.objects.filter(author = author).order_by("published")
-                    result = {"items": self.serializer_class(post, many=True).data}
-                    return response.Response(result, status=status.HTTP_200_OK)
-                except Exception as e:
-                    return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-            else:
-                return response.Response(status=status.HTTP_404_NOT_FOUND)
-
-    def post(self, request, author_id):
-        if check_author_id(request) == False:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            try: 
-                author_url_id = get_author_url_id(request)
-                author = Author.objects.get(id=author_url_id)
-                print(author.id)
-            except Exception as e:
-                print("e")
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+        ''' Gets all posts of the specified author UUID
+        '''
         try:
-            post =Post.objects.create(id = author_url_id+'/'+'posts/'+str(uuid4()), author = author)
-       
-            if post:
-                try:
-                    post.title = request.data["title"]
-                    post.source = request.data['source']
-                    post.origin = request.data['origin']
-                    post.description = request.data["description"]
-                    #post.contentType=request.data['contentType']
-                    post.content = request.data["content"]
-                    post.categories = request.data["categories"]
-                    #post.comments = request.data['comments']
-                    post.visibility = request.data["visibility"]
-                    if 'unlisted' not in request.data:
-                        post.unlisted = False
-                    else:
-                        post.unlisted = True
-                    try:
-                        post.save()
-                        result = self.serializer_class(post, many=False)
-                        return response.Response(result.data, status=status.HTTP_201_CREATED)
-                    except Exception as e:
-                        return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-                except Exception as e:
-                    return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
-            else:
-                e = "Post id not found!"
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            author = Author.objects.get(uuid = author_id)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+        if author is not None:
+            try:
+                post = Post.objects.filter(author = author).order_by("published")
+                result = {"items": self.serializer_class(post, many=True).data}
+                return response.Response(result, status=status.HTTP_200_OK)
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+        else:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, author_id):
+        ''' Creates new post
+            Fields that should NOT be received from the request are:
+                id,
+                author,
+                count,
+                comments,
+                origin,
+                source
+        '''
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                # serialize data to turn it to a post
+                serialize = self.serializer_class(data=request.data)
+                if serialize.is_valid(raise_exception=True):
+                    # get author obj to be saved in author field of post
+                    authorObj = Author.objects.get(uuid=author_id)
+                    # create post ID and origin and source
+                    postUUID = str(uuid4())
+                    postId = get_post_url(request, author_id)+ postUUID
+                    origin = authorObj.host + 'posts/' + postUUID
+
+                    serialize.save(
+                        id=postId,
+                        uuid=postUUID,
+                        author=authorObj,
+                        count=0,
+                        comments=postId+'/comments',
+                        origin=origin,
+                        source=origin,
+                        )
+                    return response.Response(serialize.data, status=status.HTTP_201_CREATED)
+
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -211,8 +186,9 @@ def get_author_url_id(request):
         return author_url_id
     else:
         xx=request.build_absolute_uri()[:-7].split('service/')
-        author_url_id= xx[0]+xx[1]
-        return author_url_id
+        author_id= xx[0]+xx[1]
+        return author_id
+
 
 def get_foreign_id(request):
     xx=request.build_absolute_uri().split('service/')
@@ -241,3 +217,13 @@ def check_author_id(request):
     author = Author.objects.filter(id = author_url_id)
     return author.exists()
 
+def get_post_url(request, author_id):
+    """
+    Delete <service> in url, return post url without post uuid
+    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
+    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
+    """
+
+    xx=request.build_absolute_uri().split('service/')
+    author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
+    return str(author_url_id)
