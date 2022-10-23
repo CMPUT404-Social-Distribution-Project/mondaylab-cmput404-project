@@ -7,6 +7,9 @@ class Server(models.Model):
     # If admin wants authors to require their approval before being able to access their server
     requireLoginPermission = models.BooleanField(default=False, blank=False, null=False)
 
+    def __str__(self):
+        return 'Server Settings'
+
     def save(self, *args, **kwargs):
         # Makes sure there is only one instance
         # ref: https://stackoverflow.com/questions/39412968/allow-only-one-instance-of-a-model-in-django
