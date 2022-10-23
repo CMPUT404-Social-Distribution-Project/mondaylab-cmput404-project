@@ -60,12 +60,12 @@ export const AuthProvider = ({ children }) => {
       }) 
     });
 
-    const data = await response.json();
-    
     if (response.status === 201) {
       navigate("/login");
     } else {
-      alert("ERROR:" + data["detail"]);
+      response.json().then(function(value) {
+        alert("ERROR: " + value);
+      })
     }
   };
 
