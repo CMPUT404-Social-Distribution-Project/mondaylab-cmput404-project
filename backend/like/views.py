@@ -9,15 +9,16 @@ from like.models import Like
 from django.db.models import Q
 from like.Serializers import LikePostSerializer, LikeAuthorSerializer
 # Create your views here.
-
+from auth.utils import isUUID, isAuthorized
 
 class LikesPostApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikePostSerializer
     def get(self, request, author_id, post_id):
         post_id = get_post_id(request)
-        if check_author_id(request) == False:
-            return response.Response("Author not found", status=status.HTTP_404_NOT_FOUND)
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        
         else:
             author_url_id = get_author_url_id(request)
             try:
@@ -37,8 +38,9 @@ class AuthorLikedApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
-        if check_author_id(request) == False:
-            return response.Response("Author not found", status=status.HTTP_404_NOT_FOUND)
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        
         else:
             author_url_id = get_author_url_id(request)
             
