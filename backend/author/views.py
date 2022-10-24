@@ -61,6 +61,12 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             try:
                 obj = Author.objects.get(uuid=pk)
+                # check if the display name is unique
+                requestedDisplayName = request.data.get("displayName")
+                authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
+                if authorExists != None:
+                    return Response(data=f"Author with displayName = {requestedDisplayName} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
+
                 serializer = self.serializer_class(obj, data=request.data)
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
@@ -80,6 +86,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if not isAuthorized(request, pk): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
+            # check if the display name is unique
+            requestedDisplayName = request.data.get("displayName")
+            authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
+            if authorExists != None:
+                return Response(data=f"Author with displayName = {requestedDisplayName} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
+
             # check if the requested field(s) to change exists
             for key in request.data.keys():
                 print([f.name for f in Author._meta.get_fields()])
