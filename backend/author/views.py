@@ -51,7 +51,8 @@ class UserViewSet(viewsets.ModelViewSet):
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def update(self, request, pk=None):
+    @action(detail=False, methods=['post'])
+    def post(self, request, pk=None):
         ''' Updates an author's fields. Requires authentication token ('Authentication' header)
             Use: Send a POST to
                 /service/authors/<author_uuid>/
@@ -61,11 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             try:
                 obj = Author.objects.get(uuid=pk)
-                # check if the display name is unique
-                requestedDisplayName = request.data.get("displayName")
-                authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
-                if authorExists != None:
-                    return Response(data=f"Author with displayName = {requestedDisplayName} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
+                self.check_is_unique(request, obj)
 
                 serializer = self.serializer_class(obj, data=request.data)
                 if serializer.is_valid(raise_exception=True):
@@ -86,11 +83,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if not isAuthorized(request, pk): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
-            # check if the display name is unique
-            requestedDisplayName = request.data.get("displayName")
-            authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
-            if authorExists != None:
-                return Response(data=f"Author with displayName = {requestedDisplayName} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
 
             # check if the requested field(s) to change exists
             for key in request.data.keys():
@@ -101,12 +93,23 @@ class UserViewSet(viewsets.ModelViewSet):
                     return Response(data=f"No changy password :)", status=status.HTTP_400_BAD_REQUEST)
             
             obj = Author.objects.get(uuid=pk)
+            self.check_is_unique(request, obj)
+
             serializer = self.serializer_class(obj, data=request.data, partial=True)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
             else:
                 return Response(data="Error validating data", status=status.HTTP_400_BAD_REQUEST)
+
+    def check_is_unique(self, request, req_author):
+        # check if the display name is unique
+        requestedDisplayName = request.data.get("displayName")
+        if requestedDisplayName != req_author.displayName:          
+            # if the requested displayName change is not the same as before, check if the displayName is unique
+            authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
+            if authorExists != None:
+                return Response(data=f"Author with displayName = {requestedDisplayName} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
 
 
 
