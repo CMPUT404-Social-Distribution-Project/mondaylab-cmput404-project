@@ -18,6 +18,11 @@
     src: local('Readex Pro Bold'), url(./des/fonts/ReadexPro-Bold.ttf) format('truetype');
   }
 
+div.main {
+    height:auto;
+    min-height: 5000%;
+}
+
 // overwrite theme variables
 @import "node_modules/bootstrap/scss/_functions.scss";
 @import "node_modules/bootstrap/scss/_variables.scss";

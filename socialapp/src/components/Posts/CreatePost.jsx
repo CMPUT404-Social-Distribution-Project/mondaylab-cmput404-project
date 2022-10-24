@@ -29,11 +29,11 @@ export default function Example() {
 
     const setVisibility = (option) => {
         setPost({...post, visibility: option})
-        if(option == "PUBLIC"){
+        if(option === "PUBLIC"){
             setEveActive(true)
             setFriActive(false)
             setPriActive(false)
-        } else if(option == "PRIVATE"){
+        } else if(option === "PRIVATE"){
             setEveActive(false)
             setFriActive(true)
             setPriActive(false)
@@ -62,6 +62,7 @@ export default function Example() {
             { headers: { 'Authorization': `Bearer ${authTokens.access}` }})
             .then((response) => {
                 console.log(response.data);
+                closePost();
             })
             .catch((error) => {
                 alert(`Something went wrong posting! \n Error: ${error}`)
