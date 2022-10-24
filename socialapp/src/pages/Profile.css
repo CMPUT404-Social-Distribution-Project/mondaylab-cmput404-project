@@ -7,13 +7,14 @@
     flex-direction: column;
     padding-left: 2rem;
     padding-right: 2rem;
-
+    height: fit-content;
 }
 
 .profileHeader {
     background-color: var(--dark-blue);
     align-self: center;
     width: fit-content;
+    min-width: 40em;
     padding-top: 2rem;
     padding-left: 2rem;
     padding-right: 2rem;
@@ -83,9 +84,7 @@
 }
 
 #statContainer {
-
     display: flex;
-    align-items: center;
     gap: 0.5rem;
 }
 
@@ -95,14 +94,24 @@ span {
 }
 
 .infoNum {
+    display: inline-flex;
+    align-items: center;
     font-size: 1rem;
     text-align: center;
     align-self: center;
     padding: 0.3rem;
     border-radius: 2rem;
     width: fit-content;
+    max-width: 3rem;
     height: 1.5rem;
     background-color: var(--orange);
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.posts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2em 2em 0em;
 }
