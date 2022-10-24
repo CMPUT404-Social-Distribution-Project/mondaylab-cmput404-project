@@ -7,7 +7,7 @@ from inbox.models import Inbox
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
 from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
@@ -16,14 +16,21 @@ from followers.models import FriendRequest
 from followers.Serializers import FriendRequestSerializer
 from comments.serializers import CommentsSerializer
 
+class UnauthenticatedPost(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in ['POST']
+
+
 class InboxApiView(GenericAPIView):
     """
     The inbox is all the new posts from who you follow
     URL: ://service/authors/{AUTHOR_ID}/inbox
     DELETE [local]: clear the inbox
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated|UnauthenticatedPost]
     serializer_class = PostSerializer
+    http_method_names=['get', 'post', 'delete']
+
     def get(self, request, author_id):
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
