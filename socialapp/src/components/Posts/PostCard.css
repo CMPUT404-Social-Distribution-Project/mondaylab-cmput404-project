@@ -1,0 +1,11 @@
+.card {
+    --bs-card-bg: none;
+}
+
+.card-body {
+    color: var(--white-teal);
+    background-color: var(--dark-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border: transparent;
+    border-radius: 11px;
+}
