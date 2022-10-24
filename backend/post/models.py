@@ -27,7 +27,7 @@ class Post(Model):
     contentType = CharField(default=ContentType.plain, blank=False, null=False, choices=ContentType.choices, max_length=200)
     content = TextField(blank=True, null=True)
     author = ForeignKey(Author, blank=False, null=True, on_delete=CASCADE)
-    categories = TextField(null=True)
+    categories = TextField(null=True, blank=True)
     #see this to send categories
     #https://stackoverflow.com/a/7151813 
     count = IntegerField(default=0)

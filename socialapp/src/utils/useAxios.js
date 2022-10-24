@@ -7,6 +7,8 @@ import AuthContext from "../context/AuthContext";
 const baseURL = "http://127.0.0.1:8000/service";
 
 const useAxios = () => {
+  // Use this function when you want to use a method that requires 
+  // authorization. See FollowButton.jsx for an example use.
   const { authTokens, setUser, setAuthTokens } = useContext(AuthContext);
 
   const axiosInstance = axios.create({
@@ -15,6 +17,9 @@ const useAxios = () => {
   });
 
   axiosInstance.interceptors.request.use(async req => {
+    // intercepts the outgoing request and checks if the 
+    // token is still valid (i.e. not expired)
+    // if expired, refreshes it before letting the request continue
     const user = jwt_decode(authTokens.access);
     const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
 

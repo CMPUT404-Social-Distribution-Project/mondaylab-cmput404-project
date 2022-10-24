@@ -19,21 +19,21 @@ export default function Example() {
         source: "",
         orgin: "",
         description: "",
-        contentType: "",
+        contentType: "text/plain",
         content: "",
         author: "",
         categories: "",
-        visibility: "Everyone",
+        visibility: "PUBLIC",
         unlisted: false,
     })
 
     const setVisibility = (option) => {
         setPost({...post, visibility: option})
-        if(option == "Everyone"){
+        if(option == "PUBLIC"){
             setEveActive(true)
             setFriActive(false)
             setPriActive(false)
-        } else if(option == "Friends"){
+        } else if(option == "PRIVATE"){
             setEveActive(false)
             setFriActive(true)
             setPriActive(false)
@@ -64,6 +64,7 @@ export default function Example() {
                 console.log(response.data);
             })
             .catch((error) => {
+                alert(`Something went wrong posting! \n Error: ${error}`)
                 console.log(error);
             });
     };
@@ -89,7 +90,7 @@ export default function Example() {
                                 color: eveActive ? 'black' : '',
                             }} 
                             onClick={() => {
-                                setVisibility("Everyone")}}>
+                                setVisibility("PUBLIC")}}>
                         Everyone </Button>
                         <Button type="radio" value="Friends" className='option' name="view" 
                             style={{
@@ -97,7 +98,7 @@ export default function Example() {
                                 color: friActive ? 'black' : '',
                             }} 
                             onClick={() => {
-                                setVisibility("Friends")
+                                setVisibility("FRIENDS")
                             }}>
                         Friends-Only </Button>
                         <Button type="radio" value="Private" className='option' name="view" 

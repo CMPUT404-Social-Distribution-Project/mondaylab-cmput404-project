@@ -34,16 +34,19 @@ export const AuthProvider = ({ children }) => {
       })
       
     });
-    const data = await response.json();
+    await response.json().then(function(data) {
+      if (response.status === 200) {
+        setAuthTokens(data);
+        setUser(jwt_decode(data.access));
+        localStorage.setItem("authTokens", JSON.stringify(data));
+        navigate("/stream");
+      } else {
+        console.log(data)
+        alert("ERROR: " + data);
+      }
+    });
 
-    if (response.status === 200) {
-      setAuthTokens(data);
-      setUser(jwt_decode(data.access));
-      localStorage.setItem("authTokens", JSON.stringify(data));
-      navigate("/stream");
-    } else {
-      alert("ERROR:" + data["detail"]);
-    }
+
   };
   
   const registerUser = async (displayName, password, github) => {
@@ -60,12 +63,12 @@ export const AuthProvider = ({ children }) => {
       }) 
     });
 
-    const data = await response.json();
-    
     if (response.status === 201) {
       navigate("/login");
     } else {
-      alert("ERROR:" + data["detail"]);
+      response.json().then(function(value) {
+        alert("ERROR: " + value);
+      })
     }
   };
 

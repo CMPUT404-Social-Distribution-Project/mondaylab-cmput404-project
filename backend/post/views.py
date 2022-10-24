@@ -27,7 +27,10 @@ class PostApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = Author.objects.get(uuid=author_id)
-            postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
+            if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
+                postObj = Post.objects.get(uuid = post_id, author=authorObj)
+            else:
+                postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
             result = {"items": self.serializer_class(postObj).data}
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
