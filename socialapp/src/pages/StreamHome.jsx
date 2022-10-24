@@ -1,37 +1,37 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext} from 'react';
 import axios from 'axios';
 import "./pages.css";
-import AuthContext from "../context/AuthContext";
 import "./Profile.css";
-import { useParams } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
+import { Container } from 'react-bootstrap';
 import PostCard from "../components/Posts/PostCard";
-import { Container } from "react-bootstrap";
 
 export default function StreamHome() {
-  const [posts, setPosts] = useState([])
-  const user_id = localStorage.getItem("user_id");  // the currently logged in author
+  const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
+  const [postsArray, setPostsArray] = useState([]);
+  const user_id = localStorage.getItem("user_id");
 
   useEffect(() => {
     axios
-      .get(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, { params: { visibility: "Public" } })
-      .then((response) => {
-        setPosts(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  })
+        .get(`${baseURL}/authors/${user_id}/posts/`)
+        .then((response) => {
+          setPostsArray(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+  }, []);
 
   return (
-    <div>
-      <h1>Posts</h1>
-      <Container>
-        {posts.map((posts) => (
-          <div>
-              <PostCard props="posts"/>
-          </div>
-        ))}
-      </Container>
+    <div className='homepage'>
+      <Container style={{ zIndex: 10 }}>
+          <h1>My Feed</h1>
+          <div classNme = "posts">
+            {postsArray.map((post) => (
+              <PostCard post = {post}/>
+            ))}
+        </div>
+        </Container>
     </div>
   );
 }

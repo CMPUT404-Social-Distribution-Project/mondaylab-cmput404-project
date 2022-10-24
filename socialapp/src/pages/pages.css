@@ -1,5 +1,19 @@
 .main-content-container {
-    width: 100vw;
-    height: 100vh;
+    width: auto;
+    height: auto;
     background-color: var(--darker-blue);
+    color: white;
+}
+
+.posts {
+    width: 1100000%;
+}
+.card {
+    width: 500%;
+    min-width: none;
+}
+
+.card-body {
+    width: 200%;
+    margin-bottom: 5%;
 }
