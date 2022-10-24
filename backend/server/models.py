@@ -14,5 +14,5 @@ class Server(models.Model):
         # Makes sure there is only one instance
         # ref: https://stackoverflow.com/questions/39412968/allow-only-one-instance-of-a-model-in-django
         if not self.pk and Server.objects.exists():
-            raise ValidationError('There can only be one instance of Server')
+            return Server.objects.filter().first()
         return super(Server, self).save(*args, **kwargs)
