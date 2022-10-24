@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Modal, Button, InputGroup, Form, CloseButton } from "react-bootstrap";
+import { Modal, Button, InputGroup, Form, CloseButton, DropdownButton } from "react-bootstrap";
 import axios from 'axios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
@@ -12,6 +12,7 @@ export default function Example() {
     const [eveActive, setEveActive] = useState(true)
     const [friActive, setFriActive] = useState(false)
     const [priActive, setPriActive] = useState(false)
+    const [uriPost, setURIPost] = useState(false)
     const { authTokens } = useContext(AuthContext);
     const user_id = localStorage.getItem("user_id");
     const [post, setPost] = useState({
@@ -28,40 +29,41 @@ export default function Example() {
     })
 
     const setVisibility = (option) => {
-        setPost({...post, visibility: option})
-        if(option == "PUBLIC"){
+        setPost({ ...post, visibility: option })
+        if (option == "PUBLIC") {
             setEveActive(true)
             setFriActive(false)
             setPriActive(false)
-        } else if(option == "PRIVATE"){
-            setEveActive(false)
-            setFriActive(true)
-            setPriActive(false)
-        } else {
+        } else if (option == "Private") {
             setEveActive(false)
             setFriActive(false)
             setPriActive(true)
+        } else {
+            setEveActive(false)
+            setFriActive(true)
+            setPriActive(false)
         }
     }
 
     const unlistPost = () => {
         setUnlist(!unlist)
-        if(unlist){
+        if (unlist) {
             setIsActive(true)
-            setPost({...post, unlisted: true})
+            setPost({ ...post, unlisted: true })
         } else {
             setIsActive(false)
-            setPost({ ...post, unlisted: false})
+            setPost({ ...post, unlisted: false })
         }
     };
 
 
     const sendPost = () => {
         axios
-            .post(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, post, 
-            { headers: { 'Authorization': `Bearer ${authTokens.access}` }})
+            .post(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, post,
+                { headers: { 'Authorization': `Bearer ${authTokens.access}` } })
             .then((response) => {
                 console.log(response.data);
+                closePost()
             })
             .catch((error) => {
                 alert(`Something went wrong posting! \n Error: ${error}`)
@@ -71,6 +73,9 @@ export default function Example() {
 
     const closePost = () => {
         setShow(false)
+        if(post.unlisted){
+            setURIPost(true)
+        }
     };
 
     return (
@@ -80,54 +85,68 @@ export default function Example() {
                 centered
                 show={show}
                 onHide={closePost}>
-                <Modal.Header>
+                <Modal.Header className='border-0'>
                     <Modal.Title className='header'>Make a Post | </Modal.Title>
                     <Modal.Title className="header1">Who can see this post?</Modal.Title>
                     <InputGroup>
-                        <Button type="radio" value="Everyone" className='option' name="view" 
+                        <Button type="radio" value="Everyone" className='option' name="view"
                             style={{
                                 backgroundColor: eveActive ? ' #BFEFE9' : '',
                                 color: eveActive ? 'black' : '',
-                            }} 
+                            }}
                             onClick={() => {
-                                setVisibility("PUBLIC")}}>
-                        Everyone </Button>
-                        <Button type="radio" value="Friends" className='option' name="view" 
+                                setVisibility("PUBLIC")
+                            }}>
+                            Everyone </Button>
+                        <Button type="radio" value="Friends" className='option' name="view"
                             style={{
                                 backgroundColor: friActive ? ' #BFEFE9' : '',
                                 color: friActive ? 'black' : '',
-                            }} 
+                            }}
                             onClick={() => {
                                 setVisibility("FRIENDS")
                             }}>
-                        Friends-Only </Button>
-                        <Button type="radio" value="Private" className='option' name="view" 
+                            Friends-Only </Button>
+                        <Button type="radio" value="Private" className='option' name="view"
                             style={{
                                 backgroundColor: priActive ? ' #BFEFE9' : '',
                                 color: priActive ? 'black' : '',
-                            }} 
+                            }}
                             onClick={() => {
                                 setVisibility("Private")
                             }}>
-                        Private </Button>
+                            Private </Button>
                     </InputGroup>
                     <Button style={{
                         backgroundColor: isActive ? ' #BFEFE9' : '',
                         color: isActive ? 'black' : '',
-                    }} className="unlist" onClick={unlistPost}> 
-                    Unlisted 
+                    }} className="unlist" onClick={unlistPost}>
+                        Unlisted
                     </Button>
                     <CloseButton className='me-2' variant="white" onClick={closePost} />
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
+                        {friActive ?
+                            <div className="sendTo">
+                                <InputGroup>
+                                    <p style={{ color: 'orange' }} >Send to: </p>
+                                    <div className="dropDown">
+                                        <DropdownButton>
+                                        </DropdownButton>
+                                    </div>
+                                </InputGroup>
+                            </div>
+                            : ""
+                        }
                         <InputGroup className="title">
-                            <Form.Control type="title" placeholder="Title" 
+                            <Form.Control type="title" placeholder="Title"
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
                                         title: e.target.value,
-                                    })}} />
+                                    })
+                                }} />
                         </InputGroup>
                         <InputGroup>
                             <Form.Control className="body" type="content" placeholder="Write you Post..."
@@ -140,7 +159,7 @@ export default function Example() {
                         </InputGroup>
                     </Form>
                 </Modal.Body>
-                <Modal.Footer>
+                <Modal.Footer className="border-0">
                     <FaImage className="image" onClick={(e) => {
                         setPost({
                             ...post,
@@ -158,6 +177,18 @@ export default function Example() {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            {uriPost && 
+            <Modal>
+                <Modal.Title className="header">unlisted Post Created!</Modal.Title>
+                <Modal.Body>
+                    Shareable URI: <br></br>
+                    <InputGroup readOnly>
+                        Hello!
+                    </InputGroup>
+                </Modal.Body>
+            </Modal>}
         </div>
     );
 }
+
+
