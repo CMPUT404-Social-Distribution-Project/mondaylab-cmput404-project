@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Register() {
     const validate = Yup.object().shape({
-        username: Yup.string().required('Required').max(26, 'Invalid username'),
+        username: Yup.string().required('Required').max(128, 'Must be within 128 characters'),
         password: Yup.string().required('Required').min(8, 'Must be at least 8 characters'),
         confirmPass: Yup.string().required('Required').min(8, 'Must be at least 8 characters')
             .oneOf([Yup.ref('password'), null], 'Passwords must match'),
