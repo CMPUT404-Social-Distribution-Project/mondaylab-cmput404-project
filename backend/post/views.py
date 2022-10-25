@@ -2,6 +2,7 @@
 
 from post.models import Post
 from author.models import Author
+from comments.models import Comment, CommentSrc
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
@@ -11,6 +12,9 @@ from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
 from auth.utils import isUUID, isAuthorized
+from comments.serializers import CommentsSerializer
+
+from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 
 class PostApiView(GenericAPIView):
     """
@@ -113,23 +117,68 @@ class PostsApiView(GenericAPIView):
     """
     permission_classes = [IsAuthenticatedOrReadOnly,]
     serializer_class = PostSerializer
+    pagination_class = CustomPagination
 
     def get(self, request, author_id):
-        ''' Gets all posts of the specified author UUID
-        '''
+        ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
-            author = Author.objects.get(uuid = author_id)
+            authorObj = Author.objects.get(uuid=author_id)
+            postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC').order_by("published").reverse()
+            postsPaginated = self.paginate_queryset(postsQuerySet)
+
+            
+            # Need to set the commentSrc of each post object in the paginated posts
+            # so we loop through the paginated query set to do so
+            for postObj in postsPaginated:
+                # need to define separate paginator for commentSrc since self.paginator_class is for posts only
+                paginator = CustomPaginationCommentsSrc()
+                # get the comments of this postObj as a paginated query (only 5 comments max)
+                commentsQuerySet = Comment.objects.filter(id__contains = postObj.id).order_by("published").reverse()
+                commentsPageQuerySet = paginator.paginate_queryset(commentsQuerySet)
+                commentsSerializer = CommentsSerializer(commentsPageQuerySet, many=True)
+                commentsPaginationResult = paginator.get_paginated_response(commentsSerializer.data)
+                comments = commentsPaginationResult.data.get("results")
+ 
+                # Need to check if the post already has a commentSrc
+                commentSrcExists = CommentSrc.objects.filter(id=postObj.comments).first()
+                postSerializer = self.serializer_class(postObj)
+
+                if len(comments) != 0:      # if there are no comments, leave commentSrc as null
+                    if postObj.commentSrc is None:
+                        if commentSrcExists != None:
+                            # if there's already an existing commentSrc, clear it and re-add comments
+                            commentSrcExists.comments.clear()
+                            for comment in comments:
+                                commentSrcExists.comments.add(comment["uuid"])
+                            # set the commentSrc of post object to the existing commentSrc
+                            postObj.commentSrc = commentSrcExists
+
+                        else:
+                            # if it doesn't exist, create one
+                            commentSrcObj = CommentSrc.objects.create(
+                                post=postObj.id,
+                                id=postObj.comments,
+                            )
+
+                            # iterate over the paginated comments and add it to the newly created CommentSrc object
+                            for comment in comments:
+                                commentSrcObj.comments.add(comment["uuid"])
+
+                            # set the current post object's commentSrc field to the newly created object
+                            postObj.commentSrc = commentSrcObj
+                        
+                    else:
+                        # else if the current post object already has a commentSrc, clear it and re-add
+                        postObj.commentSrc.comments.clear()
+                        for comment in comments:
+                            postObj.commentSrc.comments.add(comment["uuid"])
+
+            postsSerializer = self.serializer_class(postsPaginated, many=True)
+            result = {"items": postsSerializer.data}
+            
+            return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-        if author is not None:
-            try:
-                post = Post.objects.filter(author = author).order_by("published")
-                result = {"items": self.serializer_class(post, many=True).data}
-                return response.Response(result, status=status.HTTP_200_OK)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-        else:
-            return response.Response(status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, author_id):
         ''' Creates new post
