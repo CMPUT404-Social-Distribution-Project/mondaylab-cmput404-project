@@ -39,7 +39,6 @@ const AuthLayout = () => {
 
 
     if (user !== null ) {
-        let isAuthenticated = user;
         // if the token has expired or doesn't exist, log the user out, otherwise
         // show them the protected pages
         if (isExpired === true || isExpired === null) {
