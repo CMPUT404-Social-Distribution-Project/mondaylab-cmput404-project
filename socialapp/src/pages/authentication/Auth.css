@@ -107,6 +107,16 @@ label {
   width: 100%;
 }
 
+#cancel-button {
+  margin-top: 1.5rem;
+  color: var(--slightly-darker-blue);
+  background-color: var(--orange);
+  border-radius: 55rem;
+  font-size: 14px;
+  height: 2.5rem;
+  width: 100%;
+}
+
 #new-to {
   margin-top: 2rem;
 }

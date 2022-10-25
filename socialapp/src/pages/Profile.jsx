@@ -8,6 +8,7 @@ import default_profile_pic from "../des/default_profile_pic.jpg";
 import FollowButton from "../components/FollowButton";
 import { useParams } from "react-router-dom";
 import PostCard from "../components/Posts/PostCard";
+import EditProfileButton from "../components/EditProfileButton";
 
 export default function Profile() {
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
@@ -42,8 +43,6 @@ export default function Profile() {
     fetchData();
   }, []);
 
-
-
   return (
     <div className="profileContainer">
       <div className="profileHeader">
@@ -72,6 +71,7 @@ export default function Profile() {
               <div className="infoNum">100000000</div>
             </div>
           </div>
+          <EditProfileButton className="edit-button" author={author}/>
         </div>
       </div>
 
