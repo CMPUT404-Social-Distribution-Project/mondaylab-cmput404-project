@@ -1,4 +1,5 @@
-import React from 'react'
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import "./PostCard.css"
@@ -14,9 +15,11 @@ export default function PostCard(props) {
       </Card.Header>
       <Card.Img variant="top" src="" />
       <Card.Body>
-        <Card.Title>{props.post.title}</Card.Title>
+        <Card.Title>
+          <ReactMarkdown>{props.post.title}</ReactMarkdown>
+        </Card.Title>
         <Card.Text>
-          {props.post.content}
+          <ReactMarkdown>{props.post.content}</ReactMarkdown>
         </Card.Text>
         <hr/>
         <div className="comments-container">

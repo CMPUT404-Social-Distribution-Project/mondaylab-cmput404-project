@@ -22,7 +22,6 @@ export default function Example() {
         description: "",
         contentType: "text/plain",
         content: "",
-        author: "",
         categories: "",
         visibility: "PUBLIC",
         unlisted: false,
