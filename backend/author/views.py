@@ -14,12 +14,12 @@ from rest_framework import filters
 from django.shortcuts import get_list_or_404
 from auth.utils import isUUID, isAuthorized
 
-
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
     serializer_class = AuthorSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Author.objects.all()
+    # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     # filter_backends = [filters.OrderingFilter]
     # ordering_fields = ['updated']
     # ordering = ['-updated']
