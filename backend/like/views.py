@@ -1,3 +1,4 @@
+import uuid
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
@@ -6,6 +7,7 @@ from post.views import get_author_url_id, get_post_id, check_author_id
 from post.models import Post
 from author.models import Author
 from like.models import Like
+from comments.models import Comment
 from django.db.models import Q
 from like.Serializers import LikePostSerializer, LikeAuthorSerializer
 # Create your views here.
@@ -43,6 +45,36 @@ class LikesPostApiView(GenericAPIView):
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
+    def post(self, request):
+        return
+
+
+
+class LikesCommentApiView(GenericAPIView):
+    """
+    URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments/{COMMENT_ID}/likes
+    GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID comment COMMENT_ID
+    """
+    def get(self, request, author_id, post_id, comment_id):
+        
+        #TODO: do this require authentiation
+        # TODO: to test, how to I test for likes
+        # what is the summary field? suggestion is to say [list of author liked your post]
+        permission_classes = [AllowAny]
+        serializer_class=LikePostSerializer
+
+        # return list of likes from this author's post's comment
+        # Like db contains rows of like object, each like obj has this field('object') = "...author/{author_id}/posts/{postid}/comments/{commentid}"
+        # to get all likes with this comment, check if post_id, comment_id is in the field('object')
+        author = Author.objects.get(uuid = author_id)
+        post = Post.objects.get(uuid=post_id)
+        comment = Comment.objects.get(uuid=comment_id)
+        fullcommentID =  get_comment_url(author_id, post_id, comment_id)
+        likes = Like.object.filter(object=fullcommentID)
+
+
+        return response.Response(result, status=status.HTTP_200_OK)
+
 
 class AuthorLikedApiView(GenericAPIView):
     """
@@ -71,3 +103,14 @@ class AuthorLikedApiView(GenericAPIView):
 
 
 
+def get_comment_url(request, author_id, post_id, comment_id):
+    """
+    Delete <service> in url, return post url without post uuid
+    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/{postid}/comments/{comment_id}/likes
+    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/{postid}/comments/{comment_id}
+
+    """
+
+    xx=request.build_absolute_uri().split('service/')
+    author_url_id= xx[0]+ 'authors/'+author_id+"/posts/" + post_id + "/" + "comments/" + comment_id
+    return str(author_url_id)
