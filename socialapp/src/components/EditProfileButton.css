@@ -1,12 +1,12 @@
-.modal-header {
+.edit-profile-modal .modal-header {
     border-bottom: 0 none;
 }
 
-.modal-footer {
+.edit-profile-modal .modal-footer {
     border-top: 0 none;
 }
 
-.modal-content {
+.edit-profile-modal {
     min-width: 35em !important;
     width: 35em !important;
     max-width: 35em !important;

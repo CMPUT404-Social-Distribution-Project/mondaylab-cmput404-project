@@ -3,10 +3,9 @@
 }
 
 .card-title.h5 {
-    font-size: 200%;
-    margin-left: 1%;
+    font-size: 2rem;
     margin-bottom: 3%;
-    text-decoration: #BFEFE9;
+    text-decoration: var(--teal);
 }
 
 .card-text {
@@ -20,6 +19,7 @@
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
     border-radius: 11px;
+    padding: 2rem;
 }
 
 .comments-text {
