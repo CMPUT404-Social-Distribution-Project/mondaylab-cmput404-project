@@ -1,9 +1,10 @@
 from post.models import Post
 from .models import Comment
 from rest_framework import serializers
+from post.serializers import PostAuthorSerializer
 
 class CommentsSerializer(serializers.ModelSerializer):
-
+    author = PostAuthorSerializer(required=False, many=False, allow_null=True)
     class Meta:
         model = Comment
         fields = '__all__'
