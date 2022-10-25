@@ -61,8 +61,10 @@ class UserViewSet(viewsets.ModelViewSet):
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
+                # check if the name to change is unique
                 obj = Author.objects.get(uuid=pk)
-                self.check_is_unique(request, obj)
+                if not self.check_is_unique(request, obj):
+                    return Response(data=f"Author with displayName = {request.data.get('displayName')} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
 
                 serializer = self.serializer_class(obj, data=request.data)
                 if serializer.is_valid(raise_exception=True):
@@ -92,8 +94,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 elif key == "password":
                     return Response(data=f"No changy password :)", status=status.HTTP_400_BAD_REQUEST)
             
+            # check if the name to change is unique
             obj = Author.objects.get(uuid=pk)
-            self.check_is_unique(request, obj)
+            if not self.check_is_unique(request, obj):
+                return Response(data=f"Author with displayName = {request.data.get('displayName')} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
 
             serializer = self.serializer_class(obj, data=request.data, partial=True)
             if serializer.is_valid(raise_exception=True):
@@ -105,11 +109,11 @@ class UserViewSet(viewsets.ModelViewSet):
     def check_is_unique(self, request, req_author):
         # check if the display name is unique
         requestedDisplayName = request.data.get("displayName")
-        if requestedDisplayName != req_author.displayName:          
+        if requestedDisplayName != req_author.displayName:       # make sure requested name to change is not the same    
             # if the requested displayName change is not the same as before, check if the displayName is unique
             authorExists = Author.objects.filter(displayName=requestedDisplayName).first()
             if authorExists != None:
-                return Response(data=f"Author with displayName = {requestedDisplayName} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
-
+                return False
+        return True
 
 

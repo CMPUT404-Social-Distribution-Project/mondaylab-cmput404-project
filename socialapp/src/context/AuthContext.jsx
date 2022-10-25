@@ -18,11 +18,13 @@ export const AuthProvider = ({ children }) => {
       : null
   );
   const [loading, setLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(null);
   const baseURL = "http://127.0.0.1:8000/service";
 
   const navigate = useNavigate();
 
   const loginUser = async (displayName, password) => {
+    setLoginLoading(true);
     const response = await fetch(baseURL + "/auth/login/", {
       method: "POST",
       headers: {
@@ -39,13 +41,13 @@ export const AuthProvider = ({ children }) => {
         setAuthTokens(data);
         setUser(jwt_decode(data.access));
         localStorage.setItem("authTokens", JSON.stringify(data));
-        navigate("/stream");
+        setLoginLoading(false);
       } else {
         console.log(data)
         alert("ERROR: " + data);
+        setLoginLoading(null);
       }
     });
-
 
   };
   
@@ -59,7 +61,6 @@ export const AuthProvider = ({ children }) => {
         displayName,
         password,
         github,
-
       }) 
     });
 
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("authTokens");
     localStorage.removeItem("user_id");
-    navigate("/");
+    navigate("/login");
   };
 
   const contextData = {
@@ -97,7 +98,17 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user_id", user.user_id.split("/").pop());
     }
     setLoading(false);
-  }, [authTokens, loading]);
+
+  }, [authTokens, loading, user]);
+
+  // Waits user to be set before sending user to main page. Otherwise user would be null
+  // and the homepage will show nothing because it would fetch to /service/authors/null/posts/.
+  // This is due to async between setting the user in loginUser & the above useEffect hook
+  useEffect(() => {
+    if (loginLoading !== null && loginLoading === false) {
+      navigate("/stream");
+    }
+  }, [loginLoading]);
 
   return (
     <AuthContext.Provider value={contextData}>
