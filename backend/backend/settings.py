@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+# from rest_framework import pagination
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -145,7 +146,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-    )
+    ),
+
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CustomPagination',
+    'DEFAULT_PAGINATION_CLASS': 'comments.pagination.CustomPagination',
 }
 
 SIMPLE_JWT = {

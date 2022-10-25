@@ -1,3 +1,4 @@
+from distutils.sysconfig import customize_compiler
 from re import I
 from django.shortcuts import render
 from post.models import Post
@@ -14,12 +15,19 @@ from .models import Comment
 from datetime import date
 
 from auth.utils import isUUID, isAuthorized
+
+from datetime import datetime, timezone
+from django.core.paginator import Paginator
+from rest_framework import pagination
+from .pagination import CustomPagination
+
 # Create your views here.
 
 
 
 class CommentsApiView(GenericAPIView):
     serializer_class = CommentsSerializer
+    pagination_class = CustomPagination
     """
     get all the comment from this post    
     GET 
@@ -51,13 +59,39 @@ class CommentsApiView(GenericAPIView):
                 ORDER_BY commentTable.published
                 """
 
-                comments = Comment.objects.filter(id__contains = post_id).order_by("published")
-                result = {"type":"comments", 
-                           "page":1, "size":5,
-                           "post": post_id_full_path,
-                           "id": post_id_full_path + "/comments",
-                           "comments": self.serializer_class(comments, many=True).data}
+                # comments = Comment.objects.filter(id__contains = post_id).order_by("published")
+                # result = {"type":"comments", 
+                #            "page":1, "size":5,
+                #            "post": post_id_full_path,
+                #            "id": post_id_full_path + "/comments",
+                #            "comments": self.serializer_class(comments, many=True).data}
+
+
+                ## pagination
+                #todo - change to 40 per page after testing, currently set to 5
+                # p = pagination(Comment.objects.filter(id__contains = post_id).order_by("published"),3)
+                # page = request.GET.get('page')
+                # comments = p.get_page(page)
+                # comments = self.paginate_queryset(Comment.objects.filter(id__contains = post_id).order_by("published"))
+
+                p = self.paginate_queryset(Comment.objects.filter(id__contains = post_id).order_by("published"))
+                serializer = self.serializer_class(p, many=True)
+                pResult = self.get_paginated_response(serializer.data)
+                page = pResult.data.get("page")
+                size = pResult.data.get("size")
+                comments = pResult.data.get("results")
+
+                result = {
+                    "type" : "comment",
+                    "page" : page,
+                    "size" : size,
+                    "post": post_id_full_path,
+                    "id": post_id_full_path + "/comments",
+                    "comments": comments}
+
+                ## pagination
                 return response.Response(result, status=status.HTTP_200_OK)
+                # return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
@@ -107,8 +141,9 @@ class CommentsApiView(GenericAPIView):
 
                 authorObj = Author.objects.get(uuid=author_id)
                 commentId = author_id_full_path + '/' + "posts/" + post_id + "/comments/" +  commentUuid
-                #TODO: use correct format for published date
-                publishedDate = date.today().strftime('%Y-%m-%d %H:%M:%S')
+                
+                #published date is in the following format 2015-03-09T13:07:04+00:00
+                publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
                 
                 serialize.save(id=commentId, author=authorObj, published=publishedDate, uuid=commentUuid)  # save to db with additional field injected
                 print("serializer data is ", serialize.data)
