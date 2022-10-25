@@ -18,8 +18,7 @@ class FollowersApiView(GenericAPIView):
     def get(self, request, author_id):
 
         try:
-            author_id = get_author_url_id(request)
-            current_author = Author.objects.get(id = author_id)
+            current_author = Author.objects.get(uuid=author_id)
             followers = current_author.followers.all()
             if followers.exists():
                 followers = current_author.followers.all().order_by('displayName')
