@@ -1,22 +1,13 @@
 from .models import Post
 from rest_framework import serializers
 from author.models import Author
+from comments.serializers import CommentSrcSerializer
+from author.serializers import LimitedAuthorSerializer
 
-# Need a different author serializer that doesn't include the 
-# extra fields we have in the other serializer
-class PostAuthorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Author
-        fields = ['id','uuid','host','displayName','url',
-        'github','profileImage', 'type']
-        extra_kwargs = {
-            'type': {'read_only': True},
-            'id': {'read_only': True},
-            'uuid': {'read_only': True},
-        }
 
 class PostSerializer(serializers.ModelSerializer):
-    author = PostAuthorSerializer(many=False, allow_null=True, required=False)  # needed this to get post's author field to become nested json object
+    # author = LimitedAuthorSerializer(many=False, allow_null=True, required=False)  # needed this to get post's author field to become nested json object
+    # commentSrc = CommentSrcSerializer(many=True, required=False)
     class Meta:
         model = Post
         fields = '__all__'
@@ -28,3 +19,12 @@ class PostSerializer(serializers.ModelSerializer):
             'author': {'read_only': True},
             'comments': {'read_only': True},
         }
+
+    # issue with having two ForeignKey fields. This is the solution.
+    # ref: https://stackoverflow.com/questions/26702695/django-rest-framework-object-is-not-iterable
+    # answer by Mustaq Mohammad
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['author'] = LimitedAuthorSerializer(instance.author).data
+        rep['commentSrc'] = CommentSrcSerializer(instance.commentSrc).data
+        return rep
