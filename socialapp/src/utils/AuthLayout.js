@@ -7,6 +7,12 @@ import axios from "axios";
 
 const AuthLayout = () => {
     let { user, authTokens, setUser, setAuthTokens, baseURL } = useContext(AuthContext);
+    if (authTokens === null) {
+      setUser(null);
+      localStorage.removeItem("authTokens");
+      localStorage.removeItem("user_id");
+      return <Navigate to={"/login"} replace />
+    }
     const userToken = jwt_decode(authTokens.access);
     const isExpired = dayjs.unix(userToken.exp).diff(dayjs()) < 1;
     
@@ -37,9 +43,15 @@ const AuthLayout = () => {
         // if the token has expired or doesn't exist, log the user out, otherwise
         // show them the protected pages
         if (isExpired === true || isExpired === null) {
-            isAuthenticated = false;
+          setAuthTokens(null);
+          setUser(null);
+          localStorage.removeItem("authTokens");
+          localStorage.removeItem("user_id");
+          return <Navigate to={"/login"} replace />;
+          
+        } else {
+          return <Outlet />
         }
-        return isAuthenticated ? <Outlet /> : <Navigate to={"/login"} replace />; // or loading indicator, etc...
     }
     return <Navigate to={"/login"} replace />;
 };
