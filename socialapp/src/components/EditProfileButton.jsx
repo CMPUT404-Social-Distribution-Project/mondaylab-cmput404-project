@@ -131,7 +131,7 @@ export default function EditProfileButton(props) {
 
     if (user_id === props.author.uuid) {
         return (
-            <>
+            <div className="edit-profile">
                 <Button
                     className="edit-profile-button"
                     variant="primary"
@@ -145,7 +145,8 @@ export default function EditProfileButton(props) {
                     onHide={() => setModalShow(false)}
                     author={props.author}
                 />
-            </>
+            </div>
+            
         );
     } else {
         return <></>;
