@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Modal, Button, InputGroup, Form, CloseButton } from "react-bootstrap";
+import { Modal, Button, Form, Toast, ToastContainer, CloseButton } from "react-bootstrap";
 import axios from 'axios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
@@ -13,6 +13,7 @@ export default function Example() {
     const [friActive, setFriActive] = useState(false)
     const [priActive, setPriActive] = useState(false)
     const { authTokens } = useContext(AuthContext);
+    const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const user_id = localStorage.getItem("user_id");
     const [post, setPost] = useState({
         title: "",
@@ -21,11 +22,18 @@ export default function Example() {
         description: "",
         contentType: "text/plain",
         content: "",
-        author: "",
         categories: "",
         visibility: "PUBLIC",
         unlisted: false,
     })
+
+    /**
+     * In order to change the color of the button when selecting a visibility option, whenever the user clicks on one of the options,
+     * we set that as active (EveActive = Everyone, FriActive = Friends-only, PriActive = private) and set the other as false, these
+     * variables are used in the style tag to determine if they are active (if so we change the text and background color of that button).
+     * 
+     * @param {*} option 
+     */
 
     const setVisibility = (option) => {
         setPost({...post, visibility: option})
@@ -44,6 +52,13 @@ export default function Example() {
         }
     }
 
+    /**
+     * Once the user clicks the unlisted button, we set unlisted to the opposite of the current variable value.
+     * This way, if the user had previously clicked unlisted before, this changes it to false and viceversa. So
+     * we set unlisted to the correct value depending on is unlist is true or not.
+     * 
+     */
+
     const unlistPost = () => {
         setUnlist(!unlist)
         if(unlist){
@@ -56,9 +71,17 @@ export default function Example() {
     };
 
 
+    /**
+     * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
+     * We use the user_id (created using useCOntext of the current autheticated user) to create a path to posts, and we autheticated
+     * it using our auth token. If the request is successful we send a response to the console and call the function closePost. If not
+     * we will send the error to the console and the error will not be logged. 
+     * 
+     */
+
     const sendPost = () => {
         axios
-            .post(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, post, 
+            .post(`${baseURL}/authors/${user_id}/posts/`, post, 
             { headers: { 'Authorization': `Bearer ${authTokens.access}` }})
             .then((response) => {
                 console.log(response.data);
@@ -70,21 +93,34 @@ export default function Example() {
             });
     };
 
+    /**
+     * If the user clicks on the x button at the top corner of the post (or if they send a valid post), then the function
+     * will set show to false (show is what is used by the Modal to determine if it should stay up or not).
+     * 
+     */
+
     const closePost = () => {
         setShow(false)
     };
 
     return (
+        /**
+         * The modal is comprised of different buttons and input groups that are used to fill in the post variable (this variable as a dictionary,
+         * is then sent to the api). Each time a user presses a button or types in a field, that corresponding dictionary value is filled/updated. 
+         * 
+         */
+
         <div class="post-modal">
             <Modal size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 show={show}
-                onHide={closePost}>
-                <Modal.Header>
-                    <Modal.Title className='header'>Make a Post | </Modal.Title>
-                    <Modal.Title className="header1">Who can see this post?</Modal.Title>
-                    <InputGroup>
+                onHide={closePost}
+            >
+                <Form>
+                    <Modal.Header>
+                        <Modal.Title className='header'>Make a Post | </Modal.Title>
+                        <Modal.Title className="header1">Who can see this post?</Modal.Title>
                         <Button type="radio" value="Everyone" className='option' name="view" 
                             style={{
                                 backgroundColor: eveActive ? ' #BFEFE9' : '',
@@ -109,55 +145,61 @@ export default function Example() {
                             }} 
                             onClick={() => {
                                 setVisibility("Private")
-                            }}>
-                        Private </Button>
-                    </InputGroup>
-                    <Button style={{
-                        backgroundColor: isActive ? ' #BFEFE9' : '',
-                        color: isActive ? 'black' : '',
-                    }} className="unlist" onClick={unlistPost}> 
-                    Unlisted 
-                    </Button>
-                    <CloseButton className='me-2' variant="white" onClick={closePost} />
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <InputGroup className="title">
-                            <Form.Control type="title" placeholder="Title" 
+                        }}>
+                            Private 
+                        </Button>
+                        <Button style={{
+                            backgroundColor: isActive ? ' #BFEFE9' : '',
+                            color: isActive ? 'black' : '',
+                            }} className="unlist" onClick={unlistPost}> 
+                            Unlisted 
+                        </Button>
+                        <CloseButton className='me-2' variant="white" onClick={closePost} />
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form.Group className="title">
+                            <Form.Control label="title" name="title" type="text" placeholder="Title" 
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
                                         title: e.target.value,
-                                    })}} />
-                        </InputGroup>
-                        <InputGroup>
-                            <Form.Control className="body" type="content" placeholder="Write you Post..."
+                                }
+                            )}} />
+                            <Form.Control.Feedback type="invalid">
+                                Please choose a walk type.
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Control label="content" name="content" className="body" type="text" placeholder="Write you Post..."
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
                                         content: e.target.value,
                                     })
-                                }} />
-                        </InputGroup>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <FaImage className="image" onClick={(e) => {
-                        setPost({
-                            ...post,
-                            contentType: "image",
-                        });
-                    }} />
-                    <FaLink className="link" onClick={(e) => {
-                        setPost({
-                            ...post,
-                            contentType: "link",
-                        });
-                    }} />
-                    <Button className="postButton" onClick={sendPost}>
-                        Post
-                    </Button>
-                </Modal.Footer>
+                            }} />
+                            <Form.Control.Feedback type="invalid">
+                                Please choose a walk type.
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <FaImage className="image" onClick={(e) => {
+                            setPost({
+                                ...post,
+                                contentType: "image",
+                            });
+                        }} />
+                        <FaLink className="link" onClick={(e) => {
+                            setPost({
+                                ...post,
+                                contentType: "link",
+                            });
+                        }} />
+                        <Button className="postButton" onClick={sendPost}>
+                            Post
+                        </Button>
+                    </Modal.Footer>
+                </Form>
             </Modal>
         </div>
     );
