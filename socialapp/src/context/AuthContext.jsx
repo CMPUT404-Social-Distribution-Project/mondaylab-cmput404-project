@@ -98,8 +98,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user_id", user.user_id.split("/").pop());
     }
     setLoading(false);
-
-  }, [authTokens, loading, user]);
+  }, [authTokens, loading]);
 
   // Waits user to be set before sending user to main page. Otherwise user would be null
   // and the homepage will show nothing because it would fetch to /service/authors/null/posts/.
@@ -108,6 +107,7 @@ export const AuthProvider = ({ children }) => {
     if (loginLoading !== null && loginLoading === false) {
       navigate("/stream");
     }
+    setLoginLoading(null);
   }, [loginLoading]);
 
   return (

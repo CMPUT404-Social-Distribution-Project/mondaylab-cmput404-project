@@ -1,9 +1,10 @@
 from django.utils.timezone import now
 from django.utils import dateparse
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
-ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField,UUIDField
+ForeignKey, CASCADE, SET_NULL, IntegerField, DateTimeField, BooleanField, UUIDField, ManyToManyField
 )
 from author.models import Author
+from comments.models import CommentSrc
 from uuid import uuid4
 
 class Post(Model):
@@ -32,7 +33,7 @@ class Post(Model):
     #https://stackoverflow.com/a/7151813 
     count = IntegerField(default=0)
     comments = URLField(blank=True)
-    #commentsSrc = ForeignKey(CommentsSrc, blank=True, null=True)
+    commentSrc = ForeignKey(CommentSrc, blank=True, null=True, on_delete=SET_NULL, related_name='+')
     published = DateTimeField(auto_now_add=True, editable=False)
     visibility = CharField(default=Visibility.PUBLIC, choices=Visibility.choices, max_length=200)
     unlisted = BooleanField(default=False, blank=False, null=False)

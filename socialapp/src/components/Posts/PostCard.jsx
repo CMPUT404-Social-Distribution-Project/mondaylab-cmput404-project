@@ -4,7 +4,6 @@ import Card from 'react-bootstrap/Card';
 import "./PostCard.css"
 
 export default function PostCard(props) {
-    console.log(props.post.author);
   return (
     <Card style={{ width: '30rem'}}>
       <Card.Header>

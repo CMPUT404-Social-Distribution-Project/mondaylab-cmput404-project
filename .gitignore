@@ -51,3 +51,4 @@ coverage.xml
 docs/_build/
 
 backend/db.sqlite3
+backend/db.sqlite3

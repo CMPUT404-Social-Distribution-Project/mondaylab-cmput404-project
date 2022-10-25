@@ -14,6 +14,19 @@ class AuthorSerializer(serializers.ModelSerializer):
             'published': {'read_only': True},
         }
 
+# Need a different author serializer that doesn't include the 
+# extra fields we have in the other serializer
+class LimitedAuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Author
+        fields = ['id','uuid','host','displayName','url',
+        'github','profileImage', 'type']
+        extra_kwargs = {
+            'type': {'read_only': True},
+            'id': {'read_only': True},
+            'uuid': {'read_only': True},
+        }
+
 class FollowerSerializer(serializers.ModelSerializer):
     class Meta:
             model = Author
