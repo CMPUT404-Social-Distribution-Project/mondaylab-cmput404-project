@@ -4,27 +4,31 @@ import Card from 'react-bootstrap/Card';
 import "./PostCard.css"
 
 export default function PostCard(props) {
-    
+    console.log(props.post.author);
   return (
     <Card style={{ width: '30rem'}}>
-      {console.log(props)}
-    <Card.Img variant="top" src="" />
-    <Card.Body>
-      <Card.Title>{props.post.title}</Card.Title>
-      <Card.Text>
-        {props.post.content}
-      </Card.Text>
-      <hr/>
-      <div className="comments-container">
-        <div className="comments-text">
-            Comments
+      <Card.Header>
+        <div className="profilePicPage">
+          <img id="profilePicPage" src={props.post.author.profileImage} alt="profilePic"/>
         </div>
-        <div className="comments">
-            {/* show max 5 comments, have option to show more */}
+      </Card.Header>
+      <Card.Img variant="top" src="" />
+      <Card.Body>
+        <Card.Title>{props.post.title}</Card.Title>
+        <Card.Text>
+          {props.post.content}
+        </Card.Text>
+        <hr/>
+        <div className="comments-container">
+          <div className="comments-text">
+              Comments
+          </div>
+          <div className="comments">
+              {/* show max 5 comments, have option to show more */}
+          </div>
         </div>
-      </div>
 
-    </Card.Body>
-  </Card>
+      </Card.Body>
+    </Card>
   );
 }

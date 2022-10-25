@@ -3,6 +3,7 @@
     width: 100%;
     top:0;
     box-shadow: 0px 4px 5px #17191B;
+    z-index: 100; 
 }
 
 #profilePicContainer {

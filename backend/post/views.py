@@ -76,7 +76,7 @@ class PostApiView(GenericAPIView):
                             authorObj = Author.objects.get(uuid=author_id)
                             # create post ID and origin and source
                             postId = get_post_url(request, author_id)+ post_id
-                            origin = authorObj.host + 'posts/' + post_id
+                            origin = postId
             
                             serialize.save(
                                 id=postId,
@@ -153,7 +153,7 @@ class PostsApiView(GenericAPIView):
                     # create post ID and origin and source
                     postUUID = str(uuid4())
                     postId = get_post_url(request, author_id)+ postUUID
-                    origin = authorObj.host + 'posts/' + postUUID
+                    origin = postId
 
                     serialize.save(
                         id=postId,
