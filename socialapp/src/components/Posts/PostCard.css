@@ -2,10 +2,27 @@
     --bs-card-bg: none;
 }
 
+.card-title.h5 {
+    font-size: 200%;
+    margin-left: 1%;
+    margin-bottom: 3%;
+    text-decoration: #BFEFE9;
+}
+
+.card-text {
+    margin-left: 1%;
+    padding-bottom: 30%;
+}
+
 .card-body {
     color: var(--white-teal);
     background-color: var(--dark-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
     border-radius: 11px;
+}
+
+.comments-text {
+    margin-left: 1%;
+    padding-bottom: 20%;
 }

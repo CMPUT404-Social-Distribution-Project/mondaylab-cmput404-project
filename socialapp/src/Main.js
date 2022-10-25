@@ -10,7 +10,6 @@ export default function Main() {
     <div className="root-container">
       <TopNavBar />
       <div className="main">
-
           <SideNavBar />
           <div class="main-content-container">
             <Outlet />

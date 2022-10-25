@@ -6,7 +6,8 @@ import "./PostCard.css"
 export default function PostCard(props) {
     
   return (
-    <Card style={{ width: '30rem' }}>
+    <Card style={{ width: '30rem'}}>
+      {console.log(props)}
     <Card.Img variant="top" src="" />
     <Card.Body>
       <Card.Title>{props.post.title}</Card.Title>

@@ -4,10 +4,16 @@
     min-height: 15em;
     margin-top: 5em;
     margin-left: -6em;
+    border: none;
+}
+
+div.modal-header{
+    border: none;
 }
 
 .modal-footer {
     min-height: 5em;
+    border: none;
 }
 
 .modal-body {
@@ -19,6 +25,7 @@
 .modal-title {
     font-size: 200%;
     color: #BFEFE9;
+    border: none;
 }
 
 .title {
