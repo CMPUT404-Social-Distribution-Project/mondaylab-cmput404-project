@@ -5,7 +5,7 @@ from post.serializers import PostAuthorSerializer  # reuse this to have nested a
 
 class LikePostSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="Like", read_only=True)
-
+    author = PostAuthorSerializer(required=False, many=False, allow_null=True)  
     class Meta:
         model = Like
         fields = ("summary","type","author","object")

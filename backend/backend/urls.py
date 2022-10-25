@@ -32,6 +32,6 @@ urlpatterns = [
      path("service/authors/<str:author_id>/inbox/",include("inbox.urls"), name="get all post from inbox"),
     path('service/authors/<str:author_id>/friends/<str:foreign_author_id>', TrueFriendApiView.as_view(), name = "check if true friends"),
     path('service/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostApiView.as_view(), name="post like"),
-    path('service/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentApiView.as_view(), name="post like"),
+    path('service/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentApiView.as_view(), name="comment likes"),
     path('service/authors/<str:author_id>/liked', AuthorLikedApiView.as_view(), name="author like"),
 ]
