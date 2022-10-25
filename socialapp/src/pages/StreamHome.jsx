@@ -11,6 +11,12 @@ export default function StreamHome() {
   const [postsArray, setPostsArray] = useState([]);
   const user_id = localStorage.getItem("user_id");
 
+  /**
+   * Once the homepage starts rendering, we make an api call and get all posts owner by the current user and insert them into an array
+   * however any issues or errors a logged to the console.
+   * 
+   */
+
   useEffect(() => {
     axios
         .get(`${baseURL}/authors/${user_id}/posts/`)
@@ -23,6 +29,12 @@ export default function StreamHome() {
   }, []);
 
   return (
+    /**
+     * We return a container that has the header and all of the posts, which are created by mapping each individual post to the PostCard js file
+     * which has the format for each post object. 
+     * 
+     */
+    
     <div className='homepage'>
       <Container style={{ zIndex: 10 }}>
           <h1>My Feed</h1>

@@ -14,6 +14,7 @@ export default function Example() {
     const [priActive, setPriActive] = useState(false)
     const { authTokens } = useContext(AuthContext);
     const user_id = localStorage.getItem("user_id");
+    const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -26,6 +27,14 @@ export default function Example() {
         visibility: "PUBLIC",
         unlisted: false,
     })
+
+    /**
+     * In order to change the color of the button when selecting a visibility option, whenever the user clicks on one of the options,
+     * we set that as active (EveActive = Everyone, FriActive = Friends-only, PriActive = private) and set the other as false, these
+     * variables are used in the style tag to determine if they are active (if so we change the text and background color of that button).
+     * 
+     * @param {*} option 
+     */
 
     const setVisibility = (option) => {
         setPost({...post, visibility: option})
@@ -55,10 +64,17 @@ export default function Example() {
         }
     };
 
+    /**
+     * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
+     * We use the user_id (created using useCOntext of the current autheticated user) to create a path to posts, and we autheticated
+     * it using our auth token. If the request is successful we send a response to the console and call the function closePost. If not
+     * we will send the error to the console and the error will not be logged. 
+     * 
+     */
 
     const sendPost = () => {
         axios
-            .post(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, post, 
+            .post(`${baseURL}/authors/${user_id}/posts/`, post, 
             { headers: { 'Authorization': `Bearer ${authTokens.access}` }})
             .then((response) => {
                 console.log(response.data);
@@ -70,11 +86,23 @@ export default function Example() {
             });
     };
 
+    /**
+     * If the user clicks on the x button at the top corner of the post (or if they send a valid post), then the function
+     * will set show to false (show is what is used by the Modal to determine if it should stay up or not).
+     * 
+     */
+
     const closePost = () => {
         setShow(false)
     };
 
     return (
+        /**
+         * The modal is comprised of different buttons and input groups that are used to fill in the post variable (this variable as a dictionary,
+         * is then sent to the api). Each time a user presses a button or types in a field, that corresponding dictionary value is filled/updated. 
+         * 
+         */
+
         <div class="post-modal">
             <Modal size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
@@ -123,7 +151,7 @@ export default function Example() {
                 <Modal.Body>
                     <Form>
                         <InputGroup className="title">
-                            <Form.Control type="title" placeholder="Title" 
+                            <Form.Control required type="title" placeholder="Title" 
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
@@ -131,7 +159,7 @@ export default function Example() {
                                     })}} />
                         </InputGroup>
                         <InputGroup>
-                            <Form.Control className="body" type="content" placeholder="Write you Post..."
+                            <Form.Control required className="body" type="content" placeholder="Write you Post..."
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
