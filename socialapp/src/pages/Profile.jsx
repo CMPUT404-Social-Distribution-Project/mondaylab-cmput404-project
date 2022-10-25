@@ -16,8 +16,8 @@ function ProfilePosts(props) {
   return (
     <div className="posts">
     {
-      typeof props.postsArray !== 'undefined' ? 
-        props.postsArray.map((post) => <PostCard post={post} />)
+      typeof props.postsArray.items !== 'undefined' ? 
+        props.postsArray.items.map((post) => <PostCard post={post} />)
         : null
     }
     </div>
@@ -61,9 +61,9 @@ export default function Profile() {
       await api      
         .get(`${baseURL}/authors/${author_id}/posts/`)
         .then((response) => {
-          setPostsArray(response.data.items);
+          setPostsArray(response.data);
           console.log("Got posts of author")
-          console.log(response.data.items);
+          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
