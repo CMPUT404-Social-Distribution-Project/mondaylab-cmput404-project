@@ -146,7 +146,6 @@ export default function EditProfileButton(props) {
                     author={props.author}
                 />
             </div>
-            
         );
     } else {
         return <></>;
