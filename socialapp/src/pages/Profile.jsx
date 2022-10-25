@@ -5,10 +5,11 @@ import AuthContext from "../context/AuthContext";
 import axios from 'axios';
 import "./Profile.css";
 import default_profile_pic from "../des/default_profile_pic.jpg";
-import FollowButton from "../components/FollowButton";
 import { useParams } from "react-router-dom";
 import PostCard from "../components/Posts/PostCard";
-import EditProfileButton from "../components/EditProfileButton";
+import EditProfileButton from "../components/Profile/EditProfileButton";
+import FollowButton from "../components/Profile/FollowButton";
+
 
 export default function Profile() {
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
