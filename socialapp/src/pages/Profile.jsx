@@ -7,23 +7,51 @@ import "./Profile.css";
 import default_profile_pic from "../des/default_profile_pic.jpg";
 import { useParams } from "react-router-dom";
 import PostCard from "../components/Posts/PostCard";
+import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
+import ProfileTabs from "../components/Profile/ProfileTabs";
+
+function ProfilePosts(props) {
+  return (
+    <div className="posts">
+    {
+      typeof props.postsArray !== 'undefined' ? 
+        props.postsArray.map((post) => <PostCard post={post} />)
+        : null
+    }
+    </div>
+  )
+}
+
+function ProfileFollowers(props) {
+  return (
+    <div className="followers">
+    {
+      typeof props.postsArray !== 'undefined' ? 
+        props.postsArray.map((follower) => <UserCard author={follower}/>)
+        : null
+    }
+    </div>
+  );
+}
 
 
 export default function Profile() {
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
   const [postsArray, setPostsArray] = useState(""); 
+  const [followersArray, setFollowersArray] = useState(""); 
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const user_id = localStorage.getItem("user_id");  // the currently logged in author
-  const { id } = useParams();                       // gets the author id in the url
+  const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
+  console.log(dir);
 
   // Called after rendering. Fetches data
   useEffect(() => {
     const fetchData = async () => {
       await axios
-        .get(`${baseURL}/authors/${id}/`)
+        .get(`${baseURL}/authors/${author_id}/`)
         .then((response) => {
           setAuthor(response.data);
         })
@@ -31,14 +59,24 @@ export default function Profile() {
           console.log(error);
         });
       await api      
-        .get(`${baseURL}/authors/${id}/posts/`)
+        .get(`${baseURL}/authors/${author_id}/posts/`)
         .then((response) => {
-          setPostsArray(response.data);
+          setPostsArray(response.data.items);
           console.log("Got posts of author")
-          console.log(response.data);
+          console.log(response.data.items);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
+        });
+      await api      
+        .get(`${baseURL}/authors/${author_id}/followers/`)
+        .then((response) => {
+          setFollowersArray(response.data.items);
+          console.log("Got followers of author")
+          console.log(response.data.items);
+        })
+        .catch((error) => {
+          console.log("Failed to get followers of author. " + error);
         });
     };
     fetchData();
@@ -51,7 +89,7 @@ export default function Profile() {
           <div className="profilePicPage">
             <img id="profilePicPage" src={author.profileImage} alt="profilePic"/>
           </div>
-          <FollowButton id={id}/>
+          <FollowButton id={author_id}/>
         </div>
 
         <div className="profileInfo">
@@ -75,16 +113,10 @@ export default function Profile() {
           <EditProfileButton className="edit-button" author={author}/>
         </div>
       </div>
+      <ProfileTabs dir={dir} author_id={author_id}/>
+      {dir === 'posts' || dir === undefined ? <ProfilePosts postsArray={postsArray}/> : <></>}
+      {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
 
-      <div className="posts">
-        {
-          typeof postsArray.items !== 'undefined' ? 
-            postsArray.items.map((post) => <PostCard post={post} />)
-            : null
-     
-          
-        }
-      </div>
     </div>
   );
 }
