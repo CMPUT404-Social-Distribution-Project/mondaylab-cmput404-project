@@ -67,12 +67,6 @@ class CommentsApiView(GenericAPIView):
 
 
                 ## pagination
-                #todo - change to 40 per page after testing, currently set to 5
-                # p = pagination(Comment.objects.filter(id__contains = post_id).order_by("published"),3)
-                # page = request.GET.get('page')
-                # comments = p.get_page(page)
-                # comments = self.paginate_queryset(Comment.objects.filter(id__contains = post_id).order_by("published"))
-
                 p = self.paginate_queryset(Comment.objects.filter(id__contains = post_id).order_by("published"))
                 serializer = self.serializer_class(p, many=True)
                 pResult = self.get_paginated_response(serializer.data)
