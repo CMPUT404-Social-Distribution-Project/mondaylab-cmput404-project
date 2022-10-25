@@ -6,6 +6,18 @@ ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField,UUIDField
 from author.models import Author
 from uuid import uuid4
 
+# class ContentType(TextChoices):
+#     markdown ="text/markdown", "text/markdown"
+#     plain = "text/plain", "text/plain"
+#     base64 = "application/base64", "application/base64"
+#     png = "image/png;base64", "image/png;base64"
+#     jpeg = "image/jpeg;base64", "image/jpeg;base64"
+
+# class Visibility(TextChoices):
+#     PUBLIC = 'PUBLIC', 'PUBLIC'
+#     FRIENDS = 'FRIENDS', 'FRIENDS'
+
+
 class Post(Model):
     class ContentType(TextChoices):
         markdown ="text/markdown", "text/markdown"

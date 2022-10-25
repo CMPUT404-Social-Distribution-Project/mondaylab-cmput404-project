@@ -149,7 +149,7 @@ REST_FRAMEWORK = {
     ),
 
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CustomPagination',
-    'DEFAULT_PAGINATION_CLASS': 'comments.pagination.CustomPagination',
+    'DEFAULT_PAGINATION_CLASS': 'backend.pagination.CustomPagination',
 }
 
 SIMPLE_JWT = {

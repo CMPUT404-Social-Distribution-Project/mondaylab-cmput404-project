@@ -14,6 +14,7 @@ from rest_framework import filters
 from django.shortcuts import get_list_or_404
 from auth.utils import isUUID, isAuthorized
 
+from backend.pagination import CustomPagination
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
@@ -24,15 +25,27 @@ class UserViewSet(viewsets.ModelViewSet):
     # ordering_fields = ['updated']
     # ordering = ['-updated']
 
+    pagination_class = CustomPagination
+
     def list(self, request, pk=None):
         ''' Returns a queryset of all authors in the database
             Use: Send a GET to
                 /service/authors/
         '''
         try:
-            serializer = self.serializer_class(self.queryset, many=True)
-            serializer = {"type": 'authors',"items":serializer.data}
-            return Response(serializer, status=status.HTTP_200_OK)
+            
+            # serializer = self.serializer_class(self.queryset, many=True)
+            # serializer = {"type": 'authors',"items":serializer.data}
+            # return Response(serializer, status=status.HTTP_200_OK)
+            p = self.paginate_queryset(self.queryset)
+            serializer = self.serializer_class(p, many=True)
+            pResult = self.get_paginated_response(serializer.data)
+            authors = pResult.data.get("results")
+            result = {
+                "type" : "authors",
+                "items" : authors
+            }
+            return Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
@@ -45,8 +58,17 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             UUID(pk)
             obj = Author.objects.get(uuid=pk)
+
             serializer = self.serializer_class(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+            # print("in retrieve s: ", self.serializer_class(obj).data)
+            # p = self.paginate_queryset(obj)
+            # serializer = self.serializer_class(p)
+            # pResult = self.get_paginated_response(serializer.data)
+            # authors = pResult.data.get("results")
+            # print("in retrieve p: ", authors)
+            # return Response(authors, status=status.HTTP_200_OK)
 
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)

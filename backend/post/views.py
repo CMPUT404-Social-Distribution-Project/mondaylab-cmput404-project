@@ -1,5 +1,3 @@
-
-
 from post.models import Post
 from author.models import Author
 from rest_framework import response, status
@@ -12,6 +10,9 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
 from auth.utils import isUUID, isAuthorized
 
+from backend.pagination import CustomPaginationCommentsSrc
+from comments.models import Comment
+
 class PostApiView(GenericAPIView):
     """
     URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}
@@ -22,13 +23,64 @@ class PostApiView(GenericAPIView):
     """
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = PostSerializer
+    pagination_class = CustomPaginationCommentsSrc
+
     
     def get(self, request, author_id, post_id):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = Author.objects.get(uuid=author_id)
+            #TODO : need to change serializer_class to AuthorSerializer?
+            aSerializer = self.serializer_class(authorObj).data
+
             postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
-            result = {"items": self.serializer_class(postObj).data}
+            # result = {"items": self.serializer_class(postObj).data}
+            pSerializer = self.serializer_class(postObj).data
+
+            author = {
+                "type" : aSerializer.get("type"),
+                "id" : aSerializer.get("id"),
+                "host" : aSerializer.get("host"),
+                "displayName" : aSerializer.get("displayName"),
+                "url" : aSerializer.get("url"),
+                "github" : aSerializer.get("github"),
+                "profileImage" : aSerializer.get("profileImage"),
+            }
+
+            #commentsSrc
+            p = self.paginate_queryset(Comment.objects.filter(id__contains = post_id).order_by("published").reverse())
+            serializer = self.serializer_class(p, many=True)
+            pResult = self.get_paginated_response(serializer.data)
+            page = pResult.data.get("page")
+            size = pResult.data.get("size")
+            comments = pResult.data.get("results")
+            commentSrc = {
+                "type" : "comments",
+                "page" : page,
+                "size" : size,
+                "post": pSerializer.get("id"),
+                "id": pSerializer.get("id") + "/comments",
+                "comments": comments
+            }
+
+            result = {
+                "type" : pSerializer.get("type"),
+                "title" : pSerializer.get("title"),
+                "id" : pSerializer.get("id"),
+                "source" : pSerializer.get("source"),
+                "origin" : pSerializer.get("origin"),
+                "description" : pSerializer.get("discription"),
+                "contentType" : pSerializer.get("contentType"),
+                "content" : pSerializer.get("content"),
+                "author" : author,
+                "categories" : pSerializer.get("categories"),
+                "count" : pSerializer.get("count"), #total number of comments for this post
+                "comments" : pSerializer.get("comments"),
+                "commentsSrc" : commentSrc,
+                "published" : pSerializer.get("published"),
+                "visibility" : pSerializer.get("visibility"),
+                "unlisted" : pSerializer.get("unlisted"),
+            }
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)

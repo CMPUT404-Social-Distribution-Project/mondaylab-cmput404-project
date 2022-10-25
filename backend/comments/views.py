@@ -17,9 +17,8 @@ from datetime import date
 from auth.utils import isUUID, isAuthorized
 
 from datetime import datetime, timezone
-from django.core.paginator import Paginator
-from rest_framework import pagination
-from .pagination import CustomPagination
+
+from backend.pagination import CustomPagination
 
 # Create your views here.
 
@@ -40,7 +39,7 @@ class CommentsApiView(GenericAPIView):
     def get(self, request, author_id, post_id):
         # Just a test case
         author_id_full_path = get_author_id(request)
-        size = 5
+        
         post_id_full_path = get_post_id(request)
         if check_author_id(request) == False:
             return response.Response(data="you are not the author", status=status.HTTP_401_UNAUTHORIZED)
@@ -80,14 +79,14 @@ class CommentsApiView(GenericAPIView):
                 page = pResult.data.get("page")
                 size = pResult.data.get("size")
                 comments = pResult.data.get("results")
-
                 result = {
-                    "type" : "comment",
+                    "type" : "comments",
                     "page" : page,
                     "size" : size,
                     "post": post_id_full_path,
                     "id": post_id_full_path + "/comments",
-                    "comments": comments}
+                    "comments": comments
+                }
 
                 ## pagination
                 return response.Response(result, status=status.HTTP_200_OK)
