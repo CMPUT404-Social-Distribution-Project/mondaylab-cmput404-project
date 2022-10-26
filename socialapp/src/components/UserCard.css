@@ -4,6 +4,10 @@
     margin: 0.2em 0em;
 }
 
+.authors-explore-container .card:hover {
+    cursor: pointer;
+}
+
 .authors-explore-container .card-body {
     margin-bottom: 0;
     padding: 1em;
