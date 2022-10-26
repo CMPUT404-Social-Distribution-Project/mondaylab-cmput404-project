@@ -4,6 +4,7 @@ from like.Serializers import LikePostSerializer
 from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
+from like.models import Like
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
