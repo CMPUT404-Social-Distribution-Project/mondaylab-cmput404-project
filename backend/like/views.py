@@ -28,6 +28,7 @@ class LikesPostApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikePostSerializer
     def get(self, request, author_id, post_id):
+        print("breakpoint")
         post_id = get_post_id(request)
         if not isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
@@ -99,10 +100,10 @@ class LikesCommentApiView(GenericAPIView):
             author = Author.objects.get(uuid = author_id)
             post = Post.objects.get(uuid=post_id)
             comment = Comment.objects.get(uuid=comment_id)
-            fullcommentID =  get_comment_url(author_id, post_id, comment_id)
+            fullcommentID =  get_comment_url(request, author_id, post_id, comment_id)
 
             # all likes in this comment; we query using like['object']
-            commentLikes = Like.object.filter(object=fullcommentID)
+            commentLikes = Like.objects.filter(object=fullcommentID)
             commentLikesSerialize = serializer_class(commentLikes, many=True)
             result = {"type": "likes", "items": commentLikesSerialize.data}
             return response.Response(result, status=status.HTTP_200_OK)
