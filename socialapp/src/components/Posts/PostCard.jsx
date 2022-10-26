@@ -6,7 +6,6 @@ import { BiDotsVerticalRounded } from "react-icons/bi";
 import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
-import { confirmAlert } from 'react-confirm-alert';
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
