@@ -26,3 +26,17 @@
     margin-left: 1%;
     padding-bottom: 20%;
 }
+
+.options {
+    display: inline-block;
+    white-space: nowrap;
+    margin-left: 85%;
+    padding-bottom: 1%;
+}
+
+#dropdown-basic {
+
+    display: inline-block;
+    white-space: nowrap;
+    background-color: #1C212B;
+}

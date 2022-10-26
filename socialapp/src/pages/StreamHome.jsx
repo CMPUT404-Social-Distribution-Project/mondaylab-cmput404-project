@@ -40,7 +40,10 @@ export default function StreamHome() {
           <h1>My Feed</h1>
           <div classNme = "posts">
             {postsArray.map((post) => (
-              <PostCard post = {post}/>
+              <PostCard 
+                post = {post}
+                key = {post.id}
+              />
             ))}
         </div>
         </Container>

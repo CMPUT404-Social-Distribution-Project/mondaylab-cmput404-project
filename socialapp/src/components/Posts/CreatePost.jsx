@@ -150,7 +150,7 @@ export default function Example() {
                 <Modal.Body>
                     <Form>
                         <InputGroup className="title">
-                            <Form.Control required type="title" placeholder="Title" 
+                            <Form.Control type="title" placeholder="Title" 
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
@@ -158,7 +158,7 @@ export default function Example() {
                                     })}} />
                         </InputGroup>
                         <InputGroup>
-                            <Form.Control required className="body" type="content" placeholder="Write you Post..."
+                            <Form.Control as="textarea" className="body" type="content" placeholder="Write you Post..."
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
