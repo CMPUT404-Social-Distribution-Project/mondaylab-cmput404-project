@@ -55,22 +55,22 @@ class FollowersForeignApiView(GenericAPIView):
             current_author = Author.objects.get(id = author_id)
             followers = current_author.followers.all()
             if followers.exists():
-                followers = current_author.followers.all().order_by('displayName')
-                followers_serializer = self.serializer_class(followers, many=True)
-                followers_serializer_list = {
-                    "type": "followers",
-                    "items": followers_serializer.data
-                }
-                return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
+                # check if the foreign author is following author
+                isFollowing = current_author.followers.filter(id = foreign_id).first()
+                if isFollowing != None:
+                    return response.Response(True, status=status.HTTP_200_OK)
+                else:
+                    return response.Response(False, status=status.HTTP_200_OK)
             else:
                 followers_serializer_list = {
                 "type": "followers",
                 "items": []
                 }
-                return response.Response(followers_serializer_list, status=status.HTTP_200_OK)
+                return response.Response(False, status=status.HTTP_200_OK)
 
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
     def put(self, request, author_id, foreign_author_id):
         if not isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
@@ -96,7 +96,12 @@ class FollowersForeignApiView(GenericAPIView):
 
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
     def delete(self, request, author_id, foreign_author_id):
+        # Should not need to check if is author. Consider this, we are loggined in as bruh1
+        # but we want to unfollow bruh2. Author_id = bruh2, foreign_author_id = bruh1 (us)
+        # but if we do isAuthorized(request, author_id) the check will fail since we
+        # are not bruh2. But we need to 
         if not isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
