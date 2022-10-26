@@ -11,7 +11,6 @@ export default function StreamHome() {
   const [postsArray, setPostsArray] = useState([]);
   const user_id = localStorage.getItem("user_id");
 
-
   /**
    * Once the homepage starts rendering, we make an api call and get all posts owner by the current user and insert them into an array
    * however any issues or errors a logged to the console.
@@ -35,13 +34,16 @@ export default function StreamHome() {
      * which has the format for each post object. 
      * 
      */
-
+    
     <div className='homepage'>
       <Container style={{ zIndex: 10 }}>
           <h1>My Feed</h1>
           <div classNme = "posts">
             {postsArray.map((post) => (
-              <PostCard post = {post}/>
+              <PostCard 
+                post = {post}
+                key = {post.id}
+              />
             ))}
         </div>
         </Container>
