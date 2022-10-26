@@ -17,9 +17,19 @@ from followers.models import FriendRequest
 from followers.Serializers import FriendRequestSerializer
 from comments.serializers import CommentsSerializer
 
-class UnauthenticatedPost(BasePermission):
+class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
-        return request.method in ['POST']
+        if request.method == 'POST':
+            # anyone can use POST method
+            return True
+        elif request.method == 'GET' and request.user and request.user.is_authenticated:
+            # GET method requires authentication
+            return True
+        elif request.method == 'DELETE' and request.user and request.user.is_authenticated:
+            # DELETE method requires authentication
+            return True
+        else:
+            return False
 
 
 class InboxApiView(GenericAPIView):
@@ -28,7 +38,7 @@ class InboxApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/inbox
     DELETE [local]: clear the inbox
     """
-    #permission_classes = [IsAuthenticated|UnauthenticatedPost]
+    permission_classes = [AuthenticateGET]
     serializer_class = PostSerializer
     http_method_names=['get', 'post', 'delete']
 
@@ -36,7 +46,7 @@ class InboxApiView(GenericAPIView):
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
         """
-        if  isAuthorized(request, author_id): 
+        if not isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
@@ -47,12 +57,29 @@ class InboxApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
             
             try:
+                
                 posts_list = list(inbox.posts.all().order_by("published"))
                 posts_serializers = self.serializer_class(posts_list, many=True)
+
+                # get follow requests to add to items
+                fr_list = list(inbox.follow_request.all())
+                fr_serializer = FriendRequestSerializer(fr_list, many=True)
+
+                # get likes in inbox to add to items
+                likes_list = list(inbox.likes.all())
+                likes_serializer = LikePostSerializer(likes_list, many=True)
+
+                # get comments in inbox to add to items
+                comments_list = list(inbox.likes.all())
+                comments_serializer = CommentsSerializer(comments_list, many=True)
+
                 result = {
                     'type': 'inbox',
                     'author': author.url,
-                    'itmes': posts_serializers.data
+                    'items': posts_serializers.data + 
+                    fr_serializer.data +
+                    likes_serializer.data +
+                    comments_serializer.data
                 }
                 return response.Response(result, status=status.HTTP_200_OK) 
 
@@ -85,24 +112,31 @@ class InboxApiView(GenericAPIView):
 
         if request.data['type'].lower() == "follow":
             try:
+                # get the actor author object
                 url_id = request.data['actor']['id']
                 url_uuid = url_id.split("authors/")
-                actor_ = Author.objects.get(uuid=url_uuid[1])
+                actor_obj = Author.objects.get(uuid=url_uuid[1])
+
+                # get the object author object
                 url_id = request.data['object']['id']
                 url_uuid = url_id.split("authors/")
-                object_ = Author.objects.get(uuid=url_uuid[1])
+                object_obj = Author.objects.get(uuid=url_uuid[1])
                 actor_name = str(request.data['actor']['displayName'])
                 object_name =str(request.data['object']['displayName'])
                 summary = actor_name + " wants to follow " + object_name
-                fr=FriendRequest.objects.get(actor = actor_,object = object_, summary =summary)
 
-
+                # try and get the friend request if it was already sent
+                fr=FriendRequest.objects.filter(actor = actor_obj,object = object_obj).first()
+                if fr == None:
+                    # if it doesn't exist, create a new friend request object
+                    fr=FriendRequest.objects.create(actor = actor_obj,object = object_obj, summary =summary)
             except Exception  as e:
-                fr=FriendRequest.objects.create(actor = actor_,object = object_, summary =summary)
+                return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
+            # add the new follow request object to the inbox
             inbox.follow_request.add(fr)
             result={
-                "detail": str(fr.actor) +" send follow request to "+str(fr.object)
+                "detail": str(fr.actor) +" sent a follow request to "+str(fr.object)
             }
             return response.Response(result, status=status.HTTP_200_OK)
             
@@ -148,7 +182,7 @@ class InboxApiView(GenericAPIView):
         elif request.data['type'].lower() == "comment":
             print("comments")
         else:
-            result = {'detail':"plase submit correct format ", "error": " see friend/followe request model"}
+            result = {'detail':"please submit correct format ", "error": " see friend/follower request model"}
             print(result)
             return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
@@ -171,6 +205,7 @@ class InboxApiView(GenericAPIView):
                 inbox.posts.clear()
                 inbox.follow_request.clear()
                 inbox.likes.clear()
+                inbox.comments.clear()
                 return response.Response(result, status=status.HTTP_200_OK)
 
             except Exception as e:
