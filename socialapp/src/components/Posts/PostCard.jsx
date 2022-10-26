@@ -31,7 +31,7 @@ export default function PostCard(props) {
   };
 
   return (
-    <Card style={{ width: '30rem', whiteSpace: "nowrap"}}>
+    <Card className="post-card"style={{ width: '30rem', whiteSpace: "nowrap"}}>
       <Card.Header>
         <div style={{display: "inline-block"}} className="profilePicPage">
           <img id="profilePicPage" src={props.post.author.profileImage} alt="profilePic"/>

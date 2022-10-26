@@ -13,6 +13,7 @@ export default function UserCard(props) {
   return (
     <Card
         onClick={routeChange}
+        className="userCard"
     >
       <Card.Body>
         <Card.Title>

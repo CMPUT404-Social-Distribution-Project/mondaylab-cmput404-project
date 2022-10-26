@@ -6,13 +6,16 @@ import {FaBell, FaCog} from "react-icons/fa"
 import axios from "axios";
 import AuthContext from "../../context/AuthContext";
 import "./TopNavbar.css"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function TopNavbar() {
     const [res, setRes] = useState("");
     const { baseURL } = useContext(AuthContext);
     const user_id = localStorage.getItem("user_id");
-  
+    const navigate = useNavigate();
+    const routeChange = () => {
+        navigate(`/authors/${user_id}/`, {state: {refresh:true}});
+    }
   
     // Called after rendering. Fetches data
     useEffect(() => {
@@ -48,12 +51,10 @@ function TopNavbar() {
                 <Nav className="ml-auto">
                     <Nav.Link href="#home"><FaBell size={30}/>&emsp; </Nav.Link>
                     <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link>
-                    <Link id="profilePicContainer" to={{
-                        pathname: `/authors/${user_id}`
-                    }}
+                    <span id="profilePicContainer" onClick={routeChange}
                     >
                         <img id="profilePic" src={res.profileImage} alt="profilepic"/>
-                    </Link>
+                    </span>
                 </Nav>
             </Container>
         </Navbar>

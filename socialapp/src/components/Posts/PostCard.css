@@ -1,23 +1,23 @@
-.card {
+.post-card {
     --bs-card-bg: none;
 }
 
-.card-header {
+.post-card .card-header {
     width: 40em;
 }
 
-.card-title.h5 {
+.post-card .card-title.h5 {
     font-size: 2rem;
     margin-bottom: 3%;
     text-decoration: var(--teal);
 }
 
-.card-text {
+.post-card .card-text {
     margin-left: 1%;
     padding-bottom: 30%;
 }
 
-.card-body {
+.post-card .card-body {
     color: var(--white-teal);
     background-color: var(--dark-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
@@ -27,7 +27,7 @@
     width: 40em;
 }
 
-.comments-text {
+.post-card .comments-text {
     margin-left: 1%;
     padding-bottom: 20%;
 }
