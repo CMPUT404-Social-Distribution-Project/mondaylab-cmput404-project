@@ -4,7 +4,6 @@ import "./pages.css";
 import AuthContext from "../context/AuthContext";
 import axios from 'axios';
 import "./Profile.css";
-import default_profile_pic from "../des/default_profile_pic.jpg";
 import { useParams } from "react-router-dom";
 import PostCard from "../components/Posts/PostCard";
 import UserCard from "../components/UserCard";
@@ -14,7 +13,7 @@ import ProfileTabs from "../components/Profile/ProfileTabs";
 
 function ProfilePosts(props) {
   return (
-    <div className="posts">
+    <div className="posts-container-profile">
     {
       typeof props.postsArray.items !== 'undefined' ? 
         props.postsArray.items.map((post) => <PostCard post={post} />)
@@ -26,7 +25,7 @@ function ProfilePosts(props) {
 
 function ProfileFollowers(props) {
   return (
-    <div className="followers">
+    <div className="followers-container-profile">
     {
       typeof props.postsArray !== 'undefined' ? 
         props.postsArray.map((follower) => <UserCard author={follower}/>)
