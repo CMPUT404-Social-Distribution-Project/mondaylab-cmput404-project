@@ -3,6 +3,7 @@
     height: auto;
     background-color: var(--darker-blue);
     color: white;
+    padding: 2rem;
 }
 
 .posts {

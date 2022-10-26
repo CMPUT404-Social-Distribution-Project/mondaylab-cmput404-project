@@ -15,16 +15,11 @@
     text-align: center;
     display: flex;
     place-content: center;
+    align-self: center;
 }
 
 #profilePicContainer:hover {
     outline: solid var(--teal) 5px;
-}
-
-#profilePicContainer img {
-    align-self: center;
-    width: 40px;
-    height: 40px;
 }
 
 .navbar-expand .navbar-nav .nav-link {
