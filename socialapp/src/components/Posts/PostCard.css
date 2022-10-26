@@ -2,6 +2,10 @@
     --bs-card-bg: none;
 }
 
+.card-header {
+    width: 40em;
+}
+
 .card-title.h5 {
     font-size: 2rem;
     margin-bottom: 3%;
@@ -20,7 +24,7 @@
     border: transparent;
     border-radius: 11px;
     padding: 2rem;
-    width: auto;
+    width: 40em;
 }
 
 .comments-text {
