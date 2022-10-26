@@ -85,13 +85,14 @@ class LikesCommentApiView(GenericAPIView):
     GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID comment COMMENT_ID
     TODO: NEED TESTING 
     """
+
+    permission_classes = [AllowAny]
+    serializer_class=LikeCommentSerializer
     def get(self, request, author_id, post_id, comment_id):
         
         #TODO: do this require authentiation
         # TODO: to test, how to I test for likes
         # what is the summary field? suggestion is to say [list of author liked your post]
-        permission_classes = [AllowAny]
-        serializer_class=LikeCommentSerializer
 
         # return list of likes from this author's post's comment
         # Like db contains rows of like object, each like obj has this field('object') = "...author/{author_id}/posts/{postid}/comments/{commentid}"
@@ -104,13 +105,38 @@ class LikesCommentApiView(GenericAPIView):
 
             # all likes in this comment; we query using like['object']
             commentLikes = Like.objects.filter(object=fullcommentID)
-            commentLikesSerialize = serializer_class(commentLikes, many=True)
+            commentLikesSerialize = self.serializer_class(commentLikes, many=True)
             result = {"type": "likes", "items": commentLikesSerialize.data}
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-
+    """
+    API FOR ONLY FOR TESTING get() method by creating like instance
+    POST [local]: create a like object for this author's post
+    
+    in postman please enter these fields:
+    -type field-
+    """
+    def post(self, request, author_id, post_id, comment_id):
+        try:
+            serialize = self.serializer_class(data=request.data)
+            if serialize.is_valid(raise_exception=True):
+                authorObj = Author.objects.get(uuid=author_id)
+                post = Post.objects.get(uuid = post_id, author=authorObj)
+                if post == None:
+                    return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+                # id field of the post obj is exactly the id field in like obj
+                comment = Comment.objects.get(uuid=comment_id, author=authorObj)
+                objectField = comment.id
+                print("objectfield is ", objectField)
+                contextField = "https://www.w3.org/ns/activitystreams"
+                summaryField = "lara liked your post"  # NEED TO CREATE LATER
+                serialize.save(context=contextField, summary=summaryField, author=authorObj, object=objectField)
+                # create like function         
+                return response.Response(serialize.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
 class AuthorLikedApiView(GenericAPIView):
     """
@@ -136,6 +162,7 @@ class AuthorLikedApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
 
 
 
