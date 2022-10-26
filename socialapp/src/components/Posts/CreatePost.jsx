@@ -15,6 +15,7 @@ export default function Example() {
     const { authTokens } = useContext(AuthContext);
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const user_id = localStorage.getItem("user_id");
+    const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -70,6 +71,13 @@ export default function Example() {
         }
     };
 
+    /**
+     * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
+     * We use the user_id (created using useCOntext of the current autheticated user) to create a path to posts, and we autheticated
+     * it using our auth token. If the request is successful we send a response to the console and call the function closePost. If not
+     * we will send the error to the console and the error will not be logged. 
+     * 
+     */
 
     /**
      * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
@@ -81,7 +89,7 @@ export default function Example() {
 
     const sendPost = () => {
         axios
-            .post(`${baseURL}/authors/${user_id}/posts/`, post, 
+            .post(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, post, 
             { headers: { 'Authorization': `Bearer ${authTokens.access}` }})
             .then((response) => {
                 console.log(response.data);
@@ -93,23 +101,11 @@ export default function Example() {
             });
     };
 
-    /**
-     * If the user clicks on the x button at the top corner of the post (or if they send a valid post), then the function
-     * will set show to false (show is what is used by the Modal to determine if it should stay up or not).
-     * 
-     */
-
     const closePost = () => {
         setShow(false)
     };
 
     return (
-        /**
-         * The modal is comprised of different buttons and input groups that are used to fill in the post variable (this variable as a dictionary,
-         * is then sent to the api). Each time a user presses a button or types in a field, that corresponding dictionary value is filled/updated. 
-         * 
-         */
-
         <div class="post-modal">
             <Modal size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
@@ -163,14 +159,8 @@ export default function Example() {
                                     setPost({
                                         ...post,
                                         title: e.target.value,
-                                }
-                            )}} />
-                            <Form.Control.Feedback type="invalid">
-                                Please choose a walk type.
-                            </Form.Control.Feedback>
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Control label="content" name="content" className="body" type="text" placeholder="Write you Post..."
+                                    })}} />
+                            <Form.Control as="textarea" className="body" type="content" placeholder="Write you Post..."
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
