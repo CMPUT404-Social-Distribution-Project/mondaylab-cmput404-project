@@ -6,23 +6,23 @@ from rest_framework import response, status
 from uuid import uuid4, UUID
 from .serializers import AuthorSerializer
 from .models import Author
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
 from auth.utils import isUUID, isAuthorized
-import django_filters.rest_framework
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
     serializer_class = AuthorSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Author.objects.all()
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filter_backends = [filters.SearchFilter,]
+    search_fields = ['displayName']
 
-    def list(self, request, pk=None):
+    def get(self, request, pk=None):
         ''' Returns a queryset of all authors in the database
             Use: Send a GET to
                 /service/authors/
