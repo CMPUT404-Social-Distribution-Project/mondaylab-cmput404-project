@@ -17,7 +17,7 @@ class AuthorCreationForm(UserCreationForm):
         fields = ('displayName',)
 
 class AuthorChangeForm(UserChangeForm):
-    ''' For for updating authors'''
+    ''' For updating authors'''
     # make the password read only
     password = ReadOnlyPasswordHashField()
 
@@ -34,7 +34,7 @@ class AuthorAdmin(UserAdmin):
     list_display = ('displayName', 'uuid', 'id', 'is_staff', 'is_active')
     list_filter = ('displayName', 'uuid', 'id', 'is_staff', 'is_active')
     fieldsets = (
-        (None, {'fields': ('displayName', 'password', 'profileImage', 'host', 'github', 'url', 'id', 'uuid')}),
+        (None, {'fields': ('displayName', 'password', 'profileImage', 'host', 'github', 'url', 'id', 'uuid', 'followers')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
     )
     add_fieldsets = (
