@@ -155,7 +155,7 @@ class AuthorLikedApiView(GenericAPIView):
             author_url_id = get_author_url_id(request)
             
             try:
-                author = Author.objects.get(id = author_url_id)
+                author = Author.objects.get(uuid = author_id)
                 post_like = Like.objects.filter(author = author)
                 post_likes = self.serializer_class(post_like, many=True)
                 result = {"type": "liked", "items": post_likes.data}
