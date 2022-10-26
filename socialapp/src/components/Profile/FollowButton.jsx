@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
 import Button from 'react-bootstrap/Button';
-import AuthContext from "../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import axios from 'axios';
-import useAxios from '../utils/useAxios';
+import useAxios from '../../utils/useAxios';
 
 
 export default function FollowButton(props) {
@@ -19,7 +19,7 @@ export default function FollowButton(props) {
       // if the current user (user_id) has the same id in the url, don't show follow button
       setIsNotCurrentUser(false)
     }
-  })
+  }, [isNotCurrentUser]);
 
   const handleClick = () => {
     setFollowSent(true)

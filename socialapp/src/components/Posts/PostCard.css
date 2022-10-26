@@ -20,6 +20,7 @@
     border: transparent;
     border-radius: 11px;
     padding: 2rem;
+    width: auto;
 }
 
 .comments-text {

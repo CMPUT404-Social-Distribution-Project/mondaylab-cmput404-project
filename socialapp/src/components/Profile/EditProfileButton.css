@@ -18,6 +18,9 @@
     color: var(--dark-blue);
     background-color: var(--teal);
     border-radius: 2em;
+    font-size: 14px;
+    height: 2.5rem;
+    width: 100%;
 }
 
 .edit-profile-button:hover {
