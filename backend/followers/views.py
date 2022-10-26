@@ -101,8 +101,11 @@ class FollowersForeignApiView(GenericAPIView):
         # Should not need to check if is author. Consider this, we are loggined in as bruh1
         # but we want to unfollow bruh2. Author_id = bruh2, foreign_author_id = bruh1 (us)
         # but if we do isAuthorized(request, author_id) the check will fail since we
-        # are not bruh2. But we need to 
-        if not isAuthorized(request, author_id): 
+        # are not bruh2. 
+        # Made it so it checks if the foreign author is who they say they are (with JWT)
+        # and if they are who they are, then they can remove themselves from the followers
+        # list of author. 
+        if not isAuthorized(request, foreign_author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
@@ -120,7 +123,7 @@ class FollowersForeignApiView(GenericAPIView):
                         'followers': followers_serializer.data
                     }
                 else:
-                    return response.Response("Error: Foreign author do not found", status=status.HTTP_404_NOT_FOUND)
+                    return response.Response("Error: Foreign author not found", status=status.HTTP_404_NOT_FOUND)
                
                 return response.Response(result, status=status.HTTP_200_OK)
 
