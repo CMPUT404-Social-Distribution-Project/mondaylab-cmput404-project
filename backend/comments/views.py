@@ -182,7 +182,7 @@ def get_post_url(request, author_id):
     return str(author_url_id)
 
 
-def get_commenet_url(request, author_id, post_id):
+def get_comment_url(request, author_id, post_id):
     """
     Delete <service> in url, return post url without post uuid
     Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
