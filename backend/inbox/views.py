@@ -4,6 +4,7 @@ from like.Serializers import LikePostSerializer
 from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
+from like.models import Like
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
@@ -27,7 +28,7 @@ class InboxApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/inbox
     DELETE [local]: clear the inbox
     """
-    permission_classes = [IsAuthenticated|UnauthenticatedPost]
+    #permission_classes = [IsAuthenticated|UnauthenticatedPost]
     serializer_class = PostSerializer
     http_method_names=['get', 'post', 'delete']
 
@@ -35,7 +36,7 @@ class InboxApiView(GenericAPIView):
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
         """
-        if not isAuthorized(request, author_id): 
+        if  isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
@@ -80,39 +81,69 @@ class InboxApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
             result = {'detail':"Inbox Not Found", "error": str(e)}
             return response.Response(result, status=status.HTTP_404_NOT_FOUND)
-        print(request.data)
+
 
         if request.data['type'].lower() == "follow":
-            print("11")
             try:
                 url_id = request.data['actor']['id']
                 url_uuid = url_id.split("authors/")
-                actor = Author.objects.get(uuid=url_uuid[1])
+                actor_ = Author.objects.get(uuid=url_uuid[1])
                 url_id = request.data['object']['id']
                 url_uuid = url_id.split("authors/")
-                object = Author.objects.get(uuid=url_uuid[1])
+                object_ = Author.objects.get(uuid=url_uuid[1])
                 actor_name = str(request.data['actor']['displayName'])
                 object_name =str(request.data['object']['displayName'])
                 summary = actor_name + " wants to follow " + object_name
-                fr=FriendRequest.objects.get(actor = actor,object = object, summary =summary)
+                fr=FriendRequest.objects.get(actor = actor_,object = object_, summary =summary)
 
 
             except Exception  as e:
-                fr=FriendRequest.objects.create(actor = actor,object = object, summary =summary)
+                fr=FriendRequest.objects.create(actor = actor_,object = object_, summary =summary)
 
-            inbox.follow_request=fr
-            inbox.follow_request.save()
-            inbox.save()
-            result = {
-                'summary': f'{actor_name} send follow request to {object_name}',
-                
+            inbox.follow_request.add(fr)
+            result={
+                "detail": str(fr.actor) +" send follow request to "+str(fr.object)
             }
-            return response.Response(result, status=status.HTTP_200_OK) 
+            return response.Response(result, status=status.HTTP_200_OK)
+            
         elif request.data['type'].lower() == "post":
-            print("post")
+            try:
+                post_url_id= request.data['id'].split('/')[-1]
+
+                fr=Post.objects.get(uuid = post_url_id)
+
+
+            except Exception  as e:
+                post_url_id= request.data['id'].split('/')[-1]
+                fr=Post.objects.create(uuid = post_url_id)
+
+            inbox.posts.add(fr)
+            result={
+                "detail": " send post successful"
+            }
+            return response.Response(result, status=status.HTTP_200_OK)
 
         elif request.data['type'].lower() == "like":
-            print("like")
+            try:
+                url_id = request.data['author']['id']
+                url_uuid = url_id.split("authors/")
+                actor_ = Author.objects.get(uuid=url_uuid[1])
+                url_id = request.data['object']
+                url_uuid = url_id.split("authors/")
+                object_ = Author.objects.get(uuid=url_uuid[1])
+                actor_name = str(actor_.displayName)
+                summary = actor_name + " likes your post"
+                fr=Like.objects.get(author = actor_,object = url_id, summary =summary)
+
+
+            except Exception  as e:
+                fr=Like.objects.create(author = actor_,object = url_id, summary =summary)
+
+            inbox.likes.add(fr)
+            result={
+                "detail": str(fr.author) +" send like successful"
+            }
+            return response.Response(result, status=status.HTTP_200_OK)
 
         elif request.data['type'].lower() == "comment":
             print("comments")
@@ -122,8 +153,30 @@ class InboxApiView(GenericAPIView):
             return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 
-    def delete():
-        pass
+    def delete(self, request, author_id):
+        """
+        DELETE [local]: clear the inbox
+        """
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                author = get_author(author_id)
+                inbox = Inbox.objects.get(id=author)
+            except Exception as e:
+               
+                result = {'detail':"Inbox Not Found", "error": str(e)}
+                return response.Response(result, status=status.HTTP_404_NOT_FOUND)
+            try:
+                inbox.posts.clear()
+                inbox.follow_request.clear()
+                inbox.likes.clear()
+                return response.Response(result, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                result = {'detail':"Inbox clear faild", "error": str(e)}
+                return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+
 class InboxAllApiView(GenericAPIView):
     """
     This is tempary class, will delete/modify later
