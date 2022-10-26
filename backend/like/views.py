@@ -53,16 +53,21 @@ class LikesPostApiView(GenericAPIView):
     -type field-
     """
     def post(self, request, author_id, post_id):
+        print("reached here")
         try:
             serialize = self.serializer_class(data=request.data)
+            print("reached here1")
             if serialize.is_valid(raise_exception=True):
+                print("reached here2")
                 authorObj = Author.objects.get(uuid=author_id)
-                post = Post.objects.get(id = post_id, author=authorObj)
+                post = Post.objects.get(uuid = post_id, author=authorObj)
+                print("reached here3")
                 if post == None:
                     return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
                 # id field of the post obj is exactly the id field in like obj
                 objectField = post.id  
 
+                print("objectfield is ", objectField)
                 contextField = "https://www.w3.org/ns/activitystreams"
                 summaryField = "lara liked your post"  # NEED TO CREATE LATER
                 serialize.save(context=contextField, summary=summaryField, author=authorObj, object=objectField)
