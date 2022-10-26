@@ -1,0 +1,44 @@
+.authors-explore-container .card {
+    width: 50%;
+    height: fit-content;
+    margin: 0.2em 0em;
+}
+
+.authors-explore-container .card:hover {
+    cursor: pointer;
+}
+
+.authors-explore-container .card-body {
+    margin-bottom: 0;
+    padding: 1em;
+}
+
+.authors-explore-container .profilePicCard {
+    width: 1em;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    outline: solid var(--orange) 2px;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow:hidden;
+    place-content: center;
+}
+
+.authors-explore-container .text {
+    color: var(--white-teal);
+    font-size: 0.5em;
+    display: inline-flex;
+    align-items: center;
+    width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.authors-explore-container .card-title {
+    display: flex;
+    gap: 0.5em;
+    align-self: center;
+    margin-bottom: 0;
+}

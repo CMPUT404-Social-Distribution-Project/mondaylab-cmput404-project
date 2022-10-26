@@ -15,7 +15,6 @@ export default function Example() {
     const { authTokens } = useContext(AuthContext);
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const user_id = localStorage.getItem("user_id");
-    const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -160,7 +159,7 @@ export default function Example() {
                                         ...post,
                                         title: e.target.value,
                                     })}} />
-                            <Form.Control as="textarea" className="body" type="content" placeholder="Write you Post..."
+                            <Form.Control as="textarea" className="body" type="content" placeholder="Write your Post..."
                                 onChange={(e) => {
                                     setPost({
                                         ...post,

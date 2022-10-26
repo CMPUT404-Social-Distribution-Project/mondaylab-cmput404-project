@@ -27,7 +27,9 @@ root.render(
               <Route path='stream' element={<StreamHome/>} />
               <Route path='inbox' element={<Inbox/>} />
               <Route path='explore' element={<Explore/>} />
-              <Route path='authors/:id' element={<Profile/>} />
+              <Route path='authors/:author_id' element={<Profile/>} />
+              <Route path='authors/:author_id/:dir/' element={<Profile/>} />
+
             </Route>
           </Route>
           <Route path="/login" element={<Login />} />
