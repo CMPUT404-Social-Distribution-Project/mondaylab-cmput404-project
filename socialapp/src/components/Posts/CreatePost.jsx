@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Modal, Button, Form, Toast, ToastContainer, CloseButton } from "react-bootstrap";
+import { Modal, Button, Form, InputGroup, CloseButton } from "react-bootstrap";
 import axios from 'axios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
@@ -43,12 +43,12 @@ export default function Example() {
             setPriActive(false)
         } else if(option === "PRIVATE"){
             setEveActive(false)
-            setFriActive(true)
-            setPriActive(false)
-        } else {
-            setEveActive(false)
             setFriActive(false)
             setPriActive(true)
+        } else {
+            setEveActive(false)
+            setFriActive(true)
+            setPriActive(false)
         }
     }
 
@@ -69,14 +69,6 @@ export default function Example() {
             setPost({ ...post, unlisted: false})
         }
     };
-
-    /**
-     * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
-     * We use the user_id (created using useCOntext of the current autheticated user) to create a path to posts, and we autheticated
-     * it using our auth token. If the request is successful we send a response to the console and call the function closePost. If not
-     * we will send the error to the console and the error will not be logged. 
-     * 
-     */
 
     /**
      * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
@@ -116,7 +108,7 @@ export default function Example() {
                     <Modal.Header>
                         <Modal.Title className='header'>Make a Post | </Modal.Title>
                         <Modal.Title className="header1">Who can see this post?</Modal.Title>
-                        <Button type="radio" value="Everyone" className='option' name="view" 
+                        <Button type="button" value="Everyone" className='option' name="view" 
                             style={{
                                 backgroundColor: eveActive ? ' #BFEFE9' : '',
                                 color: eveActive ? 'black' : '',
@@ -124,7 +116,7 @@ export default function Example() {
                             onClick={() => {
                                 setVisibility("PUBLIC")}}>
                         Everyone </Button>
-                        <Button type="radio" value="Friends" className='option' name="view" 
+                        <Button type="button" value="Friends" className='option' name="view" 
                             style={{
                                 backgroundColor: friActive ? ' #BFEFE9' : '',
                                 color: friActive ? 'black' : '',
@@ -133,13 +125,13 @@ export default function Example() {
                                 setVisibility("FRIENDS")
                             }}>
                         Friends-Only </Button>
-                        <Button type="radio" value="Private" className='option' name="view" 
+                        <Button type="button" value="Private" className='option' name="view" 
                             style={{
                                 backgroundColor: priActive ? ' #BFEFE9' : '',
                                 color: priActive ? 'black' : '',
                             }} 
                             onClick={() => {
-                                setVisibility("Private")
+                                setVisibility("PRIVATE")
                         }}>
                             Private 
                         </Button>
@@ -159,7 +151,9 @@ export default function Example() {
                                         ...post,
                                         title: e.target.value,
                                     })}} />
-                            <Form.Control as="textarea" className="body" type="content" placeholder="Write your Post..."
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Control as="textarea" className="body" type="content" placeholder="Write you Post..."
                                 onChange={(e) => {
                                     setPost({
                                         ...post,
