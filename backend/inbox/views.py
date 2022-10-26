@@ -1,6 +1,6 @@
 from logging import exception
 from re import T
-from like.Serializers import LikePostSerializer
+from like.serializers import LikePostSerializer
 from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
@@ -14,7 +14,7 @@ from author.serializers import AuthorSerializer, FollowerSerializer
 from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
 from auth.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
-from followers.Serializers import FriendRequestSerializer
+from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentsSerializer
 
 class AuthenticateGET(BasePermission):
@@ -51,7 +51,7 @@ class InboxApiView(GenericAPIView):
         else:
             try:
                 author = get_author(author_id)
-                inbox = Inbox.objects.get(id=author)
+                inbox = Inbox.objects.get(author=author)
             except Exception as e:
                 result = {'detail':"Inbox Not Found", "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
@@ -62,7 +62,7 @@ class InboxApiView(GenericAPIView):
                 posts_serializers = self.serializer_class(posts_list, many=True)
 
                 # get follow requests to add to items
-                fr_list = list(inbox.follow_request.all())
+                fr_list = list(inbox.follow_requests.all())
                 fr_serializer = FriendRequestSerializer(fr_list, many=True)
 
                 # get likes in inbox to add to items
@@ -99,10 +99,10 @@ class InboxApiView(GenericAPIView):
         author = get_author(author_id)
         try:
             author = get_author(author_id)
-            inbox = Inbox.objects.get(id=author)
+            inbox = Inbox.objects.get(author=author)
         except Exception as e:
             try:
-                inbox = Inbox.objects.create(id=author)
+                inbox = Inbox.objects.create(author=author)
             except Exception as e:
                 result = {'detail':"Inbox Created faild", "error": str(e)}
                 return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
@@ -134,7 +134,7 @@ class InboxApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
             # add the new follow request object to the inbox
-            inbox.follow_request.add(fr)
+            inbox.follow_requests.add(fr)
             result={
                 "detail": str(fr.actor) +" sent a follow request to "+str(fr.object)
             }
@@ -196,14 +196,14 @@ class InboxApiView(GenericAPIView):
         else:
             try:
                 author = get_author(author_id)
-                inbox = Inbox.objects.get(id=author)
+                inbox = Inbox.objects.get(author=author)
             except Exception as e:
                
                 result = {'detail':"Inbox Not Found", "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
             try:
                 inbox.posts.clear()
-                inbox.follow_request.clear()
+                inbox.follow_requests.clear()
                 inbox.likes.clear()
                 inbox.comments.clear()
                 return response.Response(result, status=status.HTTP_200_OK)
@@ -233,15 +233,15 @@ class InboxAllApiView(GenericAPIView):
         else:
             try:
                 author = get_author(author_id)
-                inbox = Inbox.objects.get(id=author)
+                inbox = Inbox.objects.get(author=author)
             except Exception as e:
                 result = {'detail':"Inbox Not Found", "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
             print(type(inbox))
-            print(type(inbox.follow_request))
+            print(type(inbox.follow_requests))
 
-            follow_request_serializer = self.fr_serializer_class(list(inbox.follow_request.all()), many=True)
-            like_serializer = self.lk_serializer_class(list(inbox.likes.all()), amny=True)
+            follow_request_serializer = self.fr_serializer_class(list(inbox.follow_requests.all()), many=True)
+            like_serializer = self.lk_serializer_class(list(inbox.likes.all()), any=True)
             #comment_serializer = self.ct_serializer_class(list(inbox.comment.all()), many=True)
             
             try:
@@ -259,6 +259,36 @@ class InboxAllApiView(GenericAPIView):
                 result = {'detail':"Posts Not Found" , "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
+
+class InboxDeleteFRApiView(GenericAPIView):
+    '''
+    URL: ://service/authors/{AUTHOR_ID}/inbox/{FOREIGN_AUTHOR_ID}
+    DELETE [local]: deletes the follow request(s) from the 
+    foreign author in the inbox of author
+    '''
+    def delete(self, request, author_id, foreign_author_id):
+        if not isAuthorized(request, author_id): 
+            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try:
+                author = get_author(author_id)
+                inbox = Inbox.objects.get(author=author)
+            except Exception as e:
+                
+                result = {'detail':"Inbox Not Found", "error": str(e)}
+                return response.Response(result, status=status.HTTP_404_NOT_FOUND)
+            try:
+                # try and get the follow request from foreign author
+                follow_request = inbox.follow_requests.filter(actor__uuid= foreign_author_id).first()
+                if follow_request != None:
+                    inbox.follow_requests.remove(follow_request)
+                    return response.Response(f"Follow request from {follow_request.actor.displayName} was rejected", status=status.HTTP_200_OK)
+                else:
+                    return response.Response(f"Could not find follow request from foreign author {foreign_author_id}",status=status.HTTP_404_NOT_FOUND)
+
+            except Exception as e:
+                result = {'detail':"Failed to delete follow request", "error": str(e)}
+                return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 def get_author(author_id):
     """
