@@ -9,13 +9,7 @@ import CreatePost from "../Posts/CreatePost";
 
 export default function Sidebar() {
     const { logoutUser } = useContext(AuthContext);
-
-    const handleClose = () => setNewPost(false);
     const [newPost, setNewPost] = useState(false);
-
-    const handlePost = (show) => {
-        setNewPost(!show)
-    }
 
     return (
         <ul
@@ -23,20 +17,20 @@ export default function Sidebar() {
             class="nav nav-pills nav-flush flex-column mb-auto text-center"
         >
             <li class="nav-item">
-                <Link to= "/post">
-                    <a
-                        href="#"
-                        class="nav-link active py-3"
-                        aria-current="page"
-                        title="Create Post"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
-                        onClick={() => (handlePost(newPost))}
-                    >
-                        <MdEdit />
-                        {newPost && <CreatePost/>}
-                    </a>
-                </Link>
+         
+                <div
+                    class="nav-link active py-3"
+                    className="create-post-button"
+                    aria-current="page"
+                    title="Create Post"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    onClick={() => setNewPost(true)}
+                >
+                    <MdEdit />
+                </div>
+                {newPost && <CreatePost show={newPost} onHide={() => setNewPost(false)}/>}
+
             </li>
             <li>
                 <Link to="/stream">
