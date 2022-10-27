@@ -9,12 +9,4 @@
 .posts {
     width: 1100000%;
 }
-.card {
-    width: 500%;
-    min-width: none;
-}
 
-.card-body {
-    width: 200%;
-    margin-bottom: 5%;
-}

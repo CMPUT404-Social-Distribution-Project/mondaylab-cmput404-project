@@ -7,12 +7,13 @@ import { useNavigate } from "react-router-dom";
 export default function UserCard(props) {
     const navigate = useNavigate();
     const routeChange = () => {
-        navigate(`/authors/${props.author.uuid}/`)
+        navigate(`/authors/${props.author.uuid}/`, {state: {refresh:true}});
     }
 
   return (
     <Card
         onClick={routeChange}
+        className="userCard"
     >
       <Card.Body>
         <Card.Title>

@@ -31,6 +31,25 @@
     align-self: center;
 }
 
+/* Tabs */
+.profileContainer .nav-tabs {
+    --bs-nav-tabs-border-color: transparent;
+    --bs-nav-tabs-link-active-bg: var(--dark-blue);
+    --bs-nav-tabs-link-active-border-color: transparent;
+    --bs-nav-tabs-link-active-color: var(--teal);
+    --bs-nav-link-hover-color: transparent;
+}
+.profileContainer .nav-link {
+    border-bottom-left-radius: 11px;
+    border-bottom-right-radius: 11px; 
+    border-top-right-radius: 0;   
+    border-top-left-radius: 0;
+}
+.profileContainer .nav-link:hover {
+    outline: transparent;
+    border-color: transparent;
+}
+
 .profilePicPage {
     width: 4rem;
     height: 4rem;
@@ -129,7 +148,7 @@ span {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2em 2em 0em;
-    width: 50vw;
+    padding: 1em 0em 0em;
+    width: 65vw;
     align-self: center;
 }

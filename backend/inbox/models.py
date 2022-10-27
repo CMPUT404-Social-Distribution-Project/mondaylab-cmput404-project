@@ -6,7 +6,7 @@ from comments.models import Comment
 from post.models import Post
 from like.models import Like
 from followers.models import FriendRequest
-# Create your models here.
+
 class Inbox(Model):
     """
     items will save all types of posts
@@ -16,9 +16,9 @@ class Inbox(Model):
     if the type is “comment” then add that comment to AUTHOR_ID’s inbox
     """
     type = CharField(max_length=10, default="inbox", editable=False)
-    id = OneToOneField(Author, primary_key=True, on_delete=CASCADE, null=False)
+    author = OneToOneField(Author, primary_key=True, on_delete=CASCADE, null=False, related_name="inbox_author")
     posts = ManyToManyField(Post, related_name='inbox_posts')
     comments = ManyToManyField(Comment)
     likes = ManyToManyField(Like)
-    follow_request = ManyToManyField(FriendRequest)
+    follow_requests = ManyToManyField(FriendRequest)
     
