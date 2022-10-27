@@ -5,7 +5,7 @@
     --bs-card-bg: none;
 }
 
-.userCard .card:hover {
+.userCard:hover {
     cursor: pointer;
 }
 

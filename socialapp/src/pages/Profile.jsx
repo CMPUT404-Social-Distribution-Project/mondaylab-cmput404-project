@@ -45,7 +45,6 @@ export default function Profile() {
   const user_id = localStorage.getItem("user_id");  // the currently logged in author
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
-  console.log(dir);
 
   // Called after rendering. Fetches data
   useEffect(() => {
@@ -90,7 +89,7 @@ export default function Profile() {
         });
     };
     fetchData();
-  }, [useLocation().state], dir);
+  }, [useLocation().state, dir]);
 
   return (
     <div className="profileContainer">
