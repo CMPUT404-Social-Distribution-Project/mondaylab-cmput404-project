@@ -55,7 +55,7 @@ export default function FollowButton(props) {
         });
     };
     following();
-  }, [isFollowing]);
+  }, [isFollowing, useLocation().state]);
 
   const handleClick = () => {
     if (followState === "notFollowing") {
@@ -86,19 +86,23 @@ export default function FollowButton(props) {
       });
     }  
   };
-  
-    return (
-      <Button
+
+    if (currentAuthor.uuid === props.authorViewing.uuid) {
+      // don't show if viewing oneself's profile
+      return (<div className='empty-space' style={{width: '3em'}} />);
+    } else {
+      return (
+        <Button
         id="followButton"
         variant="primary"
         disabled={followState === "followSent"}
         onClick={followState !== "followSent" ? handleClick : null}
-        style={{visibility: isNotCurrentUser ? 'visible' : 'hidden', backgroundColor: followState === "following" ? 'var(--orange)' : 'var(--teal)'}}
+        style={{backgroundColor: followState === "following" ? 'var(--orange)' : 'var(--teal)'}}
       >
         {followState === "following" ? 'Following' : ''}
         {followState === "followSent" ? 'Sent' : ''}
         {followState === "notFollowing" ? 'Follow' : ''}
       </Button>
-    );
-
+      )
+    }
 }
