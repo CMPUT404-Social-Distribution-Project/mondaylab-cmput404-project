@@ -144,6 +144,11 @@ span {
     align-self: center;
 }
 
+.posts-container-profile .post-card {
+    width: auto !important;
+    scale: 0.8;
+}
+
 .followers-container-profile {
     display: flex;
     flex-direction: column;
