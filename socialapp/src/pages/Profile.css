@@ -145,6 +145,7 @@ span {
 }
 
 .posts-container-profile .post-card {
+    margin-top: 0rem;
     width: auto !important;
     scale: 0.8;
 }
