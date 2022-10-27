@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { Modal, Button, Form, InputGroup, CloseButton } from "react-bootstrap";
-import axios from 'axios';
+import useAxios from '../../utils/useAxios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
 import { FaImage, FaLink } from "react-icons/fa";
 
-export default function CreatePost() {
+export default function CreatePost(props) {
     const [show, setShow] = useState(true);
     const [unlist, setUnlist] = useState(false)
     const [isActive, setIsActive] = useState(false)
@@ -14,6 +14,7 @@ export default function CreatePost() {
     const [priActive, setPriActive] = useState(false)
     const { authTokens } = useContext(AuthContext);
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
+    const api = useAxios();
     const user_id = localStorage.getItem("user_id");
     const [post, setPost] = useState({
         title: "",
@@ -79,12 +80,11 @@ export default function CreatePost() {
      */
 
     const sendPost = () => {
-        axios
-            .post(`http://127.0.0.1:8000/service/authors/${user_id}/posts/`, post, 
-            { headers: { 'Authorization': `Bearer ${authTokens.access}` }})
+        api
+            .post(`${baseURL}/authors/${user_id}/posts/`, post)
             .then((response) => {
                 console.log(response.data);
-                closePost();
+                props.onHide()
             })
             .catch((error) => {
                 alert(`Something went wrong posting! \n Error: ${error}`)
@@ -92,17 +92,12 @@ export default function CreatePost() {
             });
     };
 
-    const closePost = () => {
-        setShow(false)
-    };
-
     return (
         <div class="post-modal">
             <Modal size="lg"
+                {...props}
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
-                show={show}
-                onHide={closePost}
             >
                 <Form>
                     <Modal.Header>
@@ -141,7 +136,7 @@ export default function CreatePost() {
                             }} className="unlist" onClick={unlistPost}> 
                             Unlisted 
                         </Button>
-                        <CloseButton className='me-2' variant="white" onClick={closePost} />
+                        <CloseButton className='me-2' variant="white" onClick={props.onHide} />
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group className="title">
