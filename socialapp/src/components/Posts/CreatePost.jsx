@@ -5,7 +5,7 @@ import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
 import { FaImage, FaLink } from "react-icons/fa";
 
-export default function Example() {
+export default function CreatePost() {
     const [show, setShow] = useState(true);
     const [unlist, setUnlist] = useState(false)
     const [isActive, setIsActive] = useState(false)

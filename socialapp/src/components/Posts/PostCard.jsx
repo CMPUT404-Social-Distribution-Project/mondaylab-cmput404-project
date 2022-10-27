@@ -56,8 +56,11 @@ export default function PostCard(props) {
   return (
     <Card className="post-card"style={{ width: '30rem', whiteSpace: "nowrap"}}>
       <Card.Header>
-        <div className="profilePicPost">
-          <img id="profilePicPage" src={props.post.author.profileImage} alt="profilePic"/>
+        <div className="post-author">
+          <div className="profile-pic-post">
+            <img src={props.post.author.profileImage} alt="profilePic"/>
+          </div>
+          <div className="post-author-name">{props.post.author.displayName}</div>
         </div>
         <PostOptions />
       </Card.Header>

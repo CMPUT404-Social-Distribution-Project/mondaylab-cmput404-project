@@ -1,4 +1,5 @@
 .post-card {
+    margin-top: 2rem;
     --bs-card-bg: none;
 }
 
@@ -8,7 +9,7 @@
     align-items: center;
 }
 
-.post-card .profilePicPost {
+.post-card .profile-pic-post {
     width: 3em;
     height: auto;
     aspect-ratio: 1/1;
@@ -21,15 +22,24 @@
     place-content: center;
 }
 
-.post-card .card-title.h5 {
+.post-card .post-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.post-card .card-title {
     font-size: 2rem;
     margin-bottom: 3%;
     text-decoration: var(--teal);
+    white-space: pre-line;
+
 }
 
 .post-card .card-text {
-    margin-left: 1%;
-    padding-bottom: 30%;
+    padding: 1em;
+    width: 100%;
+    white-space: pre-line;
 }
 
 .post-card .card-body {
@@ -43,15 +53,15 @@
 }
 
 .post-card .comments-text {
-    margin-left: 1%;
-    padding-bottom: 20%;
+    color: var(--teal);
+    margin-left: 1em;
+    padding-bottom: 2em;
 }
 
 .options {
     display: inline-block;
     white-space: nowrap;
-    margin-left: 85%;
-    padding-bottom: 1%;
+    margin-left: auto;
 }
 
 #dropdown-basic {
