@@ -76,3 +76,29 @@ hr {
     color: var(--orange);
 }
 
+/* Create Post Button */
+
+#sidebar .nav-item {
+    align-self: center;
+}
+
+.create-post-button {
+    color: var(--dark-blue);
+    background-color: var(--teal);
+    height: 50px;
+    width: 50px;
+    margin: 0.5em 0em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    border: 0;
+    border-radius: 11px;
+}
+
+.create-post-button:hover {
+    
+    cursor: pointer;
+}
+

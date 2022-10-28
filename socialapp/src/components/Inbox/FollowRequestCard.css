@@ -1,0 +1,55 @@
+.follow-request-card {
+    width: 50%;
+    height: fit-content;
+    margin: 0.2em 0em;
+    --bs-card-bg: none;
+}
+
+.follow-request-card .card:hover {
+    cursor: pointer;
+}
+
+.follow-request-card .card-body {
+    margin-bottom: 0;
+    padding: 1em;
+    color: var(--white-teal);
+    background-color: var(--dark-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border: transparent;
+    border-radius: 11px;
+    width: auto;
+}
+
+.follow-request-card .card-header {
+    background-color: var(--slightly-darker-blue);
+}
+
+.follow-request-card .profilePicCard {
+    width: 1em;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    outline: solid var(--orange) 2px;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow:hidden;
+    place-content: center;
+}
+
+.follow-request-card .text {
+    color: var(--white-teal);
+    font-size: 0.5em;
+    display: inline-flex;
+    align-items: center;
+    width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.follow-request-card .card-title {
+    display: flex;
+    gap: 0.5em;
+    align-self: center;
+    margin-bottom: 0;
+}

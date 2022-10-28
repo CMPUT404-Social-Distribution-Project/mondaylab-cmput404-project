@@ -57,7 +57,7 @@ class Author(AbstractBaseUser, PermissionsMixin):
     url = URLField(blank=True)
     github = URLField( blank=True)
     profileImage = URLField(blank=True, default='')
-    followers = ManyToManyField('self', blank=True)
+    followers = ManyToManyField('self', blank=True, symmetrical=False)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)

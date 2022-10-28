@@ -1,26 +1,28 @@
 import React, { useState, useEffect, useContext } from 'react';
 import ReactMarkdown from 'react-markdown';
-import axios from 'axios';
 import { Dropdown } from 'react-bootstrap';
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
-import { confirmAlert } from 'react-confirm-alert';
+import useAxios from "../../utils/useAxios";
+
+
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const [isOwner, setIsOwner] = useState(true);
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { authTokens } = useContext(AuthContext);
+  const api = useAxios();
   
   useEffect (() => {
 
   }, []);
 
   const deletePost = (uuid) => {
-      axios
-        .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`, { headers: { 'Authorization': `Bearer ${authTokens.access}` } })
+      api
+        .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
         .then((response) => {
           console.log(response.data);
           window.location.reload(true);
@@ -31,22 +33,36 @@ export default function PostCard(props) {
         });
   };
 
-  return (
-    <Card style={{ width: '30rem', whiteSpace: "nowrap"}}>
-      <Card.Header style={{width: '200%'}}>
-        <div style={{display: "inline-block"}} className="profilePicPage">
-          <img id="profilePicPage" src={props.post.author.profileImage} alt="profilePic"/>
-        </div>
+  // only render options if the user viewing it is the author of it
+  function PostOptions () {
+    if (user_id === props.post.author.uuid) {
+      return (
         <div className="options">
-          <Dropdown>
-            <Dropdown.Toggle id="dropdown-basic">
-              <BiDotsVerticalRounded />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {isOwner && <Dropdown.Item onClick={() => deletePost(props.post.uuid)}>Delete Post</Dropdown.Item>}
-            </Dropdown.Menu>  
-          </Dropdown>
+        <Dropdown>
+          <Dropdown.Toggle id="dropdown-basic">
+            <BiDotsVerticalRounded />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            {isOwner && <Dropdown.Item onClick={() => deletePost(props.post.uuid)}>Delete Post</Dropdown.Item>}
+          </Dropdown.Menu>  
+        </Dropdown>
+      </div>
+      );
+    } else {
+      return (<></>);
+    }
+  }
+
+  return (
+    <Card className="post-card"style={{ width: '30rem', whiteSpace: "nowrap"}}>
+      <Card.Header>
+        <div className="post-author">
+          <div className="profile-pic-post">
+            <img src={props.post.author.profileImage} alt="profilePic"/>
+          </div>
+          <div className="post-author-name">{props.post.author.displayName}</div>
         </div>
+        <PostOptions />
       </Card.Header>
       <Card.Img variant="top" src="" />
       <Card.Body>

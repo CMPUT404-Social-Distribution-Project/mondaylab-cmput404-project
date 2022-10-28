@@ -10,7 +10,7 @@ from author.models import Author
 from like.models import Like
 from comments.models import Comment
 from django.db.models import Q
-from like.Serializers import LikeCommentSerializer, LikePostSerializer, LikeAuthorSerializer
+from like.serializers import LikeCommentSerializer, LikePostSerializer, LikeAuthorSerializer
 # Create your views here.
 from auth.utils import isUUID, isAuthorized
 
