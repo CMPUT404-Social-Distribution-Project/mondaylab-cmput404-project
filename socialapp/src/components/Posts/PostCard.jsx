@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Dropdown } from 'react-bootstrap';
 import { BiDotsVerticalRounded } from "react-icons/bi";
@@ -6,31 +6,42 @@ import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
 import useAxios from "../../utils/useAxios";
-
-
+import { confirmAlert } from 'react-confirm-alert';
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
-  const [isOwner, setIsOwner] = useState(true);
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { authTokens } = useContext(AuthContext);
   const api = useAxios();
-  
-  useEffect (() => {
 
-  }, []);
 
   const deletePost = (uuid) => {
-      api
-        .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
-        .then((response) => {
-          console.log(response.data);
-          window.location.reload(true);
-        })
-        .catch((error) => {
-          alert(`Something went wrong posting! \n Error: ${error}`)
-          console.log(error);
-        });
+    api
+      .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
+      .then((response) => {
+        console.log(response.data);
+        window.location.reload(true);
+      })
+      .catch((error) => {
+        alert(`Something went wrong posting! \n Error: ${error}`)
+        console.log(error);
+      });
+  }
+
+  const confirmDelete = (uuid) => {
+    confirmAlert({
+      title: 'Confirm to submit',
+      message: 'Are you sure to do this.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {deletePost(uuid)}
+        },
+        {
+          label: 'No',
+        }
+      ]
+    });
   };
 
   // only render options if the user viewing it is the author of it
@@ -43,7 +54,7 @@ export default function PostCard(props) {
             <BiDotsVerticalRounded />
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            {isOwner && <Dropdown.Item onClick={() => deletePost(props.post.uuid)}>Delete Post</Dropdown.Item>}
+              <Dropdown.Item onClick={() => confirmDelete(props.post.uuid)}>Delete Post</Dropdown.Item>
           </Dropdown.Menu>  
         </Dropdown>
       </div>

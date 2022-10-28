@@ -85,6 +85,7 @@ export default function CreatePost(props) {
             .then((response) => {
                 console.log(response.data);
                 props.onHide()
+                window.location.reload(true);
             })
             .catch((error) => {
                 alert(`Something went wrong posting! \n Error: ${error}`)
