@@ -9,6 +9,7 @@ from auth.serializers import LoginSerializer, RegisterSerializer
 from uuid import uuid4
 from author.models import Author
 from server.models import Server
+from auth.utils import check_github_valid
 
 class LoginViewSet(ModelViewSet, TokenObtainPairView):
     serializer_class = LoginSerializer
@@ -46,6 +47,10 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
         if authorExists != None:
             return Response(data=f"Author with displayName = {requestedDisplayName} already exists!", status=status.HTTP_400_BAD_REQUEST)
         
+        # check if the github url is valid
+        if not check_github_valid(request):
+            return Response(data=f"The given GitHub URL is not a valid URL! Make sure to not include 'www.'!", status=status.HTTP_400_BAD_REQUEST)
+
         # Serialize requested data 
         serializer = self.get_serializer(data=request.data, context={'request':request})
         serializer.is_valid(raise_exception=True)
@@ -92,3 +97,4 @@ class RefreshViewSet(viewsets.ViewSet, TokenRefreshView):
             raise InvalidToken(e.args[0])
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
+

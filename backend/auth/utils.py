@@ -1,5 +1,6 @@
 from uuid import UUID
 from rest_framework_simplejwt.authentication import JWTAuthentication
+import re
 JWT_authenticator = JWTAuthentication()
 
 def isUUID(val):
@@ -24,3 +25,19 @@ def isAuthorized(request, author_uuid):
         return True
     else:
         return False
+
+def check_github_valid(request):
+    '''Checks if the given github (if exists) is a valid github link'''
+    github = request.data.get("github")
+
+    # Check that github is not null and is not an empty string
+    if github is not None and github != '':
+        # check if the github string given starts with http
+        if github.startswith('http') and github.split("/")[2] == 'github.com':
+            return True
+        else:
+            return False
+    else:
+        # return True since we allow a users to not have to pull
+        # in activity from their github (blank URL)
+        return True
