@@ -60,6 +60,16 @@ class AuthorTestCase(APITestCase):
         res = self.client.get(url, format="json")
         self.assertEqual(res.status_code, 404)
 
+    def testUpdateAuthorNoAuthorization(self):
+        # should be able to GET author fine since method is public
+        url = f'/service/authors/{self.mock_author.uuid}/'
+        res = self.client.get(url, format="json")
+        self.assertEqual(res.status_code, 200)
+
+        # No authorization header added, should get 401
+        update_res = self.client.post(url, {'displayName': 'AuthorPatched'})
+        self.assertEqual(update_res.status_code, 401)
+
     def testUpdateAuthor(self):
         url = f'/service/authors/{self.mock_author.uuid}/'
         res = self.client.get(url, format="json")

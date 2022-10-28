@@ -27,6 +27,11 @@ class AuthorSignupLoginTestCase(APITestCase):
         self.assertTrue('token' in res_data.keys())
         self.assertTrue('refresh' in res_data.keys())
         self.assertTrue('user' in res_data.keys())
+    
+    def testRegisterEmpty(self):
+        data = { 'displayName': '', 'password': 'nopenope1'}
+        response = self.client.post(f'/service/auth/register/', data , format="json")
+        self.assertEqual(response.status_code, 400)
 
     def testLogin(self):
         self.testRegister()
@@ -36,5 +41,15 @@ class AuthorSignupLoginTestCase(APITestCase):
         self.assertTrue('access' in response.data.keys())
         self.assertTrue('refresh' in response.data.keys())
         self.assertTrue('user' in response.data.keys())
+
+    def testLoginDNE(self):
+        self.testRegister()
+        # attempt to login with incorrect credentials, should get 400
+        response = self.client.post(f'/service/auth/login/', {'displayName': 'badUser', 'password':'doesnotexist'} , format="json")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(f'/service/auth/login/', {'displayName': 'badUser', 'password':'doesnotexist'} , format="json")
+        self.assertEqual(response.status_code, 400)
+
 
 
