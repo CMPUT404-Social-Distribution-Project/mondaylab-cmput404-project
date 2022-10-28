@@ -11,10 +11,10 @@ from author.serializers import AuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from auth.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized, is_friends
 from comments.serializers import CommentsSerializer
-
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
+import json
 
 class PostApiView(GenericAPIView):
     """
@@ -33,6 +33,8 @@ class PostApiView(GenericAPIView):
             authorObj = Author.objects.get(uuid=author_id)
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
                 postObj = Post.objects.get(uuid = post_id, author=authorObj)
+            elif is_friends(request, author_id):
+                postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility__in=['PUBLIC','FRIENDS'],)
             else:
                 postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
             result = {"items": self.serializer_class(postObj).data}
@@ -123,7 +125,13 @@ class PostsApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = Author.objects.get(uuid=author_id)
-            postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC').order_by("published").reverse()
+            author_url_id = get_author_url_id(request)
+            if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
+                postsQuerySet = Post.objects.filter(author=authorObj).order_by("published").reverse()
+            elif is_friends(request, author_url_id):             # if the current author is friends with the viewed author, show the friend posts
+                postsQuerySet = Post.objects.filter(author=authorObj, visibility__in=['PUBLIC','FRIENDS'], unlisted=False).order_by("published").reverse()
+            else:
+                postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC', unlisted=False).order_by("published").reverse()
             postsPaginated = self.paginate_queryset(postsQuerySet)
 
             
@@ -253,6 +261,7 @@ def get_friend_id(request):
     yy = xx[1].split("/friends")
     author_url_id= xx[0]+'authors'+yy[1]
     return author_url_id    
+
 def get_post_id(request):
     if "likes" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
@@ -279,3 +288,5 @@ def get_post_url(request, author_id):
     xx=request.build_absolute_uri().split('service/')
     author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
     return str(author_url_id)
+
+
