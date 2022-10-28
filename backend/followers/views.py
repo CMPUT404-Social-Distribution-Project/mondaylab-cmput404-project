@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticate
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
 from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
-from auth.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized, check_friend
 
 class FollowersApiView(GenericAPIView):
     """
@@ -193,15 +193,4 @@ class TrueFriendsApiView(GenericAPIView):
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-def check_friend(author_id, foreign_id):
-    try:
-        current_author = Author.objects.get(id = author_id)
-        foreign_author = Author.objects.get(id = foreign_id)
-        followers = current_author.followers.get(id = foreign_id)
-        friends = foreign_author.followers.get(id = author_id)
-        if followers and friends:
-            return True
-        else:
-            return False
-    except:
-        return False
+

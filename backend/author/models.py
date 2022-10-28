@@ -2,7 +2,6 @@
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
 ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, ManyToManyField, UUIDField
 )
-from django.forms import ImageField
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
 from uuid import uuid4
 

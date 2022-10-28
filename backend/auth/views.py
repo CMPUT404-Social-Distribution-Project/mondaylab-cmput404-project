@@ -9,7 +9,7 @@ from auth.serializers import LoginSerializer, RegisterSerializer
 from uuid import uuid4
 from author.models import Author
 from server.models import Server
-from auth.utils import check_github_valid
+from backend.utils import check_github_valid
 
 class LoginViewSet(ModelViewSet, TokenObtainPairView):
     serializer_class = LoginSerializer

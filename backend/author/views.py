@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
-from auth.utils import isUUID, isAuthorized, check_github_valid
+from backend.utils import isUUID, isAuthorized, check_github_valid
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
