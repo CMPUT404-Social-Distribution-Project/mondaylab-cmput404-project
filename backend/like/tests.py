@@ -56,6 +56,9 @@ class LikeTestCase(APITestCase):
         # TODO:  
         AllLikesInPost = res.get('items')
         print("ALL LIKE IS ", AllLikesInPost)
+        print("ALL LIKE IS ", AllLikesInPost)
+        for x in AllLikesInPost:
+            self.assertIn(str(self.mock_author.uuid), x.get('object')) 
         
         self.assertEqual(1, 0)
 
@@ -78,9 +81,23 @@ class LikeTestCase(APITestCase):
         self.assertTrue('object' in res.keys())
         self.assertTrue('author' in res.keys())
         
-        # TODO: check author uuid in each of like list but i dont know the syntax yet
-        AllLikesInPost = res.get('items')
-        print("ALL LIKE IS ", AllLikesInPost)
+        # TODO: check author uuid in each of like list object field
+        AllLikesInComment = res.get('items')
+        print("ALL LIKE IS ", AllLikesInComment)
+        for x in AllLikesInComment:
+            self.assertIn(str(self.mock_author.uuid), x.get('object')) 
+    
+    def testGetLikedAuthor(self):
+        self.assertEqual(1, 1)
+        url = f'service/authors/{self.mock_author.uuid}/liked'
+
+        res = self.client.get(url, format="json")
+        self.assertEqual(res.status_code, 200)
+        res = res.data
+        # check that all the fields needed are present
+        listOfliked = res.get('items')
+        for x in listOfliked:
+            self.assertIn(str(self.mock_author.uuid), x.get('object')) 
 
     @skip  
     def createPostAndComment(self):

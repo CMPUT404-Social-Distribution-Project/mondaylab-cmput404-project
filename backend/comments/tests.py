@@ -50,3 +50,7 @@ class CommentsTestCase(APITestCase):
         # check if comment author field matches the author who made the comment
         self.assertEqual(str(self.mock_author.uuid) , comment_authorUUID)
         #Comment.objects.create("")
+
+    def testGetComment(self):
+        # not yet implemented
+        self.assertEqual(1, 1)
