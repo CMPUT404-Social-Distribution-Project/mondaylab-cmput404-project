@@ -2,6 +2,8 @@ from uuid import UUID
 from rest_framework_simplejwt.authentication import JWTAuthentication
 JWT_authenticator = JWTAuthentication()
 from author.models import Author
+from author.serializers import LimitedAuthorSerializer
+
 
 def isUUID(val):
     try:
@@ -82,3 +84,18 @@ def check_friend(author_id, foreign_id):
             return False
     except:
         return False
+
+def get_friends_list(current_author):
+    friends_list = []
+    # Loop through followers and check if current author is following
+    # This indicates they're friends
+    try: 
+        for follower in current_author.followers.all():
+            followerObject = Author.objects.get(uuid=follower.uuid)
+            followersFollowers = followerObject.followers.all()
+            if current_author in followersFollowers:
+                friends_list.append(LimitedAuthorSerializer(followerObject).data)
+    except Exception as e:
+        print(e)
+
+    return friends_list

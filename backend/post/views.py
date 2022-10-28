@@ -3,6 +3,7 @@
 from post.models import Post
 from author.models import Author
 from comments.models import Comment, CommentSrc
+from inbox.models import Inbox
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
@@ -11,7 +12,7 @@ from author.serializers import AuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import isUUID, isAuthorized, is_friends
+from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import json
@@ -220,7 +221,18 @@ class PostsApiView(GenericAPIView):
                         comments=postId+'/comments',
                         origin=origin,
                         source=origin,
-                        )
+                    )
+
+                    # if the visibility is 'FRIENDS' send the post to all follower's friends
+                    try:
+                        friends_list = get_friends_list(authorObj)
+                        for friend in friends_list:
+                            friend_inbox = Inbox.objects.get(author=friend["uuid"])
+                            friend_inbox.posts.add(Post.objects.get(id=postId))
+                    except Exception as e:
+                        print(f"Failed to send post {postId} to inbox of friend")
+                        print(e)
+                    
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
