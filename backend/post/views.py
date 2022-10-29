@@ -38,8 +38,8 @@ class PostApiView(GenericAPIView):
                 postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility__in=['PUBLIC','FRIENDS'],)
             else:
                 postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
-            result = {"items": self.serializer_class(postObj).data}
-            return response.Response(result, status=status.HTTP_200_OK)
+                
+            return response.Response(self.serializer_class(postObj).data, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
