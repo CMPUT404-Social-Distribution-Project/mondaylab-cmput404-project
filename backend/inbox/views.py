@@ -191,7 +191,7 @@ class InboxApiView(GenericAPIView):
         """
         DELETE [local]: clear the inbox
         """
-        if  isAuthorized(request, author_id): 
+        if not isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
