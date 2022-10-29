@@ -1,5 +1,5 @@
 
-from unittest import skip
+from auth.views import LoginViewSet, RefreshViewSet
 from post.models import Post
 from author.models import Author
 from rest_framework.test import APIRequestFactory, APITestCase
@@ -7,45 +7,51 @@ from rest_framework.test import APIClient
 from rest_framework import status
 from uuid import uuid4
 
+
    
 
 
 class FollowersTestCase(APITestCase):
+    #This method is mainly test about post
     """
     ALL TEST DO NOT CONSIDER AUTHTICATION, SINCE IT IS DONE IN AUTH TEST
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
 
     """
- 
-    def log_in(self):
-        # To get authtication
-        self.client = APIClient()
-        # Create 3 authors
-        self.mock_author1, self.mock_author2,self.mock_author3 = self.create_authors()
-        self.author_id,self.foreign_id,self.foreign_id2 = self.get_id(self.mock_author1, self.mock_author2,self.mock_author3)
-        # Log in as current author
-        self.log_in("jackie1", "123456789")
+    def setUp(self):
+        self.create_authors()
 
+        
+    def create_authors(self):
+        self.mock_author1 = self.mock_author("Jackie1")
+        self.author_id = self.mock_author1.uuid
+        self.mock_author2 = self.mock_author("Jackie2")
+        self.foreign_id= self.mock_author2.uuid
+        self.mock_author3 = self.mock_author("Jackie3")
+        self.foreign_id2= self.mock_author3.uuid
+    def add_followers(self, mock_author2,mock_author3):
+        self.mock_author1.followers.add(mock_author2)
+        self.mock_author1.followers.add(mock_author3)
+
+        #print(self.author_id, self.foreign_id)
 
     def test_followers_get(self):
         """
         GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
         """
-        # First log in as jackie1, current user is jackie, then add jackie2 and jackie3 into jackie1's follower
-        refresh = self.log_in("jackie1", "123456789")
-        print("11111\n", self.refresh)
-
         # First to get empty list
-        response = self.client.get(f'/service/authors/{self.author_id}/followers/', HTTP_AUTHORIZATION=refresh)
+        response = self.client.get(f'/service/authors/{self.author_id}/followers/')
         self.assertEqual(response.status_code, 200)
         current_follower_list=response.data['items']
         self.assertLess(len(current_follower_list), 1)
         # Then add follower, increase list
         self.add_followers(self.mock_author2,self.mock_author3)
-        response = self.client.get(f'/service/authors/{self.author_id}/followers/', HTTP_AUTHORIZATION=refresh)
+        response = self.client.get(f'/service/authors/{self.author_id}/followers/')
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.data), 1)
+
+
 
     def test_followers_foreign_put_get(self):
         """
@@ -53,13 +59,12 @@ class FollowersTestCase(APITestCase):
         PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
         GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
         """
-        refresh = self.log_in("jackie1", "123456789")
-        self.refresh = self.log_in("jackie1", "123456789")
+
         # First put, then get to check if correct
-        response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
+        response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}')
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.get(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
+        response = self.client.get(f'/service/authors/{self.author_id}/followers/{self.foreign_id}')
         self.assertEqual(response.status_code, 200)
 
     def test_followers_foreign_delete(self):
@@ -67,55 +72,22 @@ class FollowersTestCase(APITestCase):
         URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
         DELETE [local]: remove FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID
         """
-        refresh = self.log_in("jackie1", "123456789")
-        #self.refresh = self.log_in("jackie1", "123456789")
+
         # First add follower, then delete it
         self.add_followers(self.mock_author2,self.mock_author3)
-
-        response = self.client.delete(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
+        y=self.mock_author2.uuid
+        yy=self.mock_author1.uuid
+        response = self.client.delete(f'/service/authors/{self.author_id}/followers/{self.foreign_id}')
         self.assertEqual(response.status_code, 200)
         # After delete, it only have 1
-        response = self.client.get(f'/service/authors/{self.author_id}/followers/',HTTP_AUTHORIZATION=refresh)
+        response = self.client.get(f'/service/authors/{self.author_id}/followers/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
 
-    @skip
-    def add_followers(self, mock_author2,mock_author3):
-        # Add followers to current authors
-        self.mock_author1.followers.add(mock_author2)
-        self.mock_author1.followers.add(mock_author3)
-    @skip
-    def create_authors(self):
-        # Create mock authors
-        self.credentials1 = {'displayName': 'jackie1','password': '123456789'}
-        self.credentials2 = {'displayName': 'jackie2','password': '123456789'}
-        self.credentials3 = {'displayName': 'jackie3','password': '123456789'}
-        self.client.post(f'/service/auth/register/', self.credentials1 , format="json")
-        self.client.post(f'/service/auth/register/', self.credentials2 , format="json")
-        self.client.post(f'/service/auth/register/', self.credentials3 , format="json")
-        mock_author1 = Author.objects.get(displayName="jackie1")
-        mock_author2 = Author.objects.get(displayName="jackie2")
-        mock_author3 = Author.objects.get(displayName="jackie3")
 
-        return mock_author1, mock_author2, mock_author3
-    @skip
-    def log_in(self, displayName, password):
-        # Log in existed authors
-        self.credentials = {'displayName': displayName,'password': password}
-        response =self.client.post(f'/service/auth/login/', self.credentials, format="json")
-        print(type(response.data))
-        print(response.data['refresh'])
 
-        return response.data['refresh']
-    @skip
-    def get_id(self, mock_author1, mock_author2, mock_author3):
-        # Get uuid based on authors given
-        author_id = mock_author1.uuid
-        foreign_id= mock_author2.uuid
-        foreign_id2= mock_author3.uuid
-        return author_id,foreign_id,foreign_id2
 
-    @skip
+
     def mock_author(self, name):
         # create mock authors
         try: 
