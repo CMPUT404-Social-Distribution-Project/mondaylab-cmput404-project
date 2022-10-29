@@ -17,25 +17,26 @@ class FollowersTestCase(APITestCase):
     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
 
     """
-    # def test_followers_foreign_delete(self):
-    #     """
-    #     URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
-    #     DELETE [local]: remove FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID
-    #     """
-    #     refresh = self.log_in("jackie1", "123456789")
-    #     print("33-", refresh[:10])
-    #     #self.refresh = self.log_in("jackie1", "123456789")
-    #     # First add follower, then delete it
-    #     self.add_followers(self.mock_author2,self.mock_author3)
-    #     print("33--")
+    def test_followers_foreign_delete(self):
+        """
+        URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
+        DELETE [local]: remove FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID
+        """
+        refresh = self.log_in("jackie2", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
+        # First add follower, then delete it
+        self.add_followers(self.mock_author2,self.mock_author3)
 
-    #     response = self.client.delete(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
-    #     self.assertEqual(response.status_code, 200)
-    #     # After delete, it only have 1
-    #     response = self.client.get(f'/service/authors/{self.author_id}/followers/',HTTP_AUTHORIZATION=refresh)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(len(response.data), 1)
-    #     print("33")
+        response = self.client.delete(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.status_code, 200)
+        # After delete, it only have 1
+        refresh = self.log_in("jackie1", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
+        response = self.client.get(f'/service/authors/{self.author_id}/followers/',HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
 
     def test_followers_get(self):
         """
@@ -61,6 +62,8 @@ class FollowersTestCase(APITestCase):
         GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
         """
         refresh = self.log_in("jackie1", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
         # First put, then get to check if correct
         response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
