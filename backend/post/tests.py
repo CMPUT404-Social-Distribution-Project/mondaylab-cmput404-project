@@ -2,9 +2,7 @@
 from auth.views import LoginViewSet, RefreshViewSet
 from post.models import Post
 from author.models import Author
-from rest_framework.test import APIRequestFactory, APITestCase
-from rest_framework.test import APIClient
-from rest_framework import status
+from rest_framework.test import APIRequestFactory, APITestCase, APIClient
 from uuid import uuid4
 
 
@@ -30,21 +28,12 @@ class PostTestCase(APITestCase):
         self.author_id = self.mock_author.uuid
         self.mock_post_1= self.mock_post_1()
         self.mock_post_2= self.mock_post_2()
-
-
-    # def test_login(self):
-    #     #this is not passed
-    #     pass
-    #     self.credentials = {
-    #         'displayName': 'jackie1',
-    #         'password': '123456789'}
-    #     Author.objects.create(displayName="jackie1", password="123456789")
-    #     # send login data
-    #     response = self.client.post('http://localhost:3000/login/', self.credentials, follow=True, format="json")
-    #     # should be logged in now
-    #     self.assertEqual(response.status_code,201|200)
-
-
+        # To get authtication
+        self.client = APIClient()
+        self.credentials = {'displayName': 'jackie1','password': '123456789'}
+        self.client.post(f'/service/auth/register/', self.credentials , format="json")
+        response =self.client.post(f'/service/auth/login/', self.credentials, format="json")
+        self.refresh = response.data['refresh']
     def mock_author(self):
         # create mock authors
         try: 
