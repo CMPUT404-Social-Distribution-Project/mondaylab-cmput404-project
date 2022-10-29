@@ -41,7 +41,7 @@ class LikesPostApiView(GenericAPIView):
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-            
+
     """
     ONLY FOR TESTING get() method 
     POST [local]: create a like object for this author's post
@@ -144,20 +144,16 @@ class AuthorLikedApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
-        if not isAuthorized(request, author_id): 
-            return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
+        author_url_id = get_author_url_id(request)
         
-        else:
-            author_url_id = get_author_url_id(request)
-            
-            try:
-                author = Author.objects.get(uuid = author_id)
-                post_like = Like.objects.filter(author = author)
-                post_likes = self.serializer_class(post_like, many=True)
-                result = {"type": "liked", "items": post_likes.data}
-                return response.Response(result, status=status.HTTP_200_OK)
-            except Exception as e:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+        try:
+            author = Author.objects.get(uuid = author_id)
+            post_like = Like.objects.filter(author = author)
+            post_likes = self.serializer_class(post_like, many=True)
+            result = {"type": "liked", "items": post_likes.data}
+            return response.Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
 

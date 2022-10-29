@@ -5,7 +5,6 @@ from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
 from like.models import Like
-from comments.models import Comment
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
@@ -16,6 +15,7 @@ from post.views import check_author_id, get_author_url_id, get_foreign_id, get_f
 from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
+from comments.serializers import CommentsSerializer
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
