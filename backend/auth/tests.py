@@ -1,4 +1,3 @@
-from sys import displayhook
 from django.test import TestCase
 from author.models import Author
 from rest_framework.test import APITestCase, APIClient
