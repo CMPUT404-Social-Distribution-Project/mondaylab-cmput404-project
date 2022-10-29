@@ -183,7 +183,7 @@ class PostsApiView(GenericAPIView):
                             postObj.commentSrc.comments.add(comment["uuid"])
 
             postsSerializer = self.serializer_class(postsPaginated, many=True)
-            result = {"items": postsSerializer.data}
+            result = {"type": "posts", "items": postsSerializer.data}
             
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
