@@ -13,7 +13,7 @@ class FollowersApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
     """
-    permission_classes = [AllowAny]
+    #permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
 
@@ -45,7 +45,7 @@ class FollowersForeignApiView(GenericAPIView):
     PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
     GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
     """
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    #permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         try:
@@ -72,7 +72,7 @@ class FollowersForeignApiView(GenericAPIView):
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
     def put(self, request, author_id, foreign_author_id):
-        if not isAuthorized(request, author_id): 
+        if  isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
@@ -97,7 +97,7 @@ class FollowersForeignApiView(GenericAPIView):
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
     def delete(self, request, author_id, foreign_author_id):
-        if not isAuthorized(request, author_id): 
+        if isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
@@ -127,7 +127,7 @@ class TrueFriendApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/friends
     GET [local, remote] get all true friend of AUTHOR_ID
     """
-    permission_classes = [AllowAny]
+    #permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         

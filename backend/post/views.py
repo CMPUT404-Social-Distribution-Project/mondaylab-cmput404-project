@@ -24,7 +24,7 @@ class PostApiView(GenericAPIView):
     DELETE [local] remove the post whose id is POST_ID
     PUT [local] create a post where its id is POST_ID
     """
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    #permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = PostSerializer
     
     def get(self, request, author_id, post_id):
@@ -44,7 +44,7 @@ class PostApiView(GenericAPIView):
         ''' Updates the post at post_id (UUID)
             Requires authentication with JWT.
         '''
-        if not isAuthorized(request, author_id): 
+        if isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try: 
@@ -62,7 +62,7 @@ class PostApiView(GenericAPIView):
             Requires authentication with JWT.
             NOTE: Requester must generate uuid themselves.
         '''
-        if not isAuthorized(request, author_id): 
+        if  isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try: 
@@ -99,7 +99,7 @@ class PostApiView(GenericAPIView):
         ''' Deletes a post with post_id (UUID)
             Requires authentication with JWT.
         '''
-        if not isAuthorized(request, author_id): 
+        if  isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
@@ -115,7 +115,7 @@ class PostsApiView(GenericAPIView):
     GET [local, remote] get the recent posts from author AUTHOR_ID (paginated)
     POST [local] create a new post but generate a new id
     """
-    permission_classes = [IsAuthenticatedOrReadOnly,]
+    #permission_classes = [IsAuthenticatedOrReadOnly,]
     serializer_class = PostSerializer
     pagination_class = CustomPagination
 
@@ -190,7 +190,7 @@ class PostsApiView(GenericAPIView):
                 origin,
                 source
         '''
-        if not isAuthorized(request, author_id): 
+        if  isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
