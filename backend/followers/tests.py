@@ -70,8 +70,56 @@ class FollowersTestCase(APITestCase):
 
         response = self.client.get(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
+    def test_true_friends_get(self):
+        """
+        URL: ://service/authors/{AUTHOR_ID}/friends/
+        GET [local, remote] get a list of friends
+        """
+        refresh = self.log_in("jackie1", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
+        # First put, then get to check if correct
+        response = self.client.get(f'/service/authors/{self.author_id}/friends/', HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.data['items'], [])
+        # Add jackie 2 into jackie 1
+        response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.status_code, 200)
+        # Add jackie 1 to jackie 2
+        refresh = self.log_in("jackie2", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
 
+        response = self.client.put(f'/service/authors/{self.foreign_id}/followers/{self.author_id}', HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.status_code, 200)
+        # Check if they are friends
+        response = self.client.get(f'/service/authors/{self.author_id}/friends/',HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(len(response.data['items']), 1)
 
+    def test_true_friends_get(self):
+        """
+        URL: ://service/authors/{AUTHOR_ID}/friends/{FOREIGN_AUTHOR_ID}
+        GET [local, remote] check if FOREIGN_AUTHOR_ID is a friend of AUTHOR_ID
+        """
+        refresh = self.log_in("jackie1", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
+        # First put, then get to check if correct
+        response = self.client.get(f'/service/authors/{self.author_id}/friends/', HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.data['items'], [])
+        # Add jackie 2 into jackie 1
+        response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.status_code, 200)
+        # Add jackie 1 to jackie 2
+        refresh = self.log_in("jackie2", "123456789")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
+
+        response = self.client.put(f'/service/authors/{self.foreign_id}/followers/{self.author_id}', HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(response.status_code, 200)
+        # Check if they are friends
+        response = self.client.get(f'/service/authors/{self.foreign_id}/friends/{self.author_id}',HTTP_AUTHORIZATION=refresh)
+
+        self.assertEqual(response.data, True)
 
     def add_followers(self, mock_author2,mock_author3):
         # Add followers to current authors
@@ -103,9 +151,6 @@ class FollowersTestCase(APITestCase):
         # Log in existed authors
         self.credentials = {'displayName': displayName,'password': password}
         response =self.client.post(f'/service/auth/login/', self.credentials, format="json")
-        print(type(response.data))
-        #print(response.data)
-        #print(response.data['refresh'])
 
         return response.data['access']
 
