@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
 from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
-from auth.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentsSerializer

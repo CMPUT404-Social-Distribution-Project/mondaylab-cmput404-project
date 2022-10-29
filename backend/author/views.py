@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
-from auth.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized, check_github_valid
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
@@ -64,6 +64,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 if not self.check_is_unique(request, obj):
                     return Response(data=f"Author with displayName = {request.data.get('displayName')} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
 
+                # check if new github url is a valid url
+                if not check_github_valid(request):
+                    return Response(data=f"The given GitHub URL is not a valid URL! Make sure to not include 'www.'!", status=status.HTTP_400_BAD_REQUEST)
+
                 serializer = self.serializer_class(obj, data=request.data)
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
@@ -96,6 +100,9 @@ class UserViewSet(viewsets.ModelViewSet):
             obj = Author.objects.get(uuid=pk)
             if not self.check_is_unique(request, obj):
                 return Response(data=f"Author with displayName = {request.data.get('displayName')} already exists! Choose another name", status=status.HTTP_400_BAD_REQUEST)
+            
+            if not check_github_valid(request):
+                return Response(data=f"The given GitHub URL is not a valid URL! Make sure to not include 'www.'!", status=status.HTTP_400_BAD_REQUEST)
 
             serializer = self.serializer_class(obj, data=request.data, partial=True)
             if serializer.is_valid(raise_exception=True):

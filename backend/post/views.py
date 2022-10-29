@@ -3,6 +3,7 @@
 from post.models import Post
 from author.models import Author
 from comments.models import Comment, CommentSrc
+from inbox.models import Inbox
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
@@ -11,10 +12,10 @@ from author.serializers import AuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from auth.utils import isUUID, isAuthorized
+from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list
 from comments.serializers import CommentsSerializer
-
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
+import json
 
 class PostApiView(GenericAPIView):
     """
@@ -33,6 +34,8 @@ class PostApiView(GenericAPIView):
             authorObj = Author.objects.get(uuid=author_id)
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
                 postObj = Post.objects.get(uuid = post_id, author=authorObj)
+            elif is_friends(request, author_id):
+                postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility__in=['PUBLIC','FRIENDS'],)
             else:
                 postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
             result = {"items": self.serializer_class(postObj).data}
@@ -123,7 +126,13 @@ class PostsApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = Author.objects.get(uuid=author_id)
-            postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC').order_by("published").reverse()
+            author_url_id = get_author_url_id(request)
+            if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
+                postsQuerySet = Post.objects.filter(author=authorObj).order_by("published").reverse()
+            elif is_friends(request, author_url_id):             # if the current author is friends with the viewed author, show the friend posts
+                postsQuerySet = Post.objects.filter(author=authorObj, visibility__in=['PUBLIC','FRIENDS'], unlisted=False).order_by("published").reverse()
+            else:
+                postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC', unlisted=False).order_by("published").reverse()
             postsPaginated = self.paginate_queryset(postsQuerySet)
 
             
@@ -212,7 +221,18 @@ class PostsApiView(GenericAPIView):
                         comments=postId+'/comments',
                         origin=origin,
                         source=origin,
-                        )
+                    )
+
+                    # if the visibility is 'FRIENDS' send the post to all follower's friends
+                    try:
+                        friends_list = get_friends_list(authorObj)
+                        for friend in friends_list:
+                            friend_inbox = Inbox.objects.get(author=friend["uuid"])
+                            friend_inbox.posts.add(Post.objects.get(id=postId))
+                    except Exception as e:
+                        print(f"Failed to send post {postId} to inbox of friend")
+                        print(e)
+                    
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
@@ -253,6 +273,7 @@ def get_friend_id(request):
     yy = xx[1].split("/friends")
     author_url_id= xx[0]+'authors'+yy[1]
     return author_url_id    
+
 def get_post_id(request):
     if "likes" in request.build_absolute_uri():
         xx=request.build_absolute_uri().split('service/')
@@ -279,3 +300,5 @@ def get_post_url(request, author_id):
     xx=request.build_absolute_uri().split('service/')
     author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
     return str(author_url_id)
+
+

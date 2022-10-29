@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticate
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
 from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
-from auth.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized, check_friend, get_friends_list
 
 class FollowersApiView(GenericAPIView):
     """
@@ -165,7 +165,7 @@ class TrueFriendApiView(GenericAPIView):
 
 class TrueFriendsApiView(GenericAPIView):
     """
-    URL: ://service/authors/{AUTHOR_ID}/friends/{FOREIGN_AUTHOR_ID}
+    URL: ://service/authors/{AUTHOR_ID}/friends/
     GET [local, remote] get all true friend of AUTHOR_ID
     """
     permission_classes = [AllowAny]
@@ -176,14 +176,7 @@ class TrueFriendsApiView(GenericAPIView):
             author_id = get_author_url_id(request)
             current_author = Author.objects.get(id = author_id)
 
-            friends_list = []
-            # Loop through followers and check if current author is following
-            # This indicates they're friends
-            for follower in current_author.followers.all():
-                followerObject = Author.objects.get(uuid=follower.uuid)
-                followersFollowers = followerObject.followers.all()
-                if current_author in followersFollowers:
-                    friends_list.append(LimitedAuthorSerializer(followerObject).data)
+            friends_list = get_friends_list(current_author)
 
             result = {"type": "friends", "items": friends_list}
             return response.Response(result, status=status.HTTP_200_OK)
@@ -193,15 +186,4 @@ class TrueFriendsApiView(GenericAPIView):
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-def check_friend(author_id, foreign_id):
-    try:
-        current_author = Author.objects.get(id = author_id)
-        foreign_author = Author.objects.get(id = foreign_id)
-        followers = current_author.followers.get(id = foreign_id)
-        friends = foreign_author.followers.get(id = author_id)
-        if followers and friends:
-            return True
-        else:
-            return False
-    except:
-        return False
+
