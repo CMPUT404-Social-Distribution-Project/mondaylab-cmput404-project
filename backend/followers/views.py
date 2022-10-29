@@ -15,7 +15,7 @@ class FollowersApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
     """
-    #permission_classes = [AllowAny]
+    permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
 
@@ -47,7 +47,7 @@ class FollowersForeignApiView(GenericAPIView):
     PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
     GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
     """
-    #permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         try:
@@ -143,7 +143,7 @@ class TrueFriendApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/friends/{FOREIGN_AUTHOR_ID}
     GET [local, remote] check if foreign author is friends with author
     """
-    #permission_classes = [AllowAny]
+    permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         
