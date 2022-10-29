@@ -11,11 +11,9 @@ class LikePostSerializer(serializers.ModelSerializer):
         fields = ("summary","type","author","object")
 
 class LikeAuthorSerializer(serializers.ModelSerializer):
-    type = serializers.CharField(default="Like", read_only=True)
-
     class Meta:
         model = Like
-        fields = ("summary","type","author","object")
+        fields = ("summary","type","object")
 
 class LikeCommentSerializer(serializers.ModelSerializer):
     # fields declare here will ovveride the default field in meta()

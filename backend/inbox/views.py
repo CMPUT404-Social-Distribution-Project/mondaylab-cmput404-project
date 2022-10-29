@@ -1,10 +1,11 @@
 from logging import exception
 from re import T
-from like.serializers import LikePostSerializer
+from like.serializers import LikePostSerializer, LikeAuthorSerializer
 from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
 from like.models import Like
+from comments.models import Comment
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
@@ -15,7 +16,6 @@ from post.views import check_author_id, get_author_url_id, get_foreign_id, get_f
 from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
-from comments.serializers import CommentsSerializer
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
@@ -131,7 +131,7 @@ class InboxApiView(GenericAPIView):
                     # if it doesn't exist, create a new friend request object
                     fr=FriendRequest.objects.create(actor = actor_obj,object = object_obj, summary =summary)
             except Exception  as e:
-                return response.Response(result, status=status.HTTP_404_NOT_FOUND)
+                return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
             # add the new follow request object to the inbox
             inbox.follow_requests.add(fr)
@@ -147,7 +147,7 @@ class InboxApiView(GenericAPIView):
                 fr=Post.objects.get(uuid = post_url_id)
 
 
-            except Exception  as e:
+            except Exception as e:
                 post_url_id= request.data['id'].split('/')[-1]
                 fr=Post.objects.create(uuid = post_url_id)
 
@@ -158,25 +158,38 @@ class InboxApiView(GenericAPIView):
             return response.Response(result, status=status.HTTP_200_OK)
 
         elif request.data['type'].lower() == "like":
+            if (request.data.get("author").get("id")) == None:
+                return response.Response("Author field is required or missing a field", status=status.HTTP_400_BAD_REQUEST)
             try:
-                url_id = request.data['author']['id']
-                url_uuid = url_id.split("authors/")
-                actor_ = Author.objects.get(uuid=url_uuid[1])
-                url_id = request.data['object']
-                url_uuid = url_id.split("authors/")
-                object_ = Author.objects.get(uuid=url_uuid[1])
-                actor_name = str(actor_.displayName)
-                summary = actor_name + " likes your post"
-                fr=Like.objects.get(author = actor_,object = url_id, summary =summary)
+                likes_serializer = LikeAuthorSerializer(data=request.data)
+                if likes_serializer.is_valid(raise_exception=True):
+                    object_field = likes_serializer.validated_data.get("object")
+                    like_type = get_like_type(object_field)
+                    if like_type == None:
+                        # object field is not properly formatted
+                        return response.Response("Object field is not formatted correctly", status=status.HTTP_400_BAD_REQUEST)
+                    actor_id = request.data.get("author")["id"]
+                    actor_object = Author.objects.get(id = actor_id)
+                    actor_name = actor_object.displayName
+
+                    # summary changes depending on the type it's liked on
+                    summary = f"{actor_name} likes your {like_type}"
+            
+                    like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
+                    if like == None:
+                        like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
+
+                    # add like object to inbox of author
+                    inbox.likes.add(like)
+
+                    result={
+                        "detail": str(like.author) +" send like successful"
+                    }
+            except Exception as e:
+                print(e)
+                return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
 
-            except Exception  as e:
-                fr=Like.objects.create(author = actor_,object = url_id, summary =summary)
-
-            inbox.likes.add(fr)
-            result={
-                "detail": str(fr.author) +" send like successful"
-            }
             return response.Response(result, status=status.HTTP_200_OK)
 
         elif request.data['type'].lower() == "comment":
@@ -301,3 +314,11 @@ def get_author(author_id):
         result = {'detail':"Author Not Found"}
         return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
+def get_like_type(object_field):
+    if "posts" in object_field and "comments" in object_field:
+        return "comment"
+    elif "post" in object_field:
+        return "post"
+    else:
+        # object field is not properly formatted
+        return None
