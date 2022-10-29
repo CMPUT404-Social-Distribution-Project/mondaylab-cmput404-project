@@ -5,7 +5,8 @@
 `/service/auth/register` 
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
-| ***POST*** | Registers an author | **displayName:** *max 200 char* <br/> **password:** *min 8 char, max 128 char* | **github:** *in URL format*
+| ***POST*** | Registers an author | **displayName:** *max 200 char* <br/> **password:** *min 8 char, max 128 char* | **github:** *in URL format*  
+
 Example response:
 ```json
 {
@@ -26,7 +27,8 @@ But we note here that the token has a limited lifetime, and the client should ch
 `/service/auth/login`
 |   Method   | Description | Required Fields | Optional Fields |
 | ---------- | ------------| --------------- | --------------- |
-| ***POST*** | Logs in an author | **displayName:** *max 200 char* <br/> **password:** *min 8 char, max 128 char* | 
+| ***POST*** | Logs in an author | **displayName:** *max 200 char* <br/> **password:** *min 8 char, max 128 char* |  
+
 Example response: 
 ```json
 {
@@ -53,6 +55,7 @@ Example response:
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***POST*** | Refreshes a token | **refresh:** *the refresh token*
+
 Example response:
 ```json
 {
@@ -67,6 +70,7 @@ Note here that the field `refresh` should be sent through the body, and is the t
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET***(paginated) | Retrieves all the authors on the server |  | 
+
 Example response:
 ```json
 {
@@ -109,6 +113,7 @@ Example response:
 | ***GET*** | Retrieves the user with UUID specified in <author_id> | | 
 | ***POST🔶*** | Updates the user with the all the specified fields | | **host:** where the author is hosted <br/> **displayName:** *max 200 char, must be unique* <br/> **url:** the URL to the author's profile <br/> **github:** URL field <br/> **profileImage:** URL link to author's profile image <br/>
 | ***PATCH🔶*** | Partially updates the user with the specified fields | |
+
 Example response:
 ```json
 {
@@ -132,6 +137,7 @@ Example response:
 | ---------- | --------------------| - | - |
 | ***GET*** | Retrieves all the posts of the author with UUID <author_id> | | 
 | ***POST🔶*** | Creates a post for author with UUID <author_id>, id auto generated | **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/> **visibility:** choose from [FRIENDS, PUBLIC] | **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originally from <br/> **description:** *max 300 char* <br/> **content:** the content. <br/> **categories:** list containing the categories <br/> **unlisted [default: False]:** *boolean*
+
 Example response:
 ```json
 {
@@ -186,6 +192,7 @@ Example response:
 | ***PATCH🔶*** | Partially updates the post <post_uid> from author with UUID <author_id> | |   **title:** *max 50 char* <br/> **source:** URL field, the link where the post we got from <br/> **origin:** URL field, the link where the post is originaly from <br/> **description:** *max 300 char* <br/>  **content:** the content. <br/> **categories:** list containing the categories <br/> **contentType:** *max 200 char* \ supported mimetypes: [text/markdown, text/plain, application/base64, image/png:base64, image/jpg:base64] <br/>**visibility:** choose from [FRIENDS, PUBLIC] <br/> **unlisted:** *boolean* |
 | ***PUT🔶*** | Creates a post for author with UUID <author_id>, id generated from the post_id specified in the request URL. e.g. `PUT http://localhost//service/authors/asgkljg/posts/asd/` generates a post with id=asd. ****NOTE: the ID MUST BE A UUID4!!!**** |  | same as above
 | ***DELETE🔶*** | Deletes the post <post_id> from author <author_id> | | 
+
 Example response:
 ```json
 {
@@ -232,6 +239,7 @@ Example response:
 | ---------- | --------------------| - | - |
 | ***GET***(paginated) | Gets the comments of post <post_id> of author <author_id> | | 
 | ***POST🔶*** | Adds a comment to post <post_id> of author <author_id > | | **comment:** *max 200 char*  
+
 Example response:
 ```json
 {
@@ -268,6 +276,7 @@ Example response:
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Gets the list of likes from other authors of post <post_id> of author <author_id> | | 
+
 Example response:
 ```json
 {
@@ -297,6 +306,7 @@ Example response:
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Gets the list of likes from other authors of <author_id> post <post_id> on comment <comment_id> | | 
+
 Example response:
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
@@ -304,6 +314,7 @@ Example response:
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Lists the like objects of public posts that <author_id> liked  | | 
+
 Example response:
 ```json
 {
@@ -323,6 +334,7 @@ Example response:
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Gets the followers of author <author_id> | | 
+
 Example response:
 ```json
 {
@@ -357,6 +369,7 @@ Example response:
 | ***GET🔶*** | Gets the inbox of author <author_id> | | 
 | ***POST*** | Sends an object to the inbox of author <author_id> <br> **[OBJECTS MUST FOLLOW THEIR FORMATS AS SEEN IN PROJECT SPECS.](inbox_objects.org)** | | 
 | ***DELETE🔶*** | Clears the inbox of author <author_id> | | 
+
 Example response:
 ```json
 {
@@ -389,6 +402,7 @@ Example response:
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
 | ***GET*** | Gets the friends list of author <author_id> | | 
+
 Example response:
 ```json
 {
