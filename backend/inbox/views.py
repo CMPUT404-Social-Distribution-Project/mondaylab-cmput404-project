@@ -116,14 +116,17 @@ class InboxApiView(GenericAPIView):
                 url_id = request.data['actor']['id']
                 url_uuid = url_id.split("authors/")
                 actor_obj = Author.objects.get(uuid=url_uuid[1])
+                print("-", actor_obj)
 
                 # get the object author object
                 url_id = request.data['object']['id']
                 url_uuid = url_id.split("authors/")
                 object_obj = Author.objects.get(uuid=url_uuid[1])
+                print("--", object_obj)
                 actor_name = str(request.data['actor']['displayName'])
                 object_name =str(request.data['object']['displayName'])
                 summary = actor_name + " wants to follow " + object_name
+                print("33")
 
                 # try and get the friend request if it was already sent
                 fr=FriendRequest.objects.filter(actor = actor_obj,object = object_obj).first()
