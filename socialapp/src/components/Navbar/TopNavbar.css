@@ -20,6 +20,7 @@
 
 #profilePicContainer:hover {
     outline: solid var(--teal) 5px;
+    cursor: pointer;
 }
 
 .navbar-expand .navbar-nav .nav-link {

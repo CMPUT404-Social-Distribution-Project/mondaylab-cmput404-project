@@ -12,11 +12,7 @@ from uuid import uuid4
 from django.db.models import Q
 from .models import Comment
 from datetime import date
-
-from auth.utils import isUUID, isAuthorized
-# Create your views here.
-
-
+from backend.utils import isUUID, isAuthorized
 
 class CommentsApiView(GenericAPIView):
     serializer_class = CommentsSerializer
