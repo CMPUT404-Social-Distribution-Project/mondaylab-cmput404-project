@@ -74,7 +74,7 @@ class FollowersForeignApiView(GenericAPIView):
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, author_id, foreign_author_id):
-        if  isAuthorized(request, author_id): 
+        if not isAuthorized(request, author_id): 
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
