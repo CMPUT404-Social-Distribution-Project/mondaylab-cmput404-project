@@ -35,6 +35,17 @@ function ProfileFollowers(props) {
   );
 }
 
+function ProfileFriends(props) {
+  return (
+    <div className="friends-container-profile">
+    {
+      typeof props.friendsArray.items !== 'undefined' ? 
+        props.friendsArray.items.map((friend) => <UserCard author={friend}/>)
+        : null
+    }
+    </div>
+  );
+}
 
 export default function Profile() {
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
@@ -121,6 +132,7 @@ export default function Profile() {
       <ProfileTabs dir={dir} author_id={author_id}/>
       {dir === 'posts' || dir === undefined ? <ProfilePosts postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
+      {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
 
     </div>
   );
