@@ -1,19 +1,29 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown, InputGroup, Form, Button } from 'react-bootstrap';
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
 import useAxios from "../../utils/useAxios";
 import { confirmAlert } from 'react-confirm-alert';
+import { useEffect } from 'react';
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { authTokens } = useContext(AuthContext);
+  const [postComment, setPostComment] = useState();
+  const [comments, setComments] = useState([]);
   const api = useAxios();
 
+  useEffect(() => {
+    if(props.post.comment === undefined){
+      setComments(["No Comments"]);
+    } else {
+      setComments(props.post.comment)
+    }
+  }, []);
 
   const deletePost = (uuid) => {
     api
@@ -42,6 +52,19 @@ export default function PostCard(props) {
         }
       ]
     });
+  };
+
+  const sendComment = (uuid) => {
+    api
+      .put(`${baseURL}/authors/${user_id}/posts/${uuid}`, {comments: [postComment]})
+      .then((response) => {
+        console.log(response.data);
+        window.location.reload(true);
+      })
+      .catch((error) => {
+        alert(`Something went wrong posting! \n Error: ${error}`)
+        console.log(error);
+      });
   };
 
   // only render options if the user viewing it is the author of it
@@ -87,9 +110,28 @@ export default function PostCard(props) {
         <div className="comments-container">
           <div className="comments-text">
               Comments
+            <div className="comments">
+              {comments.map((comment) => (
+                  comment
+              ))}
+            </div>
           </div>
-          <div className="comments">
-              {/* show max 5 comments, have option to show more */}
+          <div className="input-comment">
+            <InputGroup className="mb-3">
+              <Form.Control
+                placeholder="Comment"
+                aria-label="Comment"
+                onChange={(e) => (setPostComment(e))
+                }
+              />
+              <Button style={
+                  {borderRadius: '15px', color: 'black', backgroundColor: '#BFEFE9'}
+                }
+                onClick={() => sendComment(props.post.uuid)}
+              >
+                Send
+              </Button>
+            </InputGroup>
           </div>
         </div>
 
