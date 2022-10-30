@@ -366,9 +366,15 @@ Example response:
 `/service/authors/<author_id>/inbox/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
-| ***GET🔶*** | Gets the inbox of author <author_id> | | 
+| ***GET🔶*** | Gets the posts in the inbox of author <author_id> | | 
 | ***POST*** | Sends an object to the inbox of author <author_id> <br> **[OBJECTS MUST FOLLOW THEIR FORMATS AS SEEN IN PROJECT SPECS.](inbox_objects.org)** | | 
 | ***DELETE🔶*** | Clears the inbox of author <author_id> | | 
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+
+`/service/authors/<author_id>/inbox/all`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET🔶*** | Gets items of all types (not just posts) in the inbox of author <author_id> | | 
 
 Example response:
 ```json
