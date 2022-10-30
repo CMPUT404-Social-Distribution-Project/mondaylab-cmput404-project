@@ -1,4 +1,3 @@
-
 from like.serializers import LikePostSerializer, LikeAuthorSerializer
 from post.models import Post
 from author.models import Author
