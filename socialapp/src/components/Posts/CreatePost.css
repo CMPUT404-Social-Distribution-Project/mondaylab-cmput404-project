@@ -1,4 +1,4 @@
-.modal-content {
+.create-post-modal .modal-content {
     background-color: #1C212B;
     min-width: 60em;
     min-height: 15em;
@@ -7,41 +7,41 @@
     border: none;
 }
 
-div.modal-header{
+.create-post-modal div.modal-header{
     border: none;
 }
 
-.modal-footer {
+.create-post-modal  .modal-footer {
     min-height: 5em;
     border: none;
 }
 
-.modal-body {
+.create-post-modal  .modal-body {
     height: 200%;
     width: auto;
     padding: 15px;
 }
 
-.modal-title {
+.create-post-modal  .modal-title {
     font-size: 2em;
     color: #BFEFE9;
     border: none;
 }
 
-.title {
+.create-post-modal  .title {
     font-size: 100em;
     margin-bottom: 1.5%;
 }
 
 
-.body {
+.create-post-modal  .body {
     font-size: 1em;
     padding-bottom: 15em;
     text-align: left;
 }
 
 
-.unlist {
+.create-post-modal  .unlist {
     background: transparent;
     border: none;
     color: #BFEFE9;
@@ -50,45 +50,45 @@ div.modal-header{
     font-size: 85%;
 }
 
-.header {
+.create-post-modal  .header {
     margin: 0px auto;
 }
 
-.header1 {
+.create-post-modal  .header1 {
     width: 40%;
     font-size: 110%;
     margin-top: 0.5%;
     margin-right: -10%;
 }
 
-.option {
+.create-post-modal  .option {
     background: transparent;
     border: none;
     color: #BFEFE9;
     font-size: 85%;
 }
 
-.radio input {
+.create-post-modal  .radio input {
     display: none;
 }
 
-.option input[name="view"]:checked{
+.create-post-modal  .option input[name="view"]:checked{
     background-color: green;
 }
 
-.image {
+.create-post-modal  .image {
     font-size: 200%;
     color: white;
 }
 
-.link {
+.create-post-modal  .link {
     margin-left: 0.5em;
     font-size: 200%;
     margin-right: auto;
     color: white;
 }
 
-.postButton {
+.create-post-modal  .postButton {
     border-radius: 15px;    
     font-size: 150%;
     color: black;

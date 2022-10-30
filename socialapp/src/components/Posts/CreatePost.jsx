@@ -97,6 +97,7 @@ export default function CreatePost(props) {
             <Modal size="lg"
                 {...props}
                 aria-labelledby="contained-modal-title-vcenter"
+                className="create-post-modal"
                 centered
             >
                 <Form>

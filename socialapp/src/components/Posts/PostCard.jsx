@@ -2,11 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Dropdown } from 'react-bootstrap';
 import { BiDotsVerticalRounded } from "react-icons/bi";
+import { MdModeEdit, MdDelete } from "react-icons/md";
 import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
 import useAxios from "../../utils/useAxios";
-
+import EditPost from "./EditPost";
 
 
 export default function PostCard(props) {
@@ -14,6 +15,7 @@ export default function PostCard(props) {
   const [isOwner, setIsOwner] = useState(true);
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { authTokens } = useContext(AuthContext);
+  const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();
   
   useEffect (() => {
@@ -43,7 +45,8 @@ export default function PostCard(props) {
             <BiDotsVerticalRounded />
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            {isOwner && <Dropdown.Item onClick={() => deletePost(props.post.uuid)}>Delete Post</Dropdown.Item>}
+            {<Dropdown.Item onClick={() => setShowEditPost(true)}><MdModeEdit /> Edit Post</Dropdown.Item>}
+            {<Dropdown.Item className="delete-post" onClick={() => deletePost(props.post.uuid)}><MdDelete /> Delete Post</Dropdown.Item>}
           </Dropdown.Menu>  
         </Dropdown>
       </div>
@@ -63,6 +66,8 @@ export default function PostCard(props) {
           <div className="post-author-name">{props.post.author.displayName}</div>
         </div>
         <PostOptions />
+        {showEditPost && <EditPost show={showEditPost} onHide={() => setShowEditPost(false)} post={props.post} />}
+
       </Card.Header>
       <Card.Img variant="top" src="" />
       <Card.Body>

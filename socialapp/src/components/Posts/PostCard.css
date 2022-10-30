@@ -7,6 +7,9 @@
     width: 40em;
     display: inline-flex;
     align-items: center;
+    background-color: var(--slightly-darker-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    
 }
 
 .post-card .profile-pic-post {
@@ -47,7 +50,7 @@
     background-color: var(--dark-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
-    border-radius: 11px;
+    border-radius: 0px 0px 11px 11px;
     padding: 2rem;
     width: 40em;
 }
@@ -58,7 +61,7 @@
     padding-bottom: 2em;
 }
 
-.options {
+.post-card .options {
     display: inline-block;
     white-space: nowrap;
     margin-left: auto;
@@ -69,4 +72,38 @@
     display: inline-block;
     white-space: nowrap;
     background-color: #1C212B;
+}
+
+.post-card .dropdown-toggle::after {
+    content: none;
+}
+
+.options .btn-primary {
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-border-color: var(--darker-blue);
+    border-radius: 2rem;
+    --bs-btn-hover-color: var(--teal);
+    --bs-btn-active-border-color: var(--teal);
+}
+
+.options .dropdown-menu {
+    background-color: var(--slightly-darker-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    --bs-dropdown-link-active-bg: var(--teal);
+    --bs-dropdown-link-hover-bg: var(--darker-blue);
+    --bs-dropdown-link-hover-color: var(--teal);
+    --bs-dropdown-link-color: var(--white-teal);
+}
+
+.options .dropdown-menu .delete-post {
+    --bs-dropdown-link-hover-color: var(--orange);
+}
+
+/* .options .dropdown-menu a {
+    color: var(--white-teal);
+
+} */
+
+.options .dropdown-item {
+    padding: 0.8em var(--bs-dropdown-item-padding-x);
 }
