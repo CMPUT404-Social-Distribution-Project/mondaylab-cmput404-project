@@ -230,8 +230,8 @@ class PostsApiView(GenericAPIView):
                             friend_inbox = Inbox.objects.get(author=friend["uuid"])
                             friend_inbox.posts.add(Post.objects.get(id=postId))
                     except Exception as e:
-                        print(f"Failed to send post {postId} to inbox of friend")
-                        print(e)
+                        result =f"Failed to send post {postId} to inbox of friend"
+                        return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
                     
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 

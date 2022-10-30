@@ -1,17 +1,15 @@
-from logging import exception
-from re import T
 from like.serializers import LikePostSerializer, LikeAuthorSerializer
 from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
 from like.models import Like
+from comments.models import Comment
 from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
 from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
@@ -61,25 +59,10 @@ class InboxApiView(GenericAPIView):
                 posts_list = list(inbox.posts.all().order_by("published"))
                 posts_serializers = self.serializer_class(posts_list, many=True)
 
-                # get follow requests to add to items
-                fr_list = list(inbox.follow_requests.all())
-                fr_serializer = FriendRequestSerializer(fr_list, many=True)
-
-                # get likes in inbox to add to items
-                likes_list = list(inbox.likes.all())
-                likes_serializer = LikePostSerializer(likes_list, many=True)
-
-                # get comments in inbox to add to items
-                comments_list = list(inbox.likes.all())
-                comments_serializer = CommentsSerializer(comments_list, many=True)
-
                 result = {
                     'type': 'inbox',
                     'author': author.url,
-                    'items': posts_serializers.data + 
-                    fr_serializer.data +
-                    likes_serializer.data +
-                    comments_serializer.data
+                    'items': posts_serializers.data
                 }
                 return response.Response(result, status=status.HTTP_200_OK) 
 
@@ -96,20 +79,17 @@ class InboxApiView(GenericAPIView):
         if the type is “like” then add that like to AUTHOR_ID’s inbox
         if the type is “comment” then add that comment to AUTHOR_ID’s inbox  
         """
-        author = get_author(author_id)
         try:
             author = get_author(author_id)
-            inbox = Inbox.objects.get(author=author)
+            inbox , created= Inbox.objects.get_or_create(author=author)
         except Exception as e:
             try:
                 inbox = Inbox.objects.create(author=author)
             except Exception as e:
                 result = {'detail':"Inbox Created faild", "error": str(e)}
                 return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
-            result = {'detail':"Inbox Not Found", "error": str(e)}
-            return response.Response(result, status=status.HTTP_404_NOT_FOUND)
-
-
+            
+       
         if request.data['type'].lower() == "follow":
             try:
                 # get the actor author object
@@ -142,16 +122,16 @@ class InboxApiView(GenericAPIView):
             
         elif request.data['type'].lower() == "post":
             try:
-                post_url_id= request.data['id'].split('/')[-1]
-
-                fr=Post.objects.get(uuid = post_url_id)
-
+                post_uuid= request.data['id'].split('/')[-1]
+            except:
+                return response.Response("Incorrect format of post", status=status.HTTP_400_BAD_REQUEST)
+            try:    
+                post=Post.objects.get(uuid = post_uuid)
 
             except Exception as e:
-                post_url_id= request.data['id'].split('/')[-1]
-                fr=Post.objects.create(uuid = post_url_id)
+                post=Post.objects.create(uuid = post_uuid)
 
-            inbox.posts.add(fr)
+            inbox.posts.add(post)
             result={
                 "detail": " send post successful"
             }
@@ -185,18 +165,59 @@ class InboxApiView(GenericAPIView):
                     result={
                         "detail": str(like.author) +" send like successful"
                     }
+                    ####################################################
+                    # Consider a test case, when a remote use wants to send their like into our node, 
+                    # we do not have this use information in database, 
+                    # so it will get error : query matching does not exist, 
+                    # so in this case, I use get_or_create method. So they can pass test, 
+                    # however, this is not good, we need to discess them  in meeeting
+                    """ if likes_serializer.is_valid(raise_exception=True):
+                        object_field = likes_serializer.validated_data.get("object")
+                        like_type = get_like_type(object_field)
+                        if like_type == None:
+                            # object field is not properly formatted
+                            return response.Response("Object field is not formatted correctly", status=status.HTTP_400_BAD_REQUEST)
+                        actor_id = request.data.get("author")["id"]
+
+                        actor_object, create = Author.objects.get_or_create(id = actor_id)
+                        actor_name = actor_object.displayName
+                        # summary changes depending on the type it's liked on
+                        summary = f"{actor_name} likes your {like_type}"
+                        like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
+                        if like == None:
+                            like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
+                        # add like object to inbox of author
+                        inbox.likes.add(like)
+
+                        result={
+                            "detail": str(like.author) +" send like successful"
+                        } """
             except Exception as e:
-                print(e)
                 return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
 
             return response.Response(result, status=status.HTTP_200_OK)
 
         elif request.data['type'].lower() == "comment":
-            print("comments")
+            if (request.data.get("author").get("id")) == None:
+                return response.Response("Author field is required or missing a field", status=status.HTTP_400_BAD_REQUEST)
+            try:
+                comments_serializer = CommentsSerializer(data=request.data)
+                if comments_serializer.is_valid(raise_exception=True):
+                    comment, create = Comment.objects.get_or_create(id = request.data.get("id"))
+                    inbox.comments.add(comment)
+
+                    result={
+                        "detail": str(author) +" send comment successful"
+                    }
+            except Exception as e:
+                return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
+
+
+            return response.Response(result, status=status.HTTP_200_OK)
         else:
             result = {'detail':"please submit correct format ", "error": " see friend/follower request model"}
-            print(result)
+            
             return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -219,6 +240,7 @@ class InboxApiView(GenericAPIView):
                 inbox.follow_requests.clear()
                 inbox.likes.clear()
                 inbox.comments.clear()
+                result = {'detail':"Inbox clear successfully"}
                 return response.Response(result, status=status.HTTP_200_OK)
 
             except Exception as e:
@@ -246,26 +268,56 @@ class InboxAllApiView(GenericAPIView):
         else:
             try:
                 author = get_author(author_id)
-                inbox = Inbox.objects.get(author=author)
+                inbox, create = Inbox.objects.get_or_create(author=author)
             except Exception as e:
                 result = {'detail':"Inbox Not Found", "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
-            print(type(inbox))
-            print(type(inbox.follow_requests))
 
-            follow_request_serializer = self.fr_serializer_class(list(inbox.follow_requests.all()), many=True)
-            like_serializer = self.lk_serializer_class(list(inbox.likes.all()), any=True)
-            #comment_serializer = self.ct_serializer_class(list(inbox.comment.all()), many=True)
-            
             try:
+                # get posts in  box
+                if inbox.posts.exists():
+                    posts_list = list(inbox.posts.all().order_by("published"))
+                    posts_serializers = PostSerializer(posts_list, many=True)
+                    posts_serializers_data = posts_serializers.data
+                else:
+                    posts_serializers_data=[]
+
+                # get follow requests in inbox
+                if inbox.follow_requests.exists():
+                    follow_requests_list = list(inbox.follow_requests.all())
+                    follow_requests_serializers = FriendRequestSerializer(follow_requests_list, many=True)
+                    follow_requests_serializers_data = follow_requests_serializers.data
+                else:
+                    follow_requests_serializers_data=[]
+
+                # get likes in inbox 
+                if inbox.likes.exists():
+                    likes_list = list(inbox.likes.all())
+                    likes_serializers = LikePostSerializer(likes_list, many=True)
+                    likes_serializers_data = likes_serializers.data
+                    
+                else:
+                    likes_serializers_data=[]
+                    
+            
+                # get comments in inbox
+                if inbox.comments.exists():
+                    comments_list = list(inbox.comments.all())
+                    comments_serializers = CommentsSerializer(comments_list, many=True)
+                    comments_serializers_data = comments_serializers.data
+                    
+                else:
+                    comments_serializers_data=[]
+                    
                 result = {
-                "type":"inbox",
-                "author":author.url,
-                "items": []
+                    'type': 'inbox',
+                    'author': author.url,
+                    'items': posts_serializers_data + 
+                    follow_requests_serializers_data +
+                    likes_serializers_data +
+                    comments_serializers_data
+                    
                 }
-                result['items'].extend(follow_request_serializer.data)
-                result['items'].extend(like_serializer.data)
-                #result['items'].extend(comment_serializer.data)
                 return response.Response(result, status=status.HTTP_200_OK) 
 
             except Exception as e:
