@@ -22,14 +22,14 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter,]
     search_fields = ['displayName']
 
-    def get(self, request, pk=None):
+    def list(self, request, pk=None):
         ''' Returns a queryset of all authors in the database
             Use: Send a GET to
                 /service/authors/
         '''
         try:
             serializer = self.serializer_class(self.queryset, many=True)
-            serializer = {"type": 'authors',"items":serializer.data}
+            serializer = {"type": "authors", "items":serializer.data}
             return Response(serializer, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
