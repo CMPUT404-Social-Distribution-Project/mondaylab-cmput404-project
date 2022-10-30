@@ -28,7 +28,7 @@ export default function Inbox() {
   useEffect(() => {
     const fetchData = async () => {
       await api      
-        .get(`${baseURL}/authors/${user_id}/inbox/`)
+        .get(`${baseURL}/authors/${user_id}/inbox/all`)
         .then((response) => {
           setInboxItems(response.data.items);
           console.log("Got inbox of author")
