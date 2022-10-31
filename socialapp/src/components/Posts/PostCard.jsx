@@ -10,7 +10,7 @@ import useAxios from "../../utils/useAxios";
 import { confirmAlert } from 'react-confirm-alert';
 import { useEffect } from 'react';
 import EditPost from "./EditPost";
-
+import CommentCard from './CommentCard';
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -31,6 +31,7 @@ export default function PostCard(props) {
             if(commentArray.length === 0){
               setComments(["No Comments"]);
             } else {
+              console.log(commentArray)
               for (let i = 0; i < commentArray.length; i++){
                 const comment = commentArray[i].comment;
                 console.log(comment, i)
@@ -131,9 +132,9 @@ export default function PostCard(props) {
         <div className="comments-container">
           <div className="comments-text">
               Comments
-            <div className="comments">
+            <div className="comments" style={{marginTop: "5%"}}>
               {comments.map((comment) => (
-                  comment
+                  <CommentCard comment={comment} />
               ))}
             </div>
           </div>
