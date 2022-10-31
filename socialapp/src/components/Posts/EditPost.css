@@ -1,47 +1,51 @@
-.create-post-modal .modal-content {
+.edit-post-modal .modal-content {
     background-color: #1C212B;
     min-width: 60em;
     min-height: 15em;
     margin-top: 5em;
     margin-left: -6em;
     border: none;
+    min-width: 50em !important;
+    width: 45% !important;
+    /* max-width: 150em !important; */
+    transform: translateX(5%) !important;
 }
 
-.create-post-modal div.modal-header{
+.edit-post-modal div.modal-header{
     border: none;
 }
 
-.create-post-modal  .modal-footer {
+.edit-post-modal  .modal-footer {
     min-height: 5em;
     border: none;
 }
 
-.create-post-modal  .modal-body {
+.edit-post-modal  .modal-body {
     height: 200%;
     width: auto;
     padding: 15px;
 }
 
-.create-post-modal  .modal-title {
+.edit-post-modal  .modal-title {
     font-size: 2em;
     color: #BFEFE9;
     border: none;
 }
 
-.create-post-modal  .title {
+.edit-post-modal  .title {
     font-size: 100em;
     margin-bottom: 1.5%;
 }
 
 
-.create-post-modal  .body {
+.edit-post-modal  .body {
     font-size: 1em;
     padding-bottom: 15em;
     text-align: left;
 }
 
 
-.create-post-modal  .unlist {
+.edit-post-modal  .unlist {
     background: transparent;
     border: none;
     color: #BFEFE9;
@@ -50,47 +54,51 @@
     font-size: 85%;
 }
 
-.create-post-modal  .header {
+.edit-post-modal  .header {
     margin: 0px auto;
 }
 
-.create-post-modal  .header1 {
+.edit-post-modal  .header1 {
     width: 40%;
     font-size: 110%;
     margin-top: 0.5%;
     margin-right: -10%;
 }
 
-.create-post-modal  .option {
+.edit-post-modal  .option {
     background: transparent;
     border: none;
     color: #BFEFE9;
     font-size: 85%;
 }
 
-.create-post-modal  .radio input {
+.edit-post-modal  .radio input {
     display: none;
 }
 
-.create-post-modal  .option input[name="view"]:checked{
+.edit-post-modal .option input[name="view"]:checked{
     background-color: green;
 }
 
-.create-post-modal  .image {
+.edit-post-modal .image {
     font-size: 200%;
     color: white;
 }
 
-.create-post-modal  .link {
+.edit-post-modal  .link {
     margin-left: 0.5em;
     font-size: 200%;
     margin-right: auto;
     color: white;
 }
 
-.create-post-modal  .postButton {
+.edit-post-modal .postButton {
     border-radius: 15px;    
     font-size: 150%;
     color: black;
     background-color: #BFEFE9;
+}
+
+.form-control {
+    outline: none;
 }
