@@ -16,10 +16,13 @@ export default function ProfileTabs(props) {
       onSelect={(nextTab) => navigate(`/authors/${props.author_id}/${nextTab}/`)}
     >
       
-        <Tab eventKey="posts" title="Posts">
-        </Tab>
+      <Tab eventKey="posts" title="Posts">
+      </Tab>
   
       <Tab eventKey="followers" title="Followers">
+      </Tab>
+
+      <Tab eventKey="friends" title="Friends">
       </Tab>
     </Tabs>
   );

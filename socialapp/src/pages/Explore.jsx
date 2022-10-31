@@ -17,7 +17,7 @@ function RenderAuthors(props) {
     return (
       <div className="authors-explore-container">
         {
-        typeof props.authors !== 'undefined' ? props.authors.map((author) => <UserCard author={author}/>) : null
+        typeof props.authors.items !== 'undefined' ? props.authors.items.map((author) => <UserCard author={author}/>) : null
         }
       </div>
     )
