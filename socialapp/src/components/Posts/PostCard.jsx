@@ -25,14 +25,19 @@ export default function PostCard(props) {
 
   useEffect(() => {
       api
-        .get(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}/comments`)
+        .get(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}/comments/`)
         .then((response) => {
-          if(response.data.items === undefined) {
-            setComments(["No comments"]);
-          } else {
-            setComments(response.data.items);
-          }
-        })
+            const commentArray = response.data.comments;
+            if(commentArray.length === 0){
+              setComments(["No Comments"]);
+            } else {
+              for (let i = 0; i < commentArray.length; i++){
+                const comment = commentArray[i].comment;
+                console.log(comment, i)
+                setComments(comments => [...comments, comment]);
+              }
+            }
+          })
         .catch((error) => {
           console.log(error);
         });
