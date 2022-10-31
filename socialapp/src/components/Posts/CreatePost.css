@@ -72,10 +72,6 @@
     display: none;
 }
 
-.create-post-modal  .option input[name="view"]:checked{
-    background-color: green;
-}
-
 .create-post-modal  .image {
     font-size: 200%;
     color: white;

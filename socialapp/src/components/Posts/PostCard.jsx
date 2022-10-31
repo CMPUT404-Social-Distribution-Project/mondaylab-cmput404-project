@@ -7,33 +7,36 @@ import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
 import useAxios from "../../utils/useAxios";
-<<<<<<< HEAD
 import { confirmAlert } from 'react-confirm-alert';
 import { useEffect } from 'react';
-=======
 import EditPost from "./EditPost";
 
->>>>>>> main
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { authTokens } = useContext(AuthContext);
-<<<<<<< HEAD
-  const [postComment, setPostComment] = useState();
+  const [postComment, setPostComment] = useState({
+    comment: "",
+  });
   const [comments, setComments] = useState([]);
-=======
   const [showEditPost, setShowEditPost] = useState(false);
->>>>>>> main
   const api = useAxios();
 
   useEffect(() => {
-    if(props.post.comment === undefined){
-      setComments(["No Comments"]);
-    } else {
-      setComments(props.post.comment)
-    }
-  }, []);
+      api
+        .get(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}/comments`)
+        .then((response) => {
+          if(response.data.items === undefined) {
+            setComments(["No comments"]);
+          } else {
+            setComments(response.data.items);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }, []);
 
   const deletePost = (uuid) => {
     api
@@ -66,7 +69,7 @@ export default function PostCard(props) {
 
   const sendComment = (uuid) => {
     api
-      .put(`${baseURL}/authors/${user_id}/posts/${uuid}`, {comments: [postComment]})
+      .post(`${baseURL}/authors/${user_id}/posts/${uuid}/comments/`, postComment)
       .then((response) => {
         console.log(response.data);
         window.location.reload(true);
@@ -134,7 +137,7 @@ export default function PostCard(props) {
               <Form.Control
                 placeholder="Comment"
                 aria-label="Comment"
-                onChange={(e) => (setPostComment(e))
+                onChange={(e) => (setPostComment({...postComment, comment: e.target.value}))
                 }
               />
               <Button style={

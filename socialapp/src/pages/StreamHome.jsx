@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext} from 'react';
-import axios from 'axios';
+import useAxios from "../utils/useAxios";
 import "./pages.css";
 import "./Profile.css";
 import AuthContext from "../context/AuthContext";
@@ -10,6 +10,7 @@ export default function StreamHome() {
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const [postsArray, setPostsArray] = useState([]);
   const user_id = localStorage.getItem("user_id");
+  const api = useAxios();
 
   /**
    * Once the homepage starts rendering, we make an api call and get all posts owner by the current user and insert them into an array
@@ -18,7 +19,7 @@ export default function StreamHome() {
    */
 
   useEffect(() => {
-    axios
+    api
         .get(`${baseURL}/authors/${user_id}/posts/`)
         .then((response) => {
           setPostsArray(response.data.items);
