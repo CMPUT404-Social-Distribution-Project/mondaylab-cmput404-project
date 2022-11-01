@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Modal, Button, Form, InputGroup, CloseButton } from "react-bootstrap";
+import { Modal, Button, Form, InputGroup, CloseButton, Dropdown, DropdownButton, Container, Row } from "react-bootstrap";
 import useAxios from '../../utils/useAxios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
@@ -103,42 +103,55 @@ export default function CreatePost(props) {
             >
                 <Form>
                     <Modal.Header>
-                        <Modal.Title className='header'>Make a Post | </Modal.Title>
-                        <Modal.Title className="header1">Who can see this post?</Modal.Title>
-                        <Button type="button" value="Everyone" className='option' name="view" 
-                            style={{
-                                backgroundColor: eveActive ? ' #BFEFE9' : '',
-                                color: eveActive ? 'black' : '',
-                            }} 
-                            onClick={() => {
-                                setVisibility("PUBLIC")}}>
-                        Everyone </Button>
-                        <Button type="button" value="Friends" className='option' name="view" 
-                            style={{
-                                backgroundColor: friActive ? ' #BFEFE9' : '',
-                                color: friActive ? 'black' : '',
-                            }} 
-                            onClick={() => {
-                                setVisibility("FRIENDS")
+                        <div style={{ width: "100%", display: "flex" }}>
+                            <Modal.Title className='header'>Make a Post | </Modal.Title>
+                            <Modal.Title className="header1">Who can see this post?</Modal.Title>
+                            <Button type="button" value="Everyone" className='option' name="view" 
+                                style={{
+                                    backgroundColor: eveActive ? ' #BFEFE9' : '',
+                                    color: eveActive ? 'black' : '',
+                                }} 
+                                onClick={() => {
+                                    setVisibility("PUBLIC")}}>
+                            Everyone </Button>
+                            <Button type="button" value="Friends" className='option' name="view" 
+                                style={{
+                                    backgroundColor: friActive ? ' #BFEFE9' : '',
+                                    color: friActive ? 'black' : '',
+                                }} 
+                                onClick={() => {
+                                    setVisibility("FRIENDS")
+                                }}>
+                            Friends-Only </Button>
+                            <Button type="button" value="Private" className='option' name="view" 
+                                style={{
+                                    backgroundColor: priActive ? ' #BFEFE9' : '',
+                                    color: priActive ? 'black' : '',
+                                }} 
+                                onClick={() => {
+                                    setVisibility("PRIVATE")
                             }}>
-                        Friends-Only </Button>
-                        <Button type="button" value="Private" className='option' name="view" 
-                            style={{
-                                backgroundColor: priActive ? ' #BFEFE9' : '',
-                                color: priActive ? 'black' : '',
-                            }} 
-                            onClick={() => {
-                                setVisibility("PRIVATE")
-                        }}>
-                            Private 
-                        </Button>
-                        <Button style={{
-                            backgroundColor: isActive ? ' #BFEFE9' : '',
-                            color: isActive ? 'black' : '',
-                            }} className="unlist" onClick={unlistPost}> 
-                            Unlisted 
-                        </Button>
-                        <CloseButton className='me-2' variant="white" onClick={props.onHide} />
+                                Private 
+                            </Button>
+                            <Button style={{
+                                backgroundColor: isActive ? ' #BFEFE9' : '',
+                                color: isActive ? 'black' : '',
+                                }} className="unlist" onClick={unlistPost}> 
+                                Unlisted 
+                            </Button>
+                            <CloseButton className='me-2' variant="white" style={{ marginTop: "1%"}}onClick={props.onHide} />
+                        </div>
+                        <div>
+                            {friActive 
+                                ? <DropdownButton id="dropdown-item-button" title="             ">
+                                    <Dropdown.ItemText>Dropdown item text</Dropdown.ItemText>
+                                    <Dropdown.Item as="button">Action</Dropdown.Item>
+                                    <Dropdown.Item as="button">Another action</Dropdown.Item>
+                                    <Dropdown.Item as="button">Something else</Dropdown.Item>
+                                </DropdownButton>
+                                : ""
+                            }   
+                        </div>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group className="title">
