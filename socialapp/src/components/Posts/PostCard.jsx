@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Dropdown, InputGroup, Form, Button } from 'react-bootstrap';
+import { Dropdown, InputGroup, Form, Button, Container } from 'react-bootstrap';
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import Card from 'react-bootstrap/Card';
@@ -28,13 +28,9 @@ export default function PostCard(props) {
         .get(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}/comments/`)
         .then((response) => {
             const commentArray = response.data.comments;
-            if(commentArray.length === 0){
-              setComments(["No Comments"]);
-            } else {
-              console.log(commentArray)
+            if(commentArray.length !== 0) {
               for (let i = 0; i < commentArray.length; i++){
-                const comment = commentArray[i].comment;
-                console.log(comment, i)
+                const comment = commentArray[i];
                 setComments(comments => [...comments, comment]);
               }
             }
@@ -133,9 +129,25 @@ export default function PostCard(props) {
           <div className="comments-text">
               Comments
             <div className="comments" style={{marginTop: "5%"}}>
-              {comments.map((comment) => (
-                  <CommentCard comment={comment} />
-              ))}
+              <Container>
+                {(() => {
+                  if(comments.length === 0){
+                    return (
+                    <p>No Comments</p>
+                    )
+                } else {
+                    return (
+                      <div>
+                        {comments.map((comment) => (
+                          <CommentCard 
+                            author = {comment.author}
+                            comment={comment.comment} 
+                          />
+                        ))}
+                      </div>
+                    )
+                }})()}
+              </Container>
             </div>
           </div>
           <div className="input-comment">
