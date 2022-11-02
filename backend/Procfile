@@ -1,1 +1,2 @@
-web: gunicorn mysite.wsgi
+web: gunicorn backend.wsgi --log-file -
+release: python3 manage.py makemigrations && python manage.py migrate
