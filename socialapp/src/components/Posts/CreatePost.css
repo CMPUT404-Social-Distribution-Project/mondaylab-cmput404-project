@@ -9,7 +9,6 @@
 
 .create-post-modal .modal-header{
     border: none;
-    min-height: 8em !important;
 }
 
 .create-post-modal  .modal-footer {
@@ -89,4 +88,11 @@
     font-size: 150%;
     color: black;
     background-color: #BFEFE9;
+}
+
+#modal-header {
+    min-height: 1em !important;
+    padding-left: 5%;
+    padding-top: 0;
+    padding-bottom: 0;
 }

@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Modal, Button, Form, InputGroup, CloseButton, Dropdown, DropdownButton, Container, Row } from "react-bootstrap";
+import React, { useState, useContext, useEffect } from 'react';
+import { Modal, Button, Form, CloseButton, Card, Container} from "react-bootstrap";
 import useAxios from '../../utils/useAxios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
@@ -16,6 +16,9 @@ export default function CreatePost(props) {
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const api = useAxios();
     const user_id = localStorage.getItem("user_id");
+    const [authorsArray, setAuthorsArray] = useState([])
+    const [input, setInput] = useState('');
+    const [filteredArray, setFilteredArray] = useState([])
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -27,6 +30,16 @@ export default function CreatePost(props) {
         visibility: "PUBLIC",
         unlisted: false,
     })
+
+    useEffect(() => {
+        api
+            .get(`${baseURL}/authors/`)
+            .then((response) => { 
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, [])
 
     /**
      * In order to change the color of the button when selecting a visibility option, whenever the user clicks on one of the options,
@@ -93,6 +106,55 @@ export default function CreatePost(props) {
             });
     };
 
+    const searchAuthors = (value) => {
+        setInput(value);
+        if(input !== ''){
+            const filteredData = authorsArray.filter((item) => {
+                return Object.values(item.displayName).join('').toLowerCase().includes(input.toLowerCase());
+            })
+            setFilteredArray(filteredData);
+        } else {
+            setFilteredArray(authorsArray);
+        }
+    }
+
+    function CheckInputLength () {
+        console.log(authorsArray)
+        if(authorsArray.length === 0){
+            return (
+                <Card>
+                    <Card.Body>
+                        No authors available
+                    </Card.Body>
+                </Card>
+            )
+        } else {
+            if(input.length > 1 ) {
+                    filteredArray.map((item) => {
+                        return (
+                            <Card>
+                                <Card.Body>
+                                    {item.profileImage}
+                                    {item}
+                                </Card.Body>
+                            </Card>
+                        )
+                    })
+            } else {
+                authorsArray.map((item) => {
+                    return (
+                        <Card>
+                            <Card.Body>
+                                {item.profileImage}
+                                {item.displayName}
+                            </Card.Body>
+                        </Card>
+                    )
+                })
+            }
+        }
+    }
+
     return (
         <div class="post-modal">
             <Modal size="lg"
@@ -102,8 +164,8 @@ export default function CreatePost(props) {
                 centered
             >
                 <Form>
-                    <Modal.Header>
-                        <div style={{ width: "100%", display: "flex" }}>
+                    <Modal.Header >
+                        <div style={{ margin: "0", padding: "0", width: "100%", display: "flex" }}>
                             <Modal.Title className='header'>Make a Post | </Modal.Title>
                             <Modal.Title className="header1">Who can see this post?</Modal.Title>
                             <Button type="button" value="Everyone" className='option' name="view" 
@@ -141,17 +203,44 @@ export default function CreatePost(props) {
                             </Button>
                             <CloseButton className='me-2' variant="white" style={{ marginTop: "1%"}}onClick={props.onHide} />
                         </div>
-                        <div>
-                            {friActive 
-                                ? <DropdownButton id="dropdown-item-button" title="             ">
-                                    <Dropdown.ItemText>Dropdown item text</Dropdown.ItemText>
-                                    <Dropdown.Item as="button">Action</Dropdown.Item>
-                                    <Dropdown.Item as="button">Another action</Dropdown.Item>
-                                    <Dropdown.Item as="button">Something else</Dropdown.Item>
-                                </DropdownButton>
+                    </Modal.Header>
+                    <Modal.Header id="modal-header">
+                        {
+                            priActive
+                                ? <div>
+                                    <Form.Group className="title">
+                                        <Form.Control label="authors" name="authors" type="text" placeholder="search authors" 
+                                            onChange={(e) => searchAuthors(e.target.value)}/>
+                                    </Form.Group>
+                                    {(() => {
+                                        if (authorsArray.length === 0) {
+                                            return (
+                                                <Container>
+                                                    <Card>
+                                                        <Card.Body>
+                                                            No authors available
+                                                        </Card.Body>
+                                                    </Card>
+                                                </ Container>
+                                            )
+                                        } else {
+                                            if (input.length > 1) {
+                                                filteredArray.map((item) => {
+                                                    return (
+                                                        item.displayName
+                                                    )
+                                                })
+                                            } else {
+                                                authorsArray.map((item) => {
+                                                    return (
+                                                        item.displayName
+                                                )})
+                                            }
+                                        }
+                                    })()}
+                                 </div>
                                 : ""
-                            }   
-                        </div>
+                        }   
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group className="title">
