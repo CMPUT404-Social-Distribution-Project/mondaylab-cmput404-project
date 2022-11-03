@@ -30,7 +30,7 @@ urlpatterns = [
 
     # Post Endpoints
     path('service/authors/<str:author_id>/posts/', include("post.urls")),
-
+    path('service/posts/', views.AllPostsApiView.as_view(), name="all-posts"),
     # Comment Endpoints
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/', include("comments.urls")),
 
