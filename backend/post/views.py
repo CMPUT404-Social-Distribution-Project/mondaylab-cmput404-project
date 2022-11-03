@@ -238,6 +238,30 @@ class PostsApiView(GenericAPIView):
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
+class AllPostsApiView(GenericAPIView):
+    """
+    Creation URL ://posts/
+    GET [local] get the all public posts 
+    """
+    permission_classes = [IsAuthenticatedOrReadOnly,]
+    serializer_class = PostSerializer
+
+    def get(self, request):
+        '''
+        Gets all public posts
+        '''
+        try:
+            posts_list = list(Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published'))
+
+            post_serializer = PostSerializer(posts_list, many=True)
+            result = {
+                "type":"posts",
+                "items": post_serializer.data
+            }
+            return response.Response(result, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
 def get_author_url_id(request):
