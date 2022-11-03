@@ -62,7 +62,6 @@ export default function Explore() {
     var searchPosts=[]
     setSearchPostsArray([]);
     for (let i = 0; i < postsArray.length; i++) {
-      console.log("==", postsArray[i].title, "--", val)
       if (postsArray[i].title.indexOf( val ) > -1 ){       
         searchPosts.push(postsArray[i])
         setSearchPostsArray(searchPostsArray => [...searchPostsArray, postsArray[i]]); 
