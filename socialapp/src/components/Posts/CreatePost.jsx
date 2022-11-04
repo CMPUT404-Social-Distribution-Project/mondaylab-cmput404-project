@@ -1,9 +1,12 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { Modal, Button, Form, CloseButton, Card, Container} from "react-bootstrap";
+import React, { useState, useContext} from 'react';
+import { Modal, Button, Form, CloseButton, Card} from "react-bootstrap";
 import useAxios from '../../utils/useAxios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
 import { FaImage, FaLink } from "react-icons/fa";
+import { search2 } from "../../utils/searchUtil";
+import { FaSearch } from "react-icons/fa";
+
 
 export default function CreatePost(props) {
     const [show, setShow] = useState(true);
@@ -16,9 +19,8 @@ export default function CreatePost(props) {
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const api = useAxios();
     const user_id = localStorage.getItem("user_id");
-    const [authorsArray, setAuthorsArray] = useState([])
-    const [input, setInput] = useState('');
-    const [filteredArray, setFilteredArray] = useState([])
+    const [authors, setAuthors] = useState([])
+    const [value, setValue] = useState('');
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -30,16 +32,6 @@ export default function CreatePost(props) {
         visibility: "PUBLIC",
         unlisted: false,
     })
-
-    useEffect(() => {
-        api
-            .get(`${baseURL}/authors/`)
-            .then((response) => { 
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }, [])
 
     /**
      * In order to change the color of the button when selecting a visibility option, whenever the user clicks on one of the options,
@@ -106,53 +98,47 @@ export default function CreatePost(props) {
             });
     };
 
-    const searchAuthors = (value) => {
-        setInput(value);
-        if(input !== ''){
-            const filteredData = authorsArray.filter((item) => {
-                return Object.values(item.displayName).join('').toLowerCase().includes(input.toLowerCase());
-            })
-            setFilteredArray(filteredData);
-        } else {
-            setFilteredArray(authorsArray);
-        }
+    const search = async val => {
+        const res = await search2(
+            `${baseURL}/authors?search=${val}`      // TODO: need to search with pagination
+        );
+        console.log(res);
+        setAuthors(res);
+    };
+
+    const onChangeHandler = async e => {
+        search(e.target.value);
+        setValue(e.target.value);
     }
 
-    function CheckInputLength () {
-        console.log(authorsArray)
-        if(authorsArray.length === 0){
+    function RenderAuthors(props) {
+        // given the list of authors from the query, creates the user cards
+        console.log(props.authors)
+        if (props.authors) {
             return (
-                <Card>
-                    <Card.Body>
-                        No authors available
-                    </Card.Body>
-                </Card>
-            )
-        } else {
-            if(input.length > 1 ) {
-                    filteredArray.map((item) => {
-                        return (
-                            <Card>
-                                <Card.Body>
-                                    {item.profileImage}
-                                    {item}
-                                </Card.Body>
-                            </Card>
-                        )
-                    })
-            } else {
-                authorsArray.map((item) => {
-                    return (
-                        <Card>
+                <div className="authors-explore-container">
+                    {
+                        typeof props.authors.items !== 'undefined' 
+                        ? props.authors.items.map((author) => 
+                            <Card
+                               onClick={setValue(author.displayName)}
+                                className="userCard"
+                            >
                             <Card.Body>
-                                {item.profileImage}
-                                {item.displayName}
+                                <Card.Title>
+                                    <div className="profilePicCard">
+                                    <img id="profilePicCard" src={author.profileImage} alt="profilePic"/>
+                                    </div>
+                                    <div className="text">{author.displayName}</div>
+                                </Card.Title>
                             </Card.Body>
-                        </Card>
-                    )
-                })
-            }
+                            </Card>) 
+                        : null
+                    }
+                </div>
+            )
         }
+        return <></>;
     }
 
     return (
@@ -208,36 +194,14 @@ export default function CreatePost(props) {
                         {
                             priActive
                                 ? <div>
-                                    <Form.Group className="title">
-                                        <Form.Control label="authors" name="authors" type="text" placeholder="search authors" 
-                                            onChange={(e) => searchAuthors(e.target.value)}/>
-                                    </Form.Group>
-                                    {(() => {
-                                        if (authorsArray.length === 0) {
-                                            return (
-                                                <Container>
-                                                    <Card>
-                                                        <Card.Body>
-                                                            No authors available
-                                                        </Card.Body>
-                                                    </Card>
-                                                </ Container>
-                                            )
-                                        } else {
-                                            if (input.length > 1) {
-                                                filteredArray.map((item) => {
-                                                    return (
-                                                        item.displayName
-                                                    )
-                                                })
-                                            } else {
-                                                authorsArray.map((item) => {
-                                                    return (
-                                                        item.displayName
-                                                )})
-                                            }
-                                        }
-                                    })()}
+                                        <FaSearch className="FaSearch"/>
+                                        <input
+                                            className="search-bar-author"
+                                            value={value}
+                                            onChange={e => onChangeHandler(e)}
+                                            placeholder="Search for an author"
+                                        />
+                                    <RenderAuthors authors={authors}/>
                                  </div>
                                 : ""
                         }   

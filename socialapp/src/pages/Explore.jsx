@@ -10,6 +10,7 @@ import { search2 } from "../utils/searchUtil";
 import "./Explore.css";
 import { FaSearch } from "react-icons/fa";
 import PostCard from "../components/Posts/PostCard";
+
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
   console.log(props.authors)
@@ -24,6 +25,7 @@ function RenderAuthors(props) {
   }
   return <></>;
 }
+
 export default function Explore() {
   const validate = Yup.object().shape({
     search: Yup.string(),
@@ -47,6 +49,7 @@ export default function Explore() {
           console.log(error);
         });
   }, []);
+
   const search = async val => {
     setLoading(true);
     const res = await search2(
@@ -57,6 +60,7 @@ export default function Explore() {
 
     setLoading(false);
   };
+
   const searchPosts = val => {
     setLoading(true);
     var searchPosts=[]
@@ -74,6 +78,7 @@ export default function Explore() {
     }
     setLoading(false);
   };
+
   const onChangeHandler = async e => {
     search(e.target.value);
     setValue(e.target.value);
