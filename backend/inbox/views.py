@@ -160,7 +160,7 @@ class InboxApiView(GenericAPIView):
                     if like == None:
                         like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
                     else:
-                        return response.Response("Like alreay exist", status=status.HTTP_403_FORBIDDEN)
+                        return response.Response("Like already exist", status=status.HTTP_403_FORBIDDEN)
                     # add like object to inbox of author
                     inbox.likes.add(like)
 
