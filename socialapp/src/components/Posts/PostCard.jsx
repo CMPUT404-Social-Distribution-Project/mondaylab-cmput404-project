@@ -31,7 +31,7 @@ export default function PostCard(props) {
   const [author, setAuthor] = useState(""); 
   const [open, openComments] = useState(false)
 
-  const sendLike=(uuid) => {
+  const sendPostLike=(uuid) => {
     const postLike ={"type": "like", 
                     "summary":`${author.displayName} Likes your post.`, 
                     "author": author,
@@ -175,14 +175,18 @@ export default function PostCard(props) {
         <div> 
           <BsFillHeartFill 
           style={{color:likeCount!=0? "red": "white"}}
-          onClick={() => sendLike(props.post.uuid)}
+          onClick={() => sendPostLike(props.post.uuid)}
           />
           
        {likeCount==0? 0: likeCount}
-       <BsFillChatFill 
+       
+        <BsFillChatFill 
        style={{color:CommentCount!=0? "yellow": "white" , marginLeft:'30px'}}
        onClick={() => openComments(!open)}
        />
+       {comments.length}
+       </div>
+       <div>
        {
         open?
           <div className="comments-text">
@@ -198,9 +202,9 @@ export default function PostCard(props) {
                               return (
                                 <div>
                                   {comments.map((comment) => (
-                                    <CommentCard 
+                                      <CommentCard 
                                       author = {comment.author}
-                                      comment={comment.comment} 
+                                      comment={comment.comment}
                                     />
                                   ))}
                                 </div>
@@ -212,7 +216,7 @@ export default function PostCard(props) {
         : 
         null
        }
-       {comments.length}
+       
         </div>
         <div className="comments-container">
          
