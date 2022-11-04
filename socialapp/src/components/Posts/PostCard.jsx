@@ -30,24 +30,7 @@ export default function PostCard(props) {
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState(""); 
   const [open, openComments] = useState(false)
-  /* // display liked if a post is already liked
-  if (like == null) {
-    props.liked.forEach((element) => {
-      if (element.object == props.post.url) {
-        setLike(true);
-      }
-    });
-    if (like !== null) {
-      setLike(false);
-    }
-  }
-    // like a post
-    const likeHandler = () => {
-      setLike(true);
-      dispatch(likePost(props.post.url, post_author_id));
-      setNumLikes(props.post.numLikes);
-    }; */
-  // Called after rendering. Fetches data
+
   const sendLike=(uuid) => {
     const postLike ={"type": "like", 
                     "summary":`${author.displayName} Likes your post.`, 
