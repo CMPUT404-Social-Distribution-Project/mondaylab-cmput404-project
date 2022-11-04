@@ -7,12 +7,11 @@
     border: none;
 }
 
-.create-post-modal div.modal-header{
+.create-post-modal .modal-header{
     border: none;
 }
 
 .create-post-modal  .modal-footer {
-    min-height: 5em;
     border: none;
 }
 
@@ -57,7 +56,7 @@
 .create-post-modal  .header1 {
     width: 40%;
     font-size: 110%;
-    margin-top: 0.5%;
+    margin-top: 1%;
     margin-right: -10%;
 }
 
@@ -70,10 +69,6 @@
 
 .create-post-modal  .radio input {
     display: none;
-}
-
-.create-post-modal  .option input[name="view"]:checked{
-    background-color: green;
 }
 
 .create-post-modal  .image {
@@ -93,4 +88,11 @@
     font-size: 150%;
     color: black;
     background-color: #BFEFE9;
+}
+
+#modal-header {
+    min-height: 1em !important;
+    padding-left: 5%;
+    padding-top: 0;
+    padding-bottom: 0;
 }
