@@ -20,3 +20,9 @@ class CommentSrcSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+class CommentsInboxSerializer(serializers.ModelSerializer):
+    author = LimitedAuthorSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['type', 'author', 'comment',  "contentType", 'published', 'id']

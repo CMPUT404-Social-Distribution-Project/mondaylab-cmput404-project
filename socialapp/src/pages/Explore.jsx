@@ -12,7 +12,6 @@ import { FaSearch } from "react-icons/fa";
 import PostCard from "../components/Posts/PostCard";
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
-  console.log(props.authors)
   if (props.authors) {
     return (
       <div className="authors-explore-container">
@@ -52,7 +51,6 @@ export default function Explore() {
     const res = await search2(
       `${baseURL}/authors?search=${val}`      // TODO: need to search with pagination
     );
-    console.log(res);
     setAuthors(res);
 
     setLoading(false);

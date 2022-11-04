@@ -13,7 +13,7 @@ from author.serializers import AuthorSerializer, FollowerSerializer
 from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
-from comments.serializers import CommentsSerializer
+from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
@@ -79,6 +79,7 @@ class InboxApiView(GenericAPIView):
         if the type is “like” then add that like to AUTHOR_ID’s inbox
         if the type is “comment” then add that comment to AUTHOR_ID’s inbox  
         """
+        print("===", request.data)
         try:
             author = get_author(author_id)
             inbox , created= Inbox.objects.get_or_create(author=author)
@@ -202,7 +203,7 @@ class InboxApiView(GenericAPIView):
             if (request.data.get("author").get("id")) == None:
                 return response.Response("Author field is required or missing a field", status=status.HTTP_400_BAD_REQUEST)
             try:
-                comments_serializer = CommentsSerializer(data=request.data)
+                comments_serializer = CommentsInboxSerializer(data=request.data)
                 if comments_serializer.is_valid(raise_exception=True):
                     comment, create = Comment.objects.get_or_create(id = request.data.get("id"))
                     inbox.comments.add(comment)
