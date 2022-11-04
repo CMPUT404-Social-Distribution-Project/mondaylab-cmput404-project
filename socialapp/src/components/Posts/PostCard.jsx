@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import EditPost from "./EditPost";
 import CommentCard from './CommentCard';
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
 
 export default function PostCard(props) {
@@ -30,6 +31,11 @@ export default function PostCard(props) {
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState(""); 
   const [open, openComments] = useState(false)
+  
+  const navigate = useNavigate();
+  const routeChange = () => {
+      navigate(`/authors/${post_user_id}/`, {state: {refresh:true}});
+  }
 
   const sendPostLike=(uuid) => {
     const postLike ={"type": "like", 
@@ -40,14 +46,12 @@ export default function PostCard(props) {
     .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
     .then((response) => {
   
-      setColor("red")
+      setColor("var(--orange)")
       setLikeCount(likeCount=> likeCount+1)
     })
     .catch((error) => {
       console.log("Failed to get posts of author. " + error);
     });
-
-
   };
 
   useEffect(() => {
@@ -173,7 +177,7 @@ export default function PostCard(props) {
   return (
     <Card className="post-card">
       <Card.Header>
-        <div className="post-author">
+        <div className="post-author" onClick={routeChange}>
           <div className="profile-pic-post">
             <img src={props.post.author.profileImage} alt="profilePic"/>
           </div>
@@ -194,14 +198,14 @@ export default function PostCard(props) {
         <hr/>
         <div> 
           <BsFillHeartFill 
-          style={{color:likeCount!=0? "red": "white"}}
+          style={{color:likeCount!=0? "var(--orange)": "white"}}
           onClick={() => sendPostLike(props.post.uuid)}
           />
           
        {likeCount==0? 0: likeCount}
        
         <BsFillChatFill 
-       style={{color:CommentCount!=0? "yellow": "white" , marginLeft:'30px'}}
+       style={{color:CommentCount!==0? "var(--teal)": "var(--white-teal)" , marginLeft:'30px'}}
        onClick={() => openComments(!open)}
        />
        {comments.length}
@@ -249,7 +253,7 @@ export default function PostCard(props) {
                 }
               />
               <Button style={
-                  {borderRadius: '15px', color: 'black', backgroundColor: '#BFEFE9'}
+                  {borderRadius: '1.5rem', color: 'black', backgroundColor: '#BFEFE9'}
                 }
                 onClick={() => sendComment(props.post.uuid)}
               >

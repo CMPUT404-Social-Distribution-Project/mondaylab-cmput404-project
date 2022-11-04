@@ -1,16 +1,27 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { Card } from 'react-bootstrap';
-import "./PostCard.css";
+import "./CommentCard.css";
+import { useNavigate } from "react-router-dom";
 
 export default function CommentCard(props) {
+    const navigate = useNavigate();
+    const routeChange = () => {
+        navigate(`/authors/${props.author.uuid}/`, {state: {refresh:true}});
+    }
+
     return (
-        <Card>
+        <Card className="comment-card">
             <Card.Body style={{ width: "auto", display: "flex"}}>
-                <div className="profile-pic-post">
-                    <img src={props.author.profileImage} alt="profilePic" />
+                <div className="comment-author-container" onClick={routeChange}>
+                    <div className="comment-profile-pic">
+                        <img src={props.author.profileImage} alt="profilePic" />
+                    </div>
+                    <div className="comment-author">
+                        {props.author.displayName}
+                    </div>
                 </div>
-                <div style={{marginTop: "2%",marginLeft: "5%"}}>
+                <div className="comment-content">
                     {props.comment}
                 </div>
             </Card.Body>
