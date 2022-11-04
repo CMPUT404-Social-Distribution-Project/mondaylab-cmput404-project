@@ -212,7 +212,6 @@ class InboxApiView(GenericAPIView):
                         "detail": str(author) +" send comment successful"
                     }
             except Exception as e:
-                print("99", e)
                 return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
 
