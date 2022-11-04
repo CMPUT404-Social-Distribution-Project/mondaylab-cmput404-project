@@ -118,15 +118,35 @@ export default function PostCard(props) {
 
 
   const sendComment = (uuid) => {
+    var commentObject ={};
     api
       .post(`${baseURL}/authors/${user_id}/posts/${uuid}/comments/`, postComment)
       .then((response) => {
         window.location.reload(true);
-      })
+        
+        commentObject['type']=response.data.type;
+        commentObject['comment']=response.data.comment;
+        commentObject['author']=response.data.author;
+        commentObject['id']=response.data.id;
+        commentObject['contentType']=response.data.contentType;
+        commentObject['published']=response.data.published;
+        commentObject['uuid']=response.data.uui;
+      
+
+        api      
+          .post(`${baseURL}/authors/${post_user_id}/inbox/`, commentObject)
+          .then((response) => {
+            console.log("success send comments to inbox");
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+            })
       .catch((error) => {
         alert(`Something went wrong posting! \n Error: ${error}`)
         console.log(error);
       });
+   
   };
 
   // only render options if the user viewing it is the author of it

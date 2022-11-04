@@ -5,7 +5,7 @@ import "./pages.css";
 import FollowRequestCard from "../components/Inbox/FollowRequestCard";
 import LikeCard from "../components/Inbox/LikeCard";
 import PostCard from "../components/Posts/PostCard";
-
+import InboxCommentCard from '../components/Inbox/InboxCommentCard';
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);      
   const [posts, setPosts] = useState([]);
@@ -21,8 +21,12 @@ export default function Inbox() {
     if (props.item.type.toLowerCase() === "follow") {
       return <FollowRequestCard followRequest={props.item} />
     } else if (props.item.type.toLowerCase() === "like") {
-      console.log("===", props.item)
       return <LikeCard like={props.item} />
+    } else if (props.item.type.toLowerCase() === "comment") {
+      if (props.item.author!=null){
+        return <InboxCommentCard comment={props.item} />
+      }
+      
     } else if (props.item.type.toLowerCase() === "post") {
       return <PostCard post={props.item} />
     }
@@ -36,7 +40,6 @@ export default function Inbox() {
         .then((response) => {
           setInboxItems(response.data.items);
           console.log("Got inbox of author")
-          console.log(response.data.items);
         })
         .catch((error) => {
           console.log("Failed to get inbox of author. " + error);
