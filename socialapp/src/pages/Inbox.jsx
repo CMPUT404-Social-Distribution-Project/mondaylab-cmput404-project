@@ -3,6 +3,7 @@ import useAxios from "../utils/useAxios";
 import AuthContext from "../context/AuthContext";
 import "./pages.css";
 import FollowRequestCard from "../components/Inbox/FollowRequestCard";
+import LikeCard from "../components/Inbox/LikeCard";
 import PostCard from "../components/Posts/PostCard";
 
 export default function Inbox() {
@@ -19,6 +20,9 @@ export default function Inbox() {
     // renders a single inbox item based on its type
     if (props.item.type.toLowerCase() === "follow") {
       return <FollowRequestCard followRequest={props.item} />
+    } else if (props.item.type.toLowerCase() === "like") {
+      console.log("===", props.item)
+      return <LikeCard like={props.item} />
     } else if (props.item.type.toLowerCase() === "post") {
       return <PostCard post={props.item} />
     }
