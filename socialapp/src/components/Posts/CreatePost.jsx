@@ -7,9 +7,37 @@ import { FaImage, FaLink } from "react-icons/fa";
 import { search2 } from "../../utils/searchUtil";
 import { FaSearch } from "react-icons/fa";
 
+function RenderAuthors(props) {
+    // given the list of authors from the query, creates the user cards
+    console.log(props.authors)
+    if (props.authors) {
+        return (
+            <div className="authors-explore-container">
+                {
+                    typeof props.authors.items !== 'undefined' ? props.authors.items.map((author) => 
+                        <Card
+                            className="userCard"
+                        >
+                            <Card.Body onClick={console.log("hello")}>
+                                <Card.Title>
+                                    <div className="profilePicCard">
+                                        <img id="profilePicCard" src={author.profileImage} alt="profilePic" />
+                                    </div>
+                                    <div className="text">{author.displayName}</div>
+                                </Card.Title>
+                            </Card.Body>
+                        </Card>) 
+                    : null
+                }
+            </div>
+        )
+    }
+    return <></>;
+}
 
 export default function CreatePost(props) {
-    const [show, setShow] = useState(true);
+    const [showModal, setShowModal] = useState(true)
+    const [showURI, setShowURI] = useState(false)
     const [unlist, setUnlist] = useState(false)
     const [isActive, setIsActive] = useState(false)
     const [eveActive, setEveActive] = useState(true)
@@ -88,9 +116,10 @@ export default function CreatePost(props) {
         api
             .post(`${baseURL}/authors/${user_id}/posts/`, post)
             .then((response) => {
-                console.log(response.data);
                 props.onHide()
-                window.location.reload(true);
+                if (post.unlisted){
+                    setShowURI(true)
+                }
             })
             .catch((error) => {
                 alert(`Something went wrong posting! \n Error: ${error}`)
@@ -111,36 +140,6 @@ export default function CreatePost(props) {
         setValue(e.target.value);
     }
 
-    function RenderAuthors(props) {
-        // given the list of authors from the query, creates the user cards
-        console.log(props.authors)
-        if (props.authors) {
-            return (
-                <div className="authors-explore-container">
-                    {
-                        typeof props.authors.items !== 'undefined' 
-                        ? props.authors.items.map((author) => 
-                            <Card
-                               onClick={setValue(author.displayName)}
-                                className="userCard"
-                            >
-                            <Card.Body>
-                                <Card.Title>
-                                    <div className="profilePicCard">
-                                    <img id="profilePicCard" src={author.profileImage} alt="profilePic"/>
-                                    </div>
-                                    <div className="text">{author.displayName}</div>
-                                </Card.Title>
-                            </Card.Body>
-                            </Card>) 
-                        : null
-                    }
-                </div>
-            )
-        }
-        return <></>;
-    }
-
     return (
         <div class="post-modal">
             <Modal size="lg"
@@ -148,6 +147,7 @@ export default function CreatePost(props) {
                 aria-labelledby="contained-modal-title-vcenter"
                 className="create-post-modal"
                 centered
+                show={showModal}
             >
                 <Form>
                     <Modal.Header >
@@ -223,9 +223,6 @@ export default function CreatePost(props) {
                                         content: e.target.value,
                                     })
                             }} />
-                            <Form.Control.Feedback type="invalid">
-                                Please choose a walk type.
-                            </Form.Control.Feedback>
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
@@ -246,6 +243,13 @@ export default function CreatePost(props) {
                         </Button>
                     </Modal.Footer>
                 </Form>
+            </Modal>
+            <Modal 
+                aria-labelledby="contained-modal-title-vcenter"
+                className="create-post-modal"
+                centered
+                show={showURI}>
+                    Hello
             </Modal>
         </div>
     );
