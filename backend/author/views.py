@@ -22,13 +22,27 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter,]
     search_fields = ['displayName']
 
+    def filter_queryset(self, queryset):
+        '''Issue with overriding list() method and needing to override filter_queryset
+        to get proper search filter.
+        Ref: https://stackoverflow.com/questions/52366296/django-filters-does-not-work-with-the-viewset
+        Answer by Sparkp1ug
+        '''
+        filter_backends = (filters.SearchFilter, )
+
+        # Other condition for different filter backend goes here
+
+        for backend in list(filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, view=self)
+        return queryset
+
     def list(self, request, pk=None):
-        ''' Returns a queryset of all authors in the database
+        ''' Returns a queryset of all authors in the database.
             Use: Send a GET to
                 /service/authors/
         '''
         try:
-            serializer = self.serializer_class(self.queryset, many=True)
+            serializer = self.serializer_class(self.filter_queryset(self.queryset), many=True, context={"request": request})
             serializer = {"type": "authors", "items":serializer.data}
             return Response(serializer, status=status.HTTP_200_OK)
         except Exception as e:

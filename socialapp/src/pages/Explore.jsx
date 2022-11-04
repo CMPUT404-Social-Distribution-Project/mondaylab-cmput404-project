@@ -45,7 +45,8 @@ export default function Explore() {
         .catch((error) => {
           console.log(error);
         });
-  }, []);
+  });
+
   const search = async val => {
     setLoading(true);
     const res = await search2(
@@ -55,6 +56,7 @@ export default function Explore() {
 
     setLoading(false);
   };
+
   const searchPosts = val => {
     setLoading(true);
     var searchPosts=[]
@@ -65,13 +67,14 @@ export default function Explore() {
         setSearchPostsArray(searchPostsArray => [...searchPostsArray, postsArray[i]]); 
       }
     }
-    if (searchPosts.length==0){
+    if (searchPosts.length===0){
       setDisplaySearch(false)
     }else{
       setDisplaySearch(true)        
     }
     setLoading(false);
   };
+
   const onChangeHandler = async e => {
     search(e.target.value);
     setValue(e.target.value);
@@ -95,15 +98,15 @@ export default function Explore() {
 
 
       {
-      value!="" ? 
-      displaySearch == true ?
+      value!=="" ? 
+      displaySearch === true ?
       
       searchPostsArray.map((post) => (
       <><p> search result</p>
       <PostCard
           post={post}
           key={post.id} /></>
-      )): <h1> No match result for posts</h1>
+      )): <h5> No match result for posts</h5>
       : postsArray.map((post) => (
         <PostCard 
           post={post}

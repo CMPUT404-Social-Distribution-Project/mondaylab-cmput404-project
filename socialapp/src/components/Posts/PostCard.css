@@ -31,6 +31,10 @@
     gap: 1rem;
 }
 
+.post-card .post-author:hover {
+    cursor: pointer
+}
+
 .post-card .card-title {
     font-size: 2rem;
     margin-bottom: 3%;
@@ -106,4 +110,15 @@
 
 .options .dropdown-item {
     padding: 0.8em var(--bs-dropdown-item-padding-x);
+}
+
+.post-card .input-comment {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.post-card .input-comment .form-control {
+    background-color: var(--slightly-darker-blue);
+    box-shadow: none;
+    outline: none;
 }
