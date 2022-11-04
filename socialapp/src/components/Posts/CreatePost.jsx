@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { Modal, Button, Form, InputGroup, CloseButton } from "react-bootstrap";
+import React, { useState, useContext, useEffect } from 'react';
+import { Modal, Button, Form, CloseButton, Card, Container} from "react-bootstrap";
 import useAxios from '../../utils/useAxios';
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
@@ -16,6 +16,9 @@ export default function CreatePost(props) {
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
     const api = useAxios();
     const user_id = localStorage.getItem("user_id");
+    const [authorsArray, setAuthorsArray] = useState([])
+    const [input, setInput] = useState('');
+    const [filteredArray, setFilteredArray] = useState([])
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -27,6 +30,16 @@ export default function CreatePost(props) {
         visibility: "PUBLIC",
         unlisted: false,
     })
+
+    useEffect(() => {
+        api
+            .get(`${baseURL}/authors/`)
+            .then((response) => { 
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, [])
 
     /**
      * In order to change the color of the button when selecting a visibility option, whenever the user clicks on one of the options,
@@ -85,12 +98,62 @@ export default function CreatePost(props) {
             .then((response) => {
                 console.log(response.data);
                 props.onHide()
+                window.location.reload(true);
             })
             .catch((error) => {
                 alert(`Something went wrong posting! \n Error: ${error}`)
                 console.log(error);
             });
     };
+
+    const searchAuthors = (value) => {
+        setInput(value);
+        if(input !== ''){
+            const filteredData = authorsArray.filter((item) => {
+                return Object.values(item.displayName).join('').toLowerCase().includes(input.toLowerCase());
+            })
+            setFilteredArray(filteredData);
+        } else {
+            setFilteredArray(authorsArray);
+        }
+    }
+
+    function CheckInputLength () {
+        console.log(authorsArray)
+        if(authorsArray.length === 0){
+            return (
+                <Card>
+                    <Card.Body>
+                        No authors available
+                    </Card.Body>
+                </Card>
+            )
+        } else {
+            if(input.length > 1 ) {
+                    filteredArray.map((item) => {
+                        return (
+                            <Card>
+                                <Card.Body>
+                                    {item.profileImage}
+                                    {item}
+                                </Card.Body>
+                            </Card>
+                        )
+                    })
+            } else {
+                authorsArray.map((item) => {
+                    return (
+                        <Card>
+                            <Card.Body>
+                                {item.profileImage}
+                                {item.displayName}
+                            </Card.Body>
+                        </Card>
+                    )
+                })
+            }
+        }
+    }
 
     return (
         <div class="post-modal">
@@ -101,43 +164,83 @@ export default function CreatePost(props) {
                 centered
             >
                 <Form>
-                    <Modal.Header>
-                        <Modal.Title className='header'>Make a Post | </Modal.Title>
-                        <Modal.Title className="header1">Who can see this post?</Modal.Title>
-                        <Button type="button" value="Everyone" className='option' name="view" 
-                            style={{
-                                backgroundColor: eveActive ? ' #BFEFE9' : '',
-                                color: eveActive ? 'black' : '',
-                            }} 
-                            onClick={() => {
-                                setVisibility("PUBLIC")}}>
-                        Everyone </Button>
-                        <Button type="button" value="Friends" className='option' name="view" 
-                            style={{
-                                backgroundColor: friActive ? ' #BFEFE9' : '',
-                                color: friActive ? 'black' : '',
-                            }} 
-                            onClick={() => {
-                                setVisibility("FRIENDS")
+                    <Modal.Header >
+                        <div style={{ margin: "0", padding: "0", width: "100%", display: "flex" }}>
+                            <Modal.Title className='header'>Make a Post | </Modal.Title>
+                            <Modal.Title className="header1">Who can see this post?</Modal.Title>
+                            <Button type="button" value="Everyone" className='option' name="view" 
+                                style={{
+                                    backgroundColor: eveActive ? ' #BFEFE9' : '',
+                                    color: eveActive ? 'black' : '',
+                                }} 
+                                onClick={() => {
+                                    setVisibility("PUBLIC")}}>
+                            Everyone </Button>
+                            <Button type="button" value="Friends" className='option' name="view" 
+                                style={{
+                                    backgroundColor: friActive ? ' #BFEFE9' : '',
+                                    color: friActive ? 'black' : '',
+                                }} 
+                                onClick={() => {
+                                    setVisibility("FRIENDS")
+                                }}>
+                            Friends-Only </Button>
+                            <Button type="button" value="Private" className='option' name="view" 
+                                style={{
+                                    backgroundColor: priActive ? ' #BFEFE9' : '',
+                                    color: priActive ? 'black' : '',
+                                }} 
+                                onClick={() => {
+                                    setVisibility("PRIVATE")
                             }}>
-                        Friends-Only </Button>
-                        <Button type="button" value="Private" className='option' name="view" 
-                            style={{
-                                backgroundColor: priActive ? ' #BFEFE9' : '',
-                                color: priActive ? 'black' : '',
-                            }} 
-                            onClick={() => {
-                                setVisibility("PRIVATE")
-                        }}>
-                            Private 
-                        </Button>
-                        <Button style={{
-                            backgroundColor: isActive ? ' #BFEFE9' : '',
-                            color: isActive ? 'black' : '',
-                            }} className="unlist" onClick={unlistPost}> 
-                            Unlisted 
-                        </Button>
-                        <CloseButton className='me-2' variant="white" onClick={props.onHide} />
+                                Private 
+                            </Button>
+                            <Button style={{
+                                backgroundColor: isActive ? ' #BFEFE9' : '',
+                                color: isActive ? 'black' : '',
+                                }} className="unlist" onClick={unlistPost}> 
+                                Unlisted 
+                            </Button>
+                            <CloseButton className='me-2' variant="white" style={{ marginTop: "1%"}}onClick={props.onHide} />
+                        </div>
+                    </Modal.Header>
+                    <Modal.Header id="modal-header">
+                        {
+                            priActive
+                                ? <div>
+                                    <Form.Group className="title">
+                                        <Form.Control label="authors" name="authors" type="text" placeholder="search authors" 
+                                            onChange={(e) => searchAuthors(e.target.value)}/>
+                                    </Form.Group>
+                                    {(() => {
+                                        if (authorsArray.length === 0) {
+                                            return (
+                                                <Container>
+                                                    <Card>
+                                                        <Card.Body>
+                                                            No authors available
+                                                        </Card.Body>
+                                                    </Card>
+                                                </ Container>
+                                            )
+                                        } else {
+                                            if (input.length > 1) {
+                                                filteredArray.map((item) => {
+                                                    return (
+                                                        item.displayName
+                                                    )
+                                                })
+                                            } else {
+                                                authorsArray.map((item) => {
+                                                    return (
+                                                        item.displayName
+                                                )})
+                                            }
+                                        }
+                                    })()}
+                                 </div>
+                                : ""
+                        }   
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group className="title">
