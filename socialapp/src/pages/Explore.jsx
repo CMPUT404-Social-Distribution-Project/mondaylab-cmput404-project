@@ -107,7 +107,7 @@ export default function Explore() {
           key={post.id} /></>
       )): <h1> No match result for posts</h1>
       : postsArray.map((post) => (
-        <PostCard
+        <PostCard 
           post={post}
           key={post.id} />
       ))
