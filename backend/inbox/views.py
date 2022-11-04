@@ -204,9 +204,7 @@ class InboxApiView(GenericAPIView):
                 return response.Response("Author field is required or missing a field", status=status.HTTP_400_BAD_REQUEST)
             try:
                 comments_serializer = CommentsInboxSerializer(data=request.data)
-                print("---", comments_serializer)
                 if comments_serializer.is_valid(raise_exception=True):
-                    print("----")
                     comment, create = Comment.objects.get_or_create(id = request.data.get("id"))
                     inbox.comments.add(comment)
 
