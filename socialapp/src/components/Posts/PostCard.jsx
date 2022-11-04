@@ -36,7 +36,6 @@ export default function PostCard(props) {
                     "summary":`${author.displayName} Likes your post.`, 
                     "author": author,
                     "object": props.post.id};
-    console.log(postLike)
     api      
     .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
     .then((response) => {
@@ -64,7 +63,6 @@ export default function PostCard(props) {
             await api
           .get(`${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/likes`)
           .then((response) => {
-              console.log("2222", response.data.items) ;
               setLikeCount(likeCount=>response.data.items.length);
               
             })
@@ -94,7 +92,6 @@ export default function PostCard(props) {
     api
       .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
       .then((response) => {
-        console.log(response.data);
         window.location.reload(true);
       })
       .catch((error) => {
@@ -124,7 +121,6 @@ export default function PostCard(props) {
     api
       .post(`${baseURL}/authors/${user_id}/posts/${uuid}/comments/`, postComment)
       .then((response) => {
-        console.log(response.data);
         window.location.reload(true);
       })
       .catch((error) => {

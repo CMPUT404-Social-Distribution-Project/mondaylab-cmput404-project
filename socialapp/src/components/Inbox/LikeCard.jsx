@@ -21,16 +21,12 @@ export default function LikeCard(props) {
     const routeChange = () => {
         navigate(`/authors/${props.like.author.uuid}/`);
     }
-    var posts=[];
     useEffect(() => {
       api
           .get(`${baseURL}/authors/${user_id}/posts/${post_uuid}`)
           .then((response) => {
-            console.log("111",response.data)
-            console.log("111",typeof(response.data))
             //setPost(response.data);
             setPostsArray(response.data);
-            posts.push(response.data)
           })
           .catch((error) => {
             console.log(error);
@@ -39,7 +35,6 @@ export default function LikeCard(props) {
 
 
 
-    //console.log("9999", post)
 
   return (
     <Card className="follow-request-card">
