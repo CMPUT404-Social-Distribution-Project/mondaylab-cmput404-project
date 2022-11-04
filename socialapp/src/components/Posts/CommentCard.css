@@ -1,0 +1,57 @@
+.comment-card .comment-profile-pic {
+    width: 1.5em;
+    min-width: 1.5em;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow:hidden;
+    place-content: center;
+    flex: 0.05;
+}
+
+.comment-card .comment-author {
+    width: auto;
+    margin-left: 0.5rem;
+    font-family: 'Readex Pro Medium';
+    color: var(--teal);
+}
+
+.comment-card .comment-author-container {
+    display: flex;
+}
+
+.comment-card .comment-author-container:hover {
+    cursor: pointer;
+}
+
+.comment-card {
+    background-color: transparent;
+    margin: 0.5em 0em;
+    --bs-card-border-width: 1px;
+    --bs-card-border-color: var(--slightly-darker-blue);
+    --bs-card-border-radius: 11px;
+}
+
+.comment-card .card-body {
+    display: flex;
+    vertical-align: middle;
+    align-items: center;
+    padding: 0.5rem;
+    box-shadow: none;
+    width: 100%;
+    flex-wrap: wrap;
+
+}
+
+
+.comment-card .comment-content {
+    margin-top: 0.5rem;
+    padding: 0rem 1rem;
+    width: 100%;
+    white-space: pre-line;
+    font-family: 'Readex Pro Light';
+    font-size: 0.8rem;
+}
