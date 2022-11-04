@@ -11,9 +11,12 @@ import { confirmAlert } from 'react-confirm-alert';
 import { useEffect } from 'react';
 import EditPost from "./EditPost";
 import CommentCard from './CommentCard';
+import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
+
 
 export default function PostCard(props) {
-  const user_id = props.post.author.uuid
+  const user_id = localStorage.getItem("user_id");
+  const post_user_id = props.post.author.uuid;
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { authTokens } = useContext(AuthContext);
   const [postComment, setPostComment] = useState({
@@ -22,22 +25,86 @@ export default function PostCard(props) {
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();
+  const [likeCount, setLikeCount] = useState(0);
+  const [CommentCount, setCommentCount] = useState(0);
+  const [color, setColor] = useState("white");
+  const [author, setAuthor] = useState(""); 
+  const [open, openComments] = useState(false)
+  /* // display liked if a post is already liked
+  if (like == null) {
+    props.liked.forEach((element) => {
+      if (element.object == props.post.url) {
+        setLike(true);
+      }
+    });
+    if (like !== null) {
+      setLike(false);
+    }
+  }
+    // like a post
+    const likeHandler = () => {
+      setLike(true);
+      dispatch(likePost(props.post.url, post_author_id));
+      setNumLikes(props.post.numLikes);
+    }; */
+  // Called after rendering. Fetches data
+  const sendLike=(uuid) => {
+    const postLike ={"type": "like", 
+                    "summary":`${author.displayName} Likes your post.`, 
+                    "author": author,
+                    "object": props.post.id};
+    console.log(postLike)
+    api      
+    .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
+    .then((response) => {
+  
+      setColor("red")
+      setLikeCount(likeCount=> likeCount+1)
+    })
+    .catch((error) => {
+      console.log("Failed to get posts of author. " + error);
+    });
+
+
+  };
 
   useEffect(() => {
-      api
-        .get(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}/comments/`)
-        .then((response) => {
-            const commentArray = response.data.comments;
-            if(commentArray.length !== 0) {
-              for (let i = 0; i < commentArray.length; i++){
-                const comment = commentArray[i];
-                setComments(comments => [...comments, comment]);
+        const fetchData = async () => {
+          await api
+            .get(`${baseURL}/authors/${user_id}/`)
+            .then((response) => {
+              setAuthor(response.data);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+            await api
+          .get(`${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/likes`)
+          .then((response) => {
+              console.log("2222", response.data.items) ;
+              setLikeCount(likeCount=>response.data.items.length);
+              
+            })
+          .catch((error) => {
+            console.log(error);
+          });
+          await api
+          .get(`${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/comments/`)
+          .then((response) => {
+              const commentArray = response.data.comments;
+              setCommentCount(commentArray.length);
+              if(commentArray.length !== 0) {
+                for (let i = 0; i < commentArray.length; i++){
+                  const comment = commentArray[i];
+                  setComments(comments => [...comments, comment]);
+                }
               }
-            }
-          })
-        .catch((error) => {
-          console.log(error);
-        });
+            })
+          .catch((error) => {
+            console.log(error);
+          });
+          };
+          fetchData();
     }, []);
 
   const deletePost = (uuid) => {
@@ -68,6 +135,7 @@ export default function PostCard(props) {
       ]
     });
   };
+
 
   const sendComment = (uuid) => {
     api
@@ -125,31 +193,50 @@ export default function PostCard(props) {
           <ReactMarkdown>{props.post.content}</ReactMarkdown>
         </Card.Text>
         <hr/>
-        <div className="comments-container">
+        <div> 
+          <BsFillHeartFill 
+          style={{color:likeCount!=0? "red": "white"}}
+          onClick={() => sendLike(props.post.uuid)}
+          />
+          
+       {likeCount==0? 0: likeCount}
+       <BsFillChatFill 
+       style={{color:CommentCount!=0? "yellow": "white" , marginLeft:'30px'}}
+       onClick={() => openComments(!open)}
+       />
+       {
+        open?
           <div className="comments-text">
-              Comments
-            <div className="comments" style={{marginTop: "5%"}}>
-              <Container>
-                {(() => {
-                  if(comments.length === 0){
-                    return (
-                    <p>No Comments</p>
-                    )
-                } else {
-                    return (
-                      <div>
-                        {comments.map((comment) => (
-                          <CommentCard 
-                            author = {comment.author}
-                            comment={comment.comment} 
-                          />
-                        ))}
+                        Comments
+                      <div className="comments" style={{marginTop: "5%"}}>
+                        <Container>
+                          {(() => {
+                            if(comments.length === 0){
+                              return (
+                              <p>No Comments</p>
+                              )
+                          } else {
+                              return (
+                                <div>
+                                  {comments.map((comment) => (
+                                    <CommentCard 
+                                      author = {comment.author}
+                                      comment={comment.comment} 
+                                    />
+                                  ))}
+                                </div>
+                              )
+                          }})()}
+                        </Container>
                       </div>
-                    )
-                }})()}
-              </Container>
-            </div>
-          </div>
+                    </div>
+        : 
+        null
+       }
+       {comments.length}
+        </div>
+        <div className="comments-container">
+         
           <div className="input-comment">
             <InputGroup className="mb-3">
               <Form.Control
