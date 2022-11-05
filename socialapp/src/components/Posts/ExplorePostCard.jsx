@@ -5,7 +5,7 @@ import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
-import "./PostCard.css";
+import "./ExplorePostCard.css";
 import useAxios from "../../utils/useAxios";
 import { confirmAlert } from 'react-confirm-alert';
 import { useEffect } from 'react';
@@ -175,7 +175,7 @@ export default function PostCard(props) {
   }
 
   return (
-    <Card className="post-card">
+    <Card className="post-card-explore">
       <Card.Header>
         <div className="post-author" onClick={routeChange}>
           <div className="profile-pic-post">
@@ -241,26 +241,6 @@ export default function PostCard(props) {
         null
        }
        
-        </div>
-        <div className="comments-container">
-         
-          <div className="input-comment">
-            <InputGroup className="mb-3">
-              <Form.Control
-                placeholder="Comment"
-                aria-label="Comment"
-                onChange={(e) => (setPostComment({...postComment, comment: e.target.value}))
-                }
-              />
-              <Button style={
-                  {borderRadius: '1.5rem', color: 'black', backgroundColor: '#BFEFE9'}
-                }
-                onClick={() => sendComment(props.post.uuid)}
-              >
-                Send
-              </Button>
-            </InputGroup>
-          </div>
         </div>
 
       </Card.Body>

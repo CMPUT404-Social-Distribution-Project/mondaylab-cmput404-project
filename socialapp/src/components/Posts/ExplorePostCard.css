@@ -1,10 +1,11 @@
-.post-card {
-    margin-top: 2rem;
-    --bs-card-bg: none;
+.post-card-explore {
+    width:20rem;
+    height:20rem;
+    margin-block: 10px;
+    border-color: none;
 }
 
-.post-card .card-header {
-    width: 40em;
+.post-card-explore .card-header {
     display: inline-flex;
     align-items: center;
     background-color: var(--slightly-darker-blue);
@@ -12,11 +13,11 @@
     
 }
 
-.post-card .profile-pic-post {
+.post-card-explore .profile-pic-post {
     width: 3em;
-    height: auto;
+    height: 3em;
     aspect-ratio: 1/1;
-    border-radius: 100%;
+    border-radius: 80%;
     outline: solid var(--orange) 2px;
     text-align: center;
     display: flex;
@@ -25,47 +26,52 @@
     place-content: center;
 }
 
-.post-card .post-author {
+.post-card-explore .post-author {
     display: inline-flex;
     align-items: center;
     gap: 1rem;
+    
 }
-
-.post-card .post-author:hover {
-    cursor: pointer
+.post-card-explore .post-author-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    width:100px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
 }
-
-.post-card .card-title {
+.post-card-explore .card-title {
     font-size: 2rem;
-    margin-bottom: 3%;
     text-decoration: var(--teal);
     white-space: pre-line;
 
 }
 
-.post-card .card-text {
-    padding: 1em;
-    width: 100%;
-    white-space: pre-line;
-}
-
-.post-card .card-body {
+.post-card-explore .card-body {
     color: var(--white-teal);
     background-color: var(--dark-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
-    border-radius: 0px 0px 11px 11px;
-    padding: 2rem;
-    width: 40em;
-}
+    border-radius: 0px 0px 2px 2px;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
 
-.post-card .comments-text {
+}
+.post-card-explore .card-text {
+    text-decoration: var(--teal);
+    white-space: pre-line;
+    min-block-size: 6rem;
+    max-block-size: 6rem;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+
+}
+.post-card-explore .comments-text {
     color: var(--teal);
-    margin-left: 1em;
-    padding-bottom: 2em;
 }
 
-.post-card .options {
+.post-card-explore .options {
     display: inline-block;
     white-space: nowrap;
     margin-left: auto;
@@ -110,15 +116,4 @@
 
 .options .dropdown-item {
     padding: 0.8em var(--bs-dropdown-item-padding-x);
-}
-
-.post-card .input-comment {
-    width: 100%;
-    margin-top: 0.5rem;
-}
-
-.post-card .input-comment .form-control {
-    background-color: var(--slightly-darker-blue);
-    box-shadow: none;
-    outline: none;
 }
