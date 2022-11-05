@@ -45,6 +45,10 @@
     font-size: 2rem;
     text-decoration: var(--teal);
     white-space: pre-line;
+    min-block-size: 2rem;
+    max-block-size: 2rem;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
 
 }
 
