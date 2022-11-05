@@ -228,14 +228,10 @@ class PostsApiView(GenericAPIView):
                     """
                     try:
                         friends_list = get_friends_list(authorObj)
-                        print("---", friends_list)
                         for friend in friends_list:
-                            print("1111")
                             author = get_author(friend["uuid"])
                             friend_inbox = Inbox.objects.get(author=author)
-                            print("222")
                             friend_inbox.posts.add(Post.objects.get(id=postId))
-                            print("333")
                     except Exception as e:
                         result =f"Failed to send post {postId} to inbox of friend"
                         return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
@@ -248,12 +244,9 @@ class PostsApiView(GenericAPIView):
                         try:
                             followers_list = get_followers_list(authorObj)
                             for follower in followers_list:
-                                print("1111")
                                 author = get_author(follower["uuid"])
                                 follower_inbox = Inbox.objects.get(author=author)
-                                print("222")
                                 follower_inbox.posts.add(Post.objects.get(id=postId))
-                                print("333")
                         except Exception as e:
                             result =f"Failed to send post {postId} to inbox of followers"
                             return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
