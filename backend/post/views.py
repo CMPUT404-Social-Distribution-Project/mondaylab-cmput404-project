@@ -15,7 +15,9 @@ from django.db.models import Q
 from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
-import json
+import base64
+from django.core.files.base import ContentFile
+from django.http import HttpResponse
 
 class PostApiView(GenericAPIView):
     """
@@ -213,6 +215,12 @@ class PostsApiView(GenericAPIView):
                     postId = get_post_url(request, author_id)+ postUUID
                     origin = postId
 
+                    if serialize.validated_data.get("contentType").startswith("image"):
+                        # content type is an image, then the content SHOULD be a base64 string.
+                        # make image field the url link to the image
+                        image = request.build_absolute_uri() + postUUID + "/image"
+                        serialize.validated_data["image"] = image
+
                     serialize.save(
                         id=postId,
                         uuid=postUUID,
@@ -221,35 +229,39 @@ class PostsApiView(GenericAPIView):
                         comments=postId+'/comments',
                         origin=origin,
                         source=origin,
+                        image=serialize.validated_data.get("image"),
                     )
-                    """
-                    SEND to friends only
-                    if visibility is friends, then send this post to every frineds
-                    """
-                    try:
-                        friends_list = get_friends_list(authorObj)
-                        for friend in friends_list:
-                            author = get_author(friend["uuid"])
-                            friend_inbox = Inbox.objects.get(author=author)
-                            friend_inbox.posts.add(Post.objects.get(id=postId))
-                    except Exception as e:
-                        result =f"Failed to send post {postId} to inbox of friend"
-                        return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
-                    
-                    """
-                    SEND to followers
-                    if visibility is friends, then send this post to every follower
-                    """
-                    if serialize.data['visibility'].lower()=="public":
+
+                    # only send if it's not unlisted
+                    if serialize.data['unlisted'] == False:
+                        """
+                        SEND to friends only
+                        if visibility is friends, then send this post to every frineds
+                        """
                         try:
-                            followers_list = get_followers_list(authorObj)
-                            for follower in followers_list:
-                                author = get_author(follower["uuid"])
-                                follower_inbox = Inbox.objects.get(author=author)
-                                follower_inbox.posts.add(Post.objects.get(id=postId))
+                            friends_list = get_friends_list(authorObj)
+                            for friend in friends_list:
+                                author = get_author(friend["uuid"])
+                                friend_inbox = Inbox.objects.get(author=author)
+                                friend_inbox.posts.add(Post.objects.get(id=postId))
                         except Exception as e:
-                            result =f"Failed to send post {postId} to inbox of followers"
+                            result =f"Failed to send post {postId} to inbox of friend"
                             return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+                        
+                        """
+                        SEND to followers
+                        if visibility is friends, then send this post to every follower
+                        """
+                        if serialize.data['visibility'].lower()=="public":
+                            try:
+                                followers_list = get_followers_list(authorObj)
+                                for follower in followers_list:
+                                    author = get_author(follower["uuid"])
+                                    follower_inbox = Inbox.objects.get(author=author)
+                                    follower_inbox.posts.add(Post.objects.get(id=postId))
+                            except Exception as e:
+                                result =f"Failed to send post {postId} to inbox of followers"
+                                return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 
                         
@@ -282,6 +294,22 @@ class AllPostsApiView(GenericAPIView):
 
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
+class PostImageApiView(GenericAPIView):
+
+    def get(self, request, post_id, author_id):
+        try:
+            image_post = Post.objects.get(uuid=post_id, contentType__contains="image")
+
+            # decode the base64 image into binary 
+            format, imgstr = image_post.content.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+
+            return HttpResponse(data, content_type=f'image/{ext}')
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
 
 def get_followers_list(current_author):
     followers_list = []
