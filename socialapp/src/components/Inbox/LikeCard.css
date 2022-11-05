@@ -1,0 +1,56 @@
+.like-card {
+    width: 50%;
+    height: fit-content;
+    margin: 0.2em 0em;
+    --bs-card-bg: var(--orange);
+}
+
+.like-card .card:hover {
+    cursor: pointer;
+}
+
+.like-card .card-body {
+    margin-bottom: 0;
+    padding: 1em;
+    color: var(--white-teal);
+    background-color: var(--orange);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border: transparent;
+    border-radius: 11px;
+    width: auto;
+}
+
+.like-card .card-header {
+    background-color: var(--orange);
+}
+
+.like-card .profilePicCard {
+    width: 3em;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    outline: solid var(--orange) 2px;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow:hidden;
+    place-content: center;
+    margin-left: -1.5em;
+}
+
+.like-card .text {
+    color: black;
+    font-size: 1em;
+    display: inline-flex;
+    align-items: center;
+    width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.like-card .card-title {
+    display: flex;
+    gap: 0.5em;
+    align-self: center;
+    margin-bottom: 0;
+}
