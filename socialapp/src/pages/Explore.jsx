@@ -14,6 +14,7 @@ import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
+
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
   if (props.authors) {
