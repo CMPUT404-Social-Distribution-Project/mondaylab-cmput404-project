@@ -8,7 +8,7 @@ from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
 from post.serializers import PostSerializer
-from author.serializers import AuthorSerializer
+from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
@@ -222,17 +222,44 @@ class PostsApiView(GenericAPIView):
                         origin=origin,
                         source=origin,
                     )
-
-                    # if the visibility is 'FRIENDS' send the post to all follower's friends
+                    """
+                    SEND to friends only
+                    if visibility is friends, then send this post to every frineds
+                    """
                     try:
                         friends_list = get_friends_list(authorObj)
+                        print("---", friends_list)
                         for friend in friends_list:
-                            friend_inbox = Inbox.objects.get(author=friend["uuid"])
+                            print("1111")
+                            author = get_author(friend["uuid"])
+                            friend_inbox = Inbox.objects.get(author=author)
+                            print("222")
                             friend_inbox.posts.add(Post.objects.get(id=postId))
+                            print("333")
                     except Exception as e:
                         result =f"Failed to send post {postId} to inbox of friend"
                         return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
                     
+                    """
+                    SEND to followers
+                    if visibility is friends, then send this post to every follower
+                    """
+                    if serialize.data['visibility'].lower()=="public":
+                        try:
+                            followers_list = get_followers_list(authorObj)
+                            for follower in followers_list:
+                                print("1111")
+                                author = get_author(follower["uuid"])
+                                follower_inbox = Inbox.objects.get(author=author)
+                                print("222")
+                                follower_inbox.posts.add(Post.objects.get(id=postId))
+                                print("333")
+                        except Exception as e:
+                            result =f"Failed to send post {postId} to inbox of followers"
+                            return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+
+                        
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
@@ -263,6 +290,29 @@ class AllPostsApiView(GenericAPIView):
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
+def get_followers_list(current_author):
+    followers_list = []
+    # Loop through followers and check if current author is following
+    # This will find all followers
+    try: 
+        for follower in current_author.followers.all():
+            followerObject = Author.objects.get(uuid=follower.uuid)
+            followers_list.append(LimitedAuthorSerializer(followerObject).data)
+    except Exception as e:
+        print(e)
+
+    return followers_list
+
+def get_author(author_id):
+    """
+    Given author id, check if the author exists in database
+    """
+    try:
+        author = Author.objects.get(uuid = author_id)
+        return author
+    except:
+        result = {'detail':"Author Not Found"}
+        return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
 def get_author_url_id(request):
     if "posts" in request.build_absolute_uri():
