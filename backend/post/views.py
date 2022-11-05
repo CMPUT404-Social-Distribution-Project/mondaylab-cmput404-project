@@ -299,7 +299,12 @@ class PostImageApiView(GenericAPIView):
 
     def get(self, request, post_id, author_id):
         try:
-            image_post = Post.objects.get(uuid=post_id, contentType__contains="image")
+            if isAuthorized(request, author_id): 
+                image_post = Post.objects.get(uuid=post_id, contentType__contains="image")
+            elif is_friends(request, author_id):
+                image_post = Post.objects.get(uuid=post_id, contentType__contains="image", visibility__in=['PUBLIC','FRIENDS'])
+            else:
+                image_post = Post.objects.get(uuid=post_id, contentType__contains="image", visibility="PUBLIC")
 
             # decode the base64 image into binary 
             format, imgstr = image_post.content.split(';base64,')
