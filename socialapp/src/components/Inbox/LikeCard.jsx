@@ -1,14 +1,15 @@
 import React, { useContext, useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import useAxios from "../../utils/useAxios";
 import AuthContext from "../../context/AuthContext";
-import PostCard from "../Posts/PostCard";
+import "./LikeCard.css";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { BsCursorFill } from "react-icons/bs";
-
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 export default function LikeCard(props) {
     // pass in the follow request object in props
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
@@ -20,6 +21,10 @@ export default function LikeCard(props) {
     const navigate = useNavigate();
     const routeChange = () => {
         navigate(`/authors/${props.like.author.uuid}/`);
+    }
+    const postRouteChange = () => {
+      var rout = props.like.object.split("authors/")[1]
+      navigate(`/authors/${rout}`);
     }
     useEffect(() => {
       api
@@ -37,40 +42,36 @@ export default function LikeCard(props) {
 
 
   return (
-    <Card className="follow-request-card">
-      <Card.Header
-        onClick={routeChange}
-        >
-        <Card.Title>
+    <Card className="like-card">
+      <Card.Body>
+      <Row>
+        <Col md="auto">
+        <Card.Title onClick={routeChange}>
             <div className="profilePicCard">
             <img id="profilePicCard" src={props.like.author.profileImage} alt="profilePic"/>
             </div>
             <div className="text">{props.like.author.displayName}</div>
         </Card.Title>
-      </Card.Header>
-      <Card.Body>
-          <Popup  trigger={<div> {props.like.summary} <BsCursorFill/></div>} 
-          position="right center"  
-          on="hover"
-          mouseLeaveDelay={0}
-          mouseEnterDelay={100}
-          contentStyle={{ padding: '0px', border: 'none',width:'40em' ,  background:'#1c212b' }}
-          arrow={true}
+        </Col>
+        <Col md="auto"><p className='text'> like your post! </p>
+        </Col>
+        <Col>
+        <Card.Link onClick={postRouteChange}>
+        <Popup
+            trigger={<div><BsCursorFill style={{color: 'white',marginTop: '1em',marginBottom: '1em'}}/> </div>}
+            position="right center"
+            on="hover"
+            closeOnDocumentClick
+            mouseLeaveDelay={300}
+            mouseEnterDelay={0}
+            contentStyle={{ padding: '0px', border: 'none' }}
+            arrow={true}
           >
-            
-            <div>
-              {postsArray.length!=0
-            ? 
-              <PostCard 
-                post = {postsArray}
-                key = {postsArray.id}
-              />
-            
-          : null}
-            </div>
-           
-          </Popup>
-        
+            <span> Click to see Post! </span>
+
+        </Popup>
+      </Card.Link></Col>
+      </Row>
       </Card.Body>
     </Card>
   );
