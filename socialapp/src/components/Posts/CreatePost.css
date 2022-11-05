@@ -7,40 +7,40 @@
     border: none;
 }
 
-.create-post-modal .modal-header{
+.create-post-modal .modal-header {
     border: none;
 }
 
-.create-post-modal  .modal-footer {
+.create-post-modal .modal-footer {
     border: none;
 }
 
-.create-post-modal  .modal-body {
+.create-post-modal .modal-body {
     height: 200%;
     width: auto;
     padding: 15px;
 }
 
-.create-post-modal  .modal-title {
+.create-post-modal .modal-title {
     font-size: 2em;
     color: #BFEFE9;
     border: none;
 }
 
-.create-post-modal  .title {
+.create-post-modal .title {
     font-size: 100em;
     margin-bottom: 1.5%;
 }
 
 
-.create-post-modal  .body {
+.create-post-modal .body {
     font-size: 1em;
     padding-bottom: 15em;
     text-align: left;
 }
 
 
-.create-post-modal  .unlist {
+.create-post-modal .unlist {
     background: transparent;
     border: none;
     color: #BFEFE9;
@@ -49,42 +49,42 @@
     font-size: 85%;
 }
 
-.create-post-modal  .header {
+.create-post-modal .header {
     margin: 0px auto;
 }
 
-.create-post-modal  .header1 {
+.create-post-modal .header1 {
     width: 40%;
     font-size: 110%;
     margin-top: 1%;
     margin-right: -10%;
 }
 
-.create-post-modal  .option {
+.create-post-modal .option {
     background: transparent;
     border: none;
     color: #BFEFE9;
     font-size: 85%;
 }
 
-.create-post-modal  .radio input {
+.create-post-modal .radio input {
     display: none;
 }
 
-.create-post-modal  .image {
+.create-post-modal .image {
     font-size: 200%;
     color: white;
 }
 
-.create-post-modal  .link {
+.create-post-modal .link {
     margin-left: 0.5em;
     font-size: 200%;
     margin-right: auto;
     color: white;
 }
 
-.create-post-modal  .postButton {
-    border-radius: 15px;    
+.create-post-modal .postButton {
+    border-radius: 15px;
     font-size: 150%;
     color: black;
     background-color: #BFEFE9;
@@ -95,4 +95,35 @@
     padding-left: 5%;
     padding-top: 0;
     padding-bottom: 0;
+}
+
+.uri-modal .modal-content {
+    padding-top: 5%;
+    padding-left: 2%;
+    background-color: #1C212B;
+    color: #BFEFE9;
+    min-height: 15em;
+    border: none;
+    min-width: auto;
+}
+
+.uri-modal .modal-header {
+    border: none;
+}
+
+.uri-modal .modal-footer {
+    border: none;
+}
+
+.uri-modal .modal-body {
+    color: #BFEFE9;
+    border: none;
+}
+
+.ok-button {
+    width: 25%;
+    height: 25%;
+    color: black;
+    background-color: #BFEFE9;
+    border-radius: 15px;
 }
