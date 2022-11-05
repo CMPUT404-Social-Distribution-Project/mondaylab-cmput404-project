@@ -78,30 +78,43 @@ export default function Inbox() {
       onSelect={(k) => setKey(k)}
       className="mb-3">
         <Tab eventKey="post" title="Post">
+        {
+        typeof posts !== 'undefined' ? 
+        posts.length!==0 ?
+          posts.map((item) =><PostCard post={item} />)
+        :  <h4>No post yet! </h4>
+          :<h4>No post yet! </h4>
+        }
 
         
       </Tab>
       <Tab eventKey="like" title="Like">
       {
         typeof likes !== 'undefined' ? 
+        likes.length!==0?
           likes.map((item) =><LikeCard like={item} />)
-          : null
+          : <h4>No like yet! </h4>
+        : <h4>No like yet! </h4>  
         }
         
       </Tab>
       <Tab eventKey="comment" title="Comment" >
       {
         typeof comments !== 'undefined' ? 
+        comments.length!==0?
           comments.map((item) =><InboxCommentCard comment={item} />)
-          : null
+          : <h4>No comment yet! </h4>
+        : <h4>No comment yet! </h4>
         }
         
       </Tab>
       <Tab eventKey="Follow-request" title="Follow Request" >
       {
-        typeof followRequests !== 'undefined' ? 
+        typeof followRequests !== 'undefined'? 
+        followRequests.length!==0?
           followRequests.map((item) =><FollowRequestCard followRequest={item} />)
-          : null
+          :<h4>No follow request yet! </h4>
+        : <h4>No follow request yet! </h4>
         }
         
       </Tab>

@@ -25,8 +25,8 @@
 }
 
 .inbox-comment-card .profilePicCard {
-    width: 3em;
-    height: auto;
+    width: 5em;
+    height: 3em;
     aspect-ratio: 1/1;
     border-radius: 100%;
     outline: solid var(--teal) 2px;
@@ -41,11 +41,10 @@
 .inbox-comment-card .text {
     color: black;
     font-size: 1em;
-    display: inline-flex;
     align-items: center;
-    width: 80%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: 100%;
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
 
 .inbox-comment-card .card-title {

@@ -53,12 +53,12 @@ export default function LikeCard(props) {
             <div className="text">{props.like.author.displayName}</div>
         </Card.Title>
         </Col>
-        <Col md="auto"> like your post!
+        <Col md="auto"><p className='text'> like your post! </p>
         </Col>
         <Col>
         <Card.Link onClick={postRouteChange}>
         <Popup
-            trigger={<div><BsCursorFill style={{color: 'white'}}/> </div>}
+            trigger={<div><BsCursorFill style={{color: 'white',marginTop: '1em',marginBottom: '1em'}}/> </div>}
             position="right center"
             on="hover"
             closeOnDocumentClick

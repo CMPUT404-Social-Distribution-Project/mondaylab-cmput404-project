@@ -55,12 +55,12 @@ export default function InboxCommentCard(props) {
             <div className="text">{props.comment.author.displayName}</div>
         </Card.Title>
         </Col>
-        <Col md="auto"> commented your post!
+        <Col md="auto"><p className='text'> commented your post!</p> 
         </Col>
         <Col>
         <Card.Link onClick={postRouteChange}>
         <Popup
-            trigger={<div><BsCursorFill style={{color: 'white'}}/> </div>}
+            trigger={<div><BsCursorFill style={{color: 'white',marginTop: '1em',marginBottom: '1em' }}/> </div>}
             position="right center"
             on="hover"
             closeOnDocumentClick
