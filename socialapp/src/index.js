@@ -16,6 +16,7 @@ import AuthLayout from "./utils/AuthLayout";
 import CreatePost from './components/Posts/CreatePost';
 import Post from "./pages/Post";
 import GithubPage from "./pages/GithubPage"
+import Page404 from "./pages/Page404";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -32,6 +33,7 @@ root.render(
               <Route path='authors/:author_id' element={<Profile/>} />
               <Route path='authors/:author_id/:dir/' element={<Profile/>} />
               <Route path='authors/:author_id/posts/:post_id' element={<Post/>} />
+              <Route path='404' element={<Page404/>} />
             </Route>
           </Route>
           <Route path="/login" element={<Login />} />

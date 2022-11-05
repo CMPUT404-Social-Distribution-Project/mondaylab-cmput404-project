@@ -4,6 +4,7 @@ import "./pages.css";
 import AuthContext from "../context/AuthContext";
 import { useParams, useLocation } from "react-router-dom";
 import PostCard from "../components/Posts/PostCard";
+import { useNavigate } from "react-router-dom";
 
 
 export default function Post() {
@@ -12,6 +13,12 @@ export default function Post() {
   const user_id = localStorage.getItem("user_id");  // the currently logged in author
   const { author_id, post_id } = useParams();                       // gets the author id in the url
   const api = useAxios();
+
+  // route to 404 if post not found
+  const navigate = useNavigate();
+  const routeChange = () => {
+      navigate(`/404`, {state: {refresh:true}});
+  }
 
   // Called after rendering. Fetches data
   useEffect(() => {
@@ -25,6 +32,10 @@ export default function Post() {
         })
         .catch((error) => {
           console.log("Failed to get post of author. " + error);
+          if (error.response && error.response.status === 404) {
+            console.log(error.response.status);
+            routeChange();
+          }
         });
     };
     fetchData();
