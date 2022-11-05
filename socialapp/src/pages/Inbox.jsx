@@ -15,7 +15,6 @@ import Popup from 'reactjs-popup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Toast from 'react-bootstrap/Toast';
-import Button from 'react-bootstrap/Button';
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);      
   const [posts, setPosts] = useState([]);

@@ -15,6 +15,7 @@ import Register from "./pages/authentication/Register"
 import AuthLayout from "./utils/AuthLayout";
 import CreatePost from './components/Posts/CreatePost';
 import Post from "./pages/Post";
+import GithubPage from "./pages/GithubPage"
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -25,6 +26,7 @@ root.render(
             <Route path="/" element={<Main />}>
               <Route path='post' element={<CreatePost/>} />
               <Route path='stream' element={<StreamHome/>} />
+              <Route path='stream/github' element={<GithubPage/>} />
               <Route path='inbox' element={<Inbox/>} />
               <Route path='explore' element={<Explore/>} />
               <Route path='authors/:author_id' element={<Profile/>} />
