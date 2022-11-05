@@ -1,16 +1,31 @@
 .edit-profile-modal .modal-header {
     border-bottom: 0 none;
+    color: var(--teal);
+}
+
+.edit-profile-modal .btn-close {
+    background-color: var(--teal);
+    margin-right: 0rem;
 }
 
 .edit-profile-modal .modal-footer {
     border-top: 0 none;
 }
 
+.edit-profile-modal .form-control {
+    background-color: var(--slightly-darker-blue);
+}
+
 .edit-profile-modal {
     min-width: 35em !important;
     width: 35em !important;
     max-width: 35em !important;
-    transform: translateX(30%) !important;
+    transform: translateX(12%) !important;
+    background-color: var(--dark-blue);
+}
+
+.edit-profile-modal .modal-body {
+    padding: 0rem 1rem;
 }
 
 .edit-profile-button {

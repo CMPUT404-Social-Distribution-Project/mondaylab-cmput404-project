@@ -1,0 +1,55 @@
+.inbox-comment-card {
+    width: 50%;
+    height: fit-content;
+    margin: 0.2em 0em;
+    --bs-card-bg: var(--teal);
+}
+
+.inbox-comment-card .card:hover {
+    cursor: pointer;
+}
+
+.inbox-comment-card .card-body {
+    margin-bottom: 0;
+    padding: 1em;
+    color: var(--white-teal);
+    background-color: var(--teal);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border: transparent;
+    border-radius: 11px;
+    width: auto;
+}
+
+.inbox-comment-card .card-header {
+    background-color: var(--teal);
+}
+
+.inbox-comment-card .profilePicCard {
+    width: 5em;
+    height: 3em;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    outline: solid var(--teal) 2px;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow:hidden;
+    place-content: center;
+    margin-left: -1.5em;
+}
+
+.inbox-comment-card .text {
+    color: black;
+    font-size: 1em;
+    align-items: center;
+    width: 100%;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.inbox-comment-card .card-title {
+    display: flex;
+    gap: 0.5em;
+    align-self: center;
+    margin-bottom: 0;
+}
