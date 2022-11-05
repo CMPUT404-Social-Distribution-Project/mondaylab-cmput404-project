@@ -8,7 +8,9 @@ import PostCard from "../Posts/PostCard";
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import { BsCursorFill } from "react-icons/bs";
-
+import "./InboxCommentCard.css"
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 export default function InboxCommentCard(props) {
     // pass in the follow request object in props
     const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
@@ -21,6 +23,11 @@ export default function InboxCommentCard(props) {
     const routeChange = () => {
         navigate(`/authors/${props.comment.author.uuid}/`);
     }
+    const postRouteChange = () => {
+      var rout = props.like.object.split("authors/")[1]
+      navigate(`/authors/${rout}`);
+    }
+
     useEffect(() => {
       api
           .get(`${baseURL}/authors/${user_id}/posts/${post_uuid}`)
@@ -37,40 +44,36 @@ export default function InboxCommentCard(props) {
 
 
   return (
-    <Card className="follow-request-card">
-      <Card.Header
-        onClick={routeChange}
-        >
-        <Card.Title>
+    <Card className="inbox-comment-card">
+      <Card.Body>
+      <Row>
+        <Col md="auto">
+        <Card.Title onClick={routeChange}>
             <div className="profilePicCard">
             <img id="profilePicCard" src={props.comment.author.profileImage} alt="profilePic"/>
             </div>
             <div className="text">{props.comment.author.displayName}</div>
         </Card.Title>
-      </Card.Header>
-      <Card.Body>
-          <Popup  trigger={<div>Make a comment: { props.comment.comment} <BsCursorFill/></div>} 
-          position="right center"  
-          on="hover"
-          mouseLeaveDelay={0}
-          mouseEnterDelay={100}
-          contentStyle={{ padding: '0px', border: 'none',width:'40em' ,  background:'#1c212b' }}
-          arrow={true}
+        </Col>
+        <Col md="auto"><p className='text'> commented your post!</p> 
+        </Col>
+        <Col>
+        <Card.Link onClick={postRouteChange}>
+        <Popup
+            trigger={<div><BsCursorFill style={{color: 'white',marginTop: '1em',marginBottom: '1em' }}/> </div>}
+            position="right center"
+            on="hover"
+            closeOnDocumentClick
+            mouseLeaveDelay={300}
+            mouseEnterDelay={0}
+            contentStyle={{ padding: '0px', border: 'none' }}
+            arrow={true}
           >
-            
-            <div>
-              {postsArray.length!=0
-            ? 
-              <PostCard 
-                post = {postsArray}
-                key = {postsArray.id}
-              />
-            
-          : null}
-            </div>
-           
-          </Popup>
-        
+            <span> Click to see Post! </span>
+
+        </Popup>
+      </Card.Link></Col>
+      </Row>
       </Card.Body>
     </Card>
   );

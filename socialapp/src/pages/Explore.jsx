@@ -9,7 +9,12 @@ import UserCard from "../components/UserCard"
 import { search2 } from "../utils/searchUtil";
 import "./Explore.css";
 import { FaSearch } from "react-icons/fa";
-import PostCard from "../components/Posts/PostCard";
+import ExplorePostCard from "../components/Posts/ExplorePostCard";
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
+import Container from 'react-bootstrap/Container';
+
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
   if (props.authors) {
@@ -23,6 +28,7 @@ function RenderAuthors(props) {
   }
   return <></>;
 }
+
 export default function Explore() {
   const validate = Yup.object().shape({
     search: Yup.string(),
@@ -45,7 +51,7 @@ export default function Explore() {
         .catch((error) => {
           console.log(error);
         });
-  });
+  }, []);
 
   const search = async val => {
     setLoading(true);
@@ -82,39 +88,85 @@ export default function Explore() {
   }
 
   return (
-    <div className="explore-container">
-      <h1>Explore</h1>
-      <div className="search-bar-container">
-        <FaSearch className="FaSearch"/>
+
+    <Container>
+    {/* Stack the columns on mobile by making one full-width and the other half-width */}
+    <Row>
+      <Col> <h1>Explore</h1> </Col>
+      <Col>
         <input
-            className="search-bar-explore"
-            value={value}
-            onChange={e => onChangeHandler(e)}
-            placeholder="Search for an author"
-            />
-      </div>
-      {<RenderAuthors authors={authors}/>}
-
-
-
-      {
-      value!=="" ? 
-      displaySearch === true ?
+              className="search-bar-explore"
+              value={value}
+              onChange={e => onChangeHandler(e)}
+              placeholder="Search for an author/post"
+              /> 
+      </Col>
+      <Col>
+      <FaSearch className="FaSearch"/> 
+      </Col>
       
-      searchPostsArray.map((post) => (
-      <><p> search result</p>
-      <PostCard
-          post={post}
-          key={post.id} /></>
-      )): <h5> No match result for posts</h5>
-      : postsArray.map((post) => (
-        <PostCard 
-          post={post}
-          key={post.id} />
-      ))
-        }
+      
+    </Row>
+    <div className="searchResult">{value!="" ? <RenderAuthors authors={authors}/>: null} </div>
+    
+    {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
+    <Row>
+      
+      <Col>
+      <Card style={{ width: '100%' , backgroundColor: 'var(--darker-blue)'}}>
+      <Card.Body>
+          {
+                value!="" ? 
+                displaySearch == true ?
+                <><p>Search posts:</p>
+                <Row>
+                  {searchPostsArray.map((post) => (
+                    <Col>
+                          <ExplorePostCard 
+                            post={post}
+                            key={post.id} />
 
 
-    </div>
+                    </Col>
+                  ))}
+                </Row></>: <h1> No match result for posts</h1>
+                : 
+                <><p>Current public posts</p>
+                <Row >
+                      {postsArray.map((post) => (
+                        <Col>
+                              <ExplorePostCard
+                                post={post}
+                                key={post.id} />
+
+                        </Col>
+                      ))}
+                    </Row></>
+              }
+      </Card.Body>
+    </Card>
+
+    
+
+      </Col>
+
+   
+      <Col  xs lg="2">
+      <Card border="success" style={{ width: '18rem', height:'100%', backgroundColor: 'var(--darker-blue)'}}>
+        <Card.Header>Friends</Card.Header>
+        <Card.Body>
+          <Card.Title>Search author</Card.Title>
+          <Card.Text>
+            we can discuss what we need to do here.
+            maybe we can search author here, the left top one is search posts only
+          </Card.Text>
+        </Card.Body>
+      </Card>
+      </Col>
+    </Row>
+
+  </Container>
+    
+
   );
 }

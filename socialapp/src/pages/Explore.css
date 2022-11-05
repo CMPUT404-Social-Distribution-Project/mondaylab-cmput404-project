@@ -1,39 +1,36 @@
 
-.authors-explore-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.search-bar-container {
-    padding: 1em 0em;
-    display: flex;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-}
-
 .search-bar-explore {
     padding: 0.5em 3em;
-    border-radius: 2em;
     width: 20em;
-    display: inline-flex;
-    align-self: center;
     text-align: center;
-    border: solid 1px var(--orange);
-    background-color: var(--dark-blue);
+    background-color: var(--slightly-darker-blue);
     color: var(--white-teal);
-    margin-left: -2em;
-    z-index: 1;
+    border: none;
+    border-bottom:  solid 1px var(--orange);
+    position: relative;
 }
-
 .FaSearch {
-    z-index: 2;
     color: var(--teal);
+    margin-left: 0em;
+    display: flex;
+    align-items: center;
+    height:2em;
+    width:2em;
+
 }
 
 .search-bar-explore:focus {
     outline: none !important;
     border: solid 3px var(--orange);
 
+}
+.custom{
+    width:20em;
+}
+.searchResult{
+    position: relative;
+}
+.public-post{
+    border-style: solid;
+  border-width: medium;
 }
