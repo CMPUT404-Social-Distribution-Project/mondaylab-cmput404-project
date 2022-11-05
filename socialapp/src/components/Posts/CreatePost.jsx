@@ -19,6 +19,7 @@ export default function CreatePost(props) {
     const [authorsArray, setAuthorsArray] = useState([])
     const [input, setInput] = useState('');
     const [filteredArray, setFilteredArray] = useState([])
+    const [imagePost, setImagePost] = useState("");
     const [post, setPost] = useState({
         title: "",
         source: "",
@@ -51,6 +52,7 @@ export default function CreatePost(props) {
 
     const setVisibility = (option) => {
         setPost({...post, visibility: option})
+        setImagePost({...imagePost, visiblity: option})
         if(option === "PUBLIC"){
             setEveActive(true)
             setFriActive(false)
@@ -93,7 +95,9 @@ export default function CreatePost(props) {
      */
 
     const sendPost = () => {
-        api
+        // No image
+        if (imagePost === '') {
+            api
             .post(`${baseURL}/authors/${user_id}/posts/`, post)
             .then((response) => {
                 console.log(response.data);
@@ -104,6 +108,20 @@ export default function CreatePost(props) {
                 alert(`Something went wrong posting! \n Error: ${error}`)
                 console.log(error);
             });
+        } else {
+            // there is an image, then we create an unlisted image post
+            api
+            .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
+            .then((response) => {
+                console.log(response.data);
+                // image post created successfully, now link the post with the image post
+            })
+            .catch((error) => {
+                alert(`Something went wrong posting! \n Error: ${error}`)
+                console.log(error);
+            });
+        }
+
     };
 
     const searchAuthors = (value) => {
@@ -154,6 +172,76 @@ export default function CreatePost(props) {
             }
         }
     }
+
+    const [file, setFile] = useState();
+    const [imagePreview, setImagePreview] = useState('');
+    const [base64, setBase64] = useState('');
+    const [name, setFileName] = useState();
+    const [size, setSize] = useState();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const onImageChange = (e) => {
+        console.log('file', e.target.files[0]);
+        let file = e.target.files[0];
+        if (file) {
+
+            const reader = new FileReader();
+            reader.onload = _handleReaderLoaded;
+            reader.readAsBinaryString(file);
+        }
+    }
+    
+    const _handleReaderLoaded = (readerEvt) => {
+        let binaryString = readerEvt.target.result;
+        setBase64(btoa(binaryString));
+    }
+    
+    const onFileSubmit = (e) => {
+        setIsLoading(true);
+        e.preventDefault();
+        console.log('bine', base64);
+        let payload = { image: base64 };
+        console.log('payload', payload);
+
+        setTimeout(() => {
+            setIsLoading(false)
+        }, 2000);
+    }
+    const imageUpload = (e) => {
+        e.preventDefault();
+        const reader = new FileReader();
+        const file = e.target.files[0];
+        console.log('reader', reader);
+        console.log('file', file);
+        if (reader !== undefined && file !== undefined) {
+          reader.onloadend = () => {
+            setFile(file);
+            setSize(file.size);
+            setFileName(file.name);
+            setImagePreview(reader.result);
+            setImagePost({
+                title: "",
+                source: "",
+                description: "",
+                contentType: file.type,
+                content: reader.result,
+                categories: "",
+                visibility: "PUBLIC",
+                unlisted: true,
+            })
+          }
+          reader.readAsDataURL(file);
+        };
+    };
+
+    const removeImage = () => {
+        setFile('');
+        setImagePreview('');
+        setBase64('');
+        setFileName('');
+        setSize('');
+        setImagePost('');
+    };
 
     return (
         <div class="post-modal">
@@ -265,12 +353,12 @@ export default function CreatePost(props) {
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                        <FaImage className="image" onClick={(e) => {
-                            setPost({
-                                ...post,
-                                contentType: "image",
-                            });
-                        }} />
+                        
+                        {imagePreview === '' ? <FaImage/> : <img src={imagePreview} alt="postImage"/>}
+                        <form onSubmit={(e) => onFileSubmit(e)} onChange={(e) => onImageChange(e)} >
+                            <input type="file" name="file" accept='.jpeg, .png, .jpg' onChange={imageUpload}/>
+                        </form>
+                        {imagePreview === '' ? <></> : <Button className="remove-image" onClick={removeImage}>Remove Image</Button>}
                         <FaLink className="link" onClick={(e) => {
                             setPost({
                                 ...post,
