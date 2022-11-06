@@ -1,23 +1,21 @@
 import React, { useEffect, useState, useContext } from "react";
 import Button from "react-bootstrap/Button";
 import AuthContext from "../../context/AuthContext";
-import axios from "axios";
 import useAxios from "../../utils/useAxios";
 import { useParams, useLocation } from "react-router-dom";
 
-function authorInArray(id, array) {
-  // checks if the given author id is in the array
-  var i;
-  for (i = 0; i < array.length; i++) {
-    if (array[i].id === id) {
-      return true;
-    }
-  }
-  return false;
-}
+// function authorInArray(id, array) {
+//   // checks if the given author id is in the array
+//   var i;
+//   for (i = 0; i < array.length; i++) {
+//     if (array[i].id === id) {
+//       return true;
+//     }
+//   }
+//   return false;
+// }
 
 export default function FollowButton(props) {
-  const [res, setRes] = useState("");
   // if not the current user, make the follow button visible
   const [isNotCurrentUser, setIsNotCurrentUser] = useState(true);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service

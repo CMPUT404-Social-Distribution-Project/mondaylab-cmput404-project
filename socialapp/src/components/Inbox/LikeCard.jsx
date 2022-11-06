@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import { Link, useNavigate, NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAxios from "../../utils/useAxios";
 import AuthContext from "../../context/AuthContext";
 import "./LikeCard.css";

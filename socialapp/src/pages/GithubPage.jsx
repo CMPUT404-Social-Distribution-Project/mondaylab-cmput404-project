@@ -3,12 +3,10 @@ import useAxios from "../utils/useAxios";
 import "./pages.css";
 import "./Profile.css";
 import AuthContext from "../context/AuthContext";
-import { Container } from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Card, Nav } from "react-bootstrap";
+import { Card} from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
@@ -35,7 +33,7 @@ User can only see their own githubs activities */
       .get(`${baseURL}/authors/${user_id}`)
       .then((response) => {
         if (
-          response.data.github.length != 0 &&
+          response.data.github.length !== 0 &&
           response.data.github.match("[^/]+(?!.*/)")
         ) {
           let name = response.data.github.split("com/")[1];
@@ -66,7 +64,7 @@ User can see all githubs from all authors */
         const authorList = response.data.items;
         for (let author of authorList) {
           if (
-            author.github.length != 0 &&
+            author.github.length !== 0 &&
             author.github.match("[^/]+(?!.*/)")
           ) {
             let name = author.github.split("com/")[1];

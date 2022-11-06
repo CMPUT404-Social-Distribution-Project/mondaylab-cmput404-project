@@ -7,7 +7,6 @@ import LikeCard from "../components/Inbox/LikeCard";
 import PostCard from "../components/Posts/PostCard";
 import InboxCommentCard from "../components/Inbox/InboxCommentCard";
 import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs";
 import { BsFillTrashFill } from "react-icons/bs";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
@@ -30,23 +29,7 @@ export default function Inbox() {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
   const api = useAxios();
-  const [key, setKey] = useState("post");
   const [show, setShow] = useState(false);
-
-  function RenderInboxItem(props, type) {
-    // renders a single inbox item based on its type
-    if (props.item.type.toLowerCase() === "follow") {
-      return <FollowRequestCard followRequest={props.item} />;
-    } else if (props.item.type.toLowerCase() === "like") {
-      return <LikeCard like={props.item} />;
-    } else if (props.item.type.toLowerCase() === "comment") {
-      if (props.item.author != null) {
-        return <InboxCommentCard comment={props.item} />;
-      }
-    } else if (props.item.type.toLowerCase() === "post") {
-      return <PostCard post={props.item} />;
-    }
-  }
 
   useEffect(() => {
     const fetchData = async () => {

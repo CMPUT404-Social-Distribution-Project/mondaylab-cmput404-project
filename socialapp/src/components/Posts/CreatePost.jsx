@@ -1,17 +1,15 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import {
   Modal,
   Button,
   Form,
   CloseButton,
   Card,
-  Container,
-  ModalHeader,
 } from "react-bootstrap";
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
-import { FaImage, FaLink } from "react-icons/fa";
+import { FaImage } from "react-icons/fa";
 
 export default function CreatePost(props) {
   const [showURI, setShowURI] = useState(false);

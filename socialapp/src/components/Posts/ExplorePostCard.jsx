@@ -10,7 +10,7 @@ import useAxios from "../../utils/useAxios";
 import { confirmAlert } from "react-confirm-alert";
 import { useEffect } from "react";
 import EditPost from "./EditPost";
-import { BsFillChatFill, BsFillHeartFill, BsCursorFill } from "react-icons/bs";
+import { BsFillHeartFill, BsCursorFill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
@@ -20,10 +20,6 @@ export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_user_id = props.post.author.uuid;
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
-  const { authTokens } = useContext(AuthContext);
-  const [postComment, setPostComment] = useState({
-    comment: "",
-  });
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();
@@ -31,7 +27,6 @@ export default function PostCard(props) {
   const [CommentCount, setCommentCount] = useState(0);
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState("");
-  const [open, openComments] = useState(false);
 
   const navigate = useNavigate();
   const routeChange = () => {

@@ -1,10 +1,8 @@
 import React, { useContext, useState, useEffect } from "react";
-import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import { Link, useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 import useAxios from "../../utils/useAxios";
 import AuthContext from "../../context/AuthContext";
-import PostCard from "../Posts/PostCard";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import { BsCursorFill } from "react-icons/bs";

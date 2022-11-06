@@ -2,11 +2,10 @@ import React, { useEffect, useState, useContext } from 'react';
 import {Container, Nav, Navbar} from "react-bootstrap";
 import Logo from "../../des/logos/logo.svg";
 import LogoText from "../../des/logos/logo-text.svg";
-import {FaBell, FaCog} from "react-icons/fa"
 import axios from "axios";
 import AuthContext from "../../context/AuthContext";
 import "./TopNavbar.css"
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function TopNavbar() {
     const [res, setRes] = useState("");

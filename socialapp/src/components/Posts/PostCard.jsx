@@ -19,7 +19,6 @@ export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_user_id = props.post.author.uuid;
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
-  const { authTokens } = useContext(AuthContext);
   const [postComment, setPostComment] = useState({
     comment: "",
   });

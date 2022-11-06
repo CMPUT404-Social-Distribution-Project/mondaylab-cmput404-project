@@ -1,8 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import "./pages.css";
-import TextField from "../components/TextField";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
+// import * as Yup from "yup";
 import useAxios from "../utils/useAxios.js";
 import AuthContext from "../context/AuthContext";
 import UserCard from "../components/UserCard";
@@ -38,9 +36,9 @@ function RenderAuthors(props) {
 }
 
 export default function Explore() {
-  const validate = Yup.object().shape({
-    search: Yup.string(),
-  });
+  // const validate = Yup.object().shape({
+  //   search: Yup.string(),
+  // });
   const [authors, setAuthors] = useState(null);
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
@@ -119,15 +117,15 @@ export default function Explore() {
         </Col>
       </Row>
       <div className="searchResult">
-        {value != "" ? <RenderAuthors authors={authors} /> : null}{" "}
+        {value !== "" ? <RenderAuthors authors={authors} /> : null}{" "}
       </div>
 
       {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
 
       <Card style={{ backgroundColor: "var(--darker-blue)" }}>
         <Card.Body>
-          {value != "" ? (
-            displaySearch == true ? (
+          {value !== "" ? (
+            displaySearch === true ? (
               <>
                 <p>Search posts:</p>
                 <Row>

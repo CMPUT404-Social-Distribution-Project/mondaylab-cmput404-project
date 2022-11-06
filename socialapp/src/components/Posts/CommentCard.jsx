@@ -1,5 +1,4 @@
 import React from "react";
-import { useEffect, useState } from "react";
 import { Card } from "react-bootstrap";
 import "./CommentCard.css";
 import { useNavigate } from "react-router-dom";

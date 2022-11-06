@@ -53,7 +53,6 @@ export default function Profile() {
   const [followersArray, setFollowersArray] = useState(""); 
   const [friendsArray, setFriendsArray] = useState(""); 
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
-  const user_id = localStorage.getItem("user_id");  // the currently logged in author
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 

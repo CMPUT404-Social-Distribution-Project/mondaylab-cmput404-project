@@ -1,17 +1,14 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import {
   Modal,
   Button,
   Form,
   CloseButton,
-  Card,
-  Container,
-  ModalHeader,
 } from "react-bootstrap";
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
-import { FaImage, FaLink } from "react-icons/fa";
+import { FaImage } from "react-icons/fa";
 
 export default function EditPost(props) {
   const [showURI, setShowURI] = useState(false);
@@ -30,9 +27,6 @@ export default function EditPost(props) {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const api = useAxios();
   const user_id = localStorage.getItem("user_id");
-  const [authorsArray, setAuthorsArray] = useState([]);
-  const [input, setInput] = useState("");
-  const [filteredArray, setFilteredArray] = useState([]);
   const [imagePost, setImagePost] = useState(null);
   const [uri, setURI] = useState("");
   // const [post, setPost] = useState({

@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useContext } from "react";
+import React from "react";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileTabs(props) {
   const navigate = useNavigate();

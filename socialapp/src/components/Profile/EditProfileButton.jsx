@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Formik, Form } from "formik";
@@ -6,7 +6,6 @@ import TextField from "../TextField";
 import * as Yup from "yup";
 import useAxios from "../../utils/useAxios.js";
 import AuthContext from "../../context/AuthContext";
-import Toast from "react-bootstrap/Toast";
 import "./EditProfileButton.css";
 
 function VerticallyCenteredModal(props) {

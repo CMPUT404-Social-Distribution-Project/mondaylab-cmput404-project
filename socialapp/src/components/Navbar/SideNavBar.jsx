@@ -1,5 +1,4 @@
-import React, { Component, useContext, useState } from "react";
-import { Modal, Button, InputGroup, Form } from "react-bootstrap";
+import React, { useContext, useState } from "react";
 import "./SideNavBar.css";
 import { FaHome, FaInbox, FaSearch, FaSignOutAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
@@ -43,7 +42,7 @@ export default function Sidebar() {
             <li>
                 <Link to="/stream">
                     <a
-                        href="#"
+                        href="/"
                         class="nav-link py-3"
                         title="Stream"
                         data-bs-toggle="tooltip"
@@ -56,7 +55,7 @@ export default function Sidebar() {
             <li>
                 <Link to="/inbox">
                     <a
-                        href="#"
+                        href="/"
                         class="nav-link py-3"
                         title="Inbox"
                         data-bs-toggle="tooltip"
@@ -69,7 +68,7 @@ export default function Sidebar() {
             <li>
                 <Link to="/explore">
                     <a
-                        href="#"
+                        href="/"
                         class="nav-link py-3"
                         title="Explore"
                         data-bs-toggle="tooltip"
