@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Dropdown, InputGroup, Form, Button, Container } from 'react-bootstrap';
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete } from "react-icons/md";
+import { IoUnlink } from "react-icons/io5"
 import Card from 'react-bootstrap/Card';
 import AuthContext from '../../context/AuthContext';
 import "./PostCard.css";
@@ -12,8 +13,7 @@ import { useEffect } from 'react';
 import EditPost from "./EditPost";
 import CommentCard from './CommentCard';
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -31,11 +31,27 @@ export default function PostCard(props) {
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState(""); 
   const [open, openComments] = useState(false)
+  // if the post is an image post, don't show it's content,
+  // since it contains a base64 string. Which is very long.
+  const [showContent, setShowContent] = useState(() => {
+    if (props.post.contentType.startsWith("image")) {
+      return false
+    } else {
+      return true
+    }
+  })
   
+  // for navigating to post's author
   const navigate = useNavigate();
   const routeChange = () => {
       navigate(`/authors/${post_user_id}/`, {state: {refresh:true}});
   }
+
+  // for refreshing the page of where the post card is
+  const location = useLocation();
+  const refreshState = () => {
+      navigate(`${location.pathname}`, {state: {refresh:true}});
+  };
 
   const sendPostLike=(uuid) => {
     const postLike ={"type": "like", 
@@ -50,7 +66,7 @@ export default function PostCard(props) {
       setLikeCount(likeCount=> likeCount+1)
     })
     .catch((error) => {
-      console.log("Failed to get posts of author. " + error);
+      console.log(error);
     });
   };
 
@@ -183,28 +199,34 @@ export default function PostCard(props) {
           </div>
           <div className="post-author-name">{props.post.author.displayName}</div>
         </div>
+        {props.post.unlisted === true ? <div className="unlisted-indicator">
+          <IoUnlink/>
+          Unlisted
+        </div> : <div className="unlisted-indicator" style={{background:"none"}}/>}
         <PostOptions />
-        {showEditPost && <EditPost show={showEditPost} onHide={() => setShowEditPost(false)} post={props.post} />}
+        {showEditPost && <EditPost show={showEditPost} onHide={() => {setShowEditPost(false); refreshState(navigate, location);}} post={props.post} />}
 
       </Card.Header>
-      <Card.Img variant="top" src="" />
       <Card.Body>
         <Card.Title>
           <ReactMarkdown>{props.post.title}</ReactMarkdown>
         </Card.Title>
+        {props.post.image && <img className="post-image" src={props.post.image} alt="postImage"/>}
         <Card.Text>
-          <ReactMarkdown>{props.post.content}</ReactMarkdown>
+          {showContent && <ReactMarkdown>{props.post.content}</ReactMarkdown>}
         </Card.Text>
         <hr/>
-        <div> 
+        <div className='like-comment-container'> 
           <BsFillHeartFill 
-          style={{color:likeCount!=0? "var(--orange)": "white"}}
+          className='like-icon'
+          style={{color:likeCount!==0? "var(--orange)": "var(--white-teal)"}}
           onClick={() => sendPostLike(props.post.uuid)}
           />
           
-       {likeCount==0? 0: likeCount}
+       {likeCount===0? 0: likeCount}
        
         <BsFillChatFill 
+        className='comment-icon'
        style={{color:CommentCount!==0? "var(--teal)": "var(--white-teal)" , marginLeft:'30px'}}
        onClick={() => openComments(!open)}
        />
@@ -215,7 +237,7 @@ export default function PostCard(props) {
         open?
           <div className="comments-text">
                         Comments
-                      <div className="comments" style={{marginTop: "5%"}}>
+                      <div className="comments" style={{marginTop: "1rem"}}>
                         <Container>
                           {(() => {
                             if(comments.length === 0){

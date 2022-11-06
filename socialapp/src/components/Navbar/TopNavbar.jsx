@@ -49,8 +49,7 @@ function TopNavbar() {
                     />
                 </Navbar.Brand>
                 <Nav className="ml-auto">
-                    <Nav.Link href="#home"><FaBell size={30}/>&emsp; </Nav.Link>
-                    <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link>
+                    {/* <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link> */}
                     <span id="profilePicContainer" onClick={routeChange}
                     >
                         <img id="profilePic" src={res.profileImage} alt="profilepic"/>

@@ -3,13 +3,21 @@ import { Modal, Button, InputGroup, Form } from "react-bootstrap";
 import "./SideNavBar.css";
 import { FaHome, FaInbox, FaSearch, FaSignOutAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import CreatePost from "../Posts/CreatePost";
+
 
 export default function Sidebar() {
     const { logoutUser } = useContext(AuthContext);
     const [newPost, setNewPost] = useState(false);
+    
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const refreshState = (navigate, location) => {
+        navigate(`${location.pathname}`, {state: {refresh:true}});
+    }
 
     return (
         <ul
@@ -29,7 +37,7 @@ export default function Sidebar() {
                 >
                     <MdEdit />
                 </div>
-                {newPost && <CreatePost show={newPost} onHide={() => setNewPost(false)}/>}
+                {newPost && <CreatePost show={newPost} onHide={() => {setNewPost(false); refreshState(navigate, location);}}/>}
 
             </li>
             <li>

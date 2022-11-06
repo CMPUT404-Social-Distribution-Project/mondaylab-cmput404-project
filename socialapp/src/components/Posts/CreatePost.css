@@ -85,9 +85,11 @@
 
 .create-post-modal .postButton {
     border-radius: 15px;
-    font-size: 150%;
-    color: black;
-    background-color: #BFEFE9;
+    font-size: 1rem;
+    font-family: "Readex Pro Bold";
+    color: var(--dark-blue);
+    background-color: var(--teal);
+    border-radius: 2rem;
 }
 
 #modal-header {
@@ -126,4 +128,45 @@
     color: black;
     background-color: #BFEFE9;
     border-radius: 15px;
+}
+
+.create-post-modal .image-preview {
+    width: 8em;
+    height: auto;
+    /* aspect-ratio: 1/1; */
+    border-radius: 11px;
+    text-align: center;
+    display: flex;
+    overflow:hidden;
+    place-content: center;
+    outline: solid var(--orange) 2px;
+    margin-left: 1rem;
+    margin-top: 1rem;
+}
+
+.create-post-modal .image-upload {
+    width: 3rem;
+    height:auto;
+    padding: 0rem 0.5rem;
+    color: var(--teal);
+}
+
+.create-post-modal .image-upload:hover {
+    cursor: pointer;
+    color: var(--teal-alt);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.image-upload-container {
+    display: flex;
+    margin-right: auto;
+    gap: 0.5rem;
+}
+
+.remove-image {
+    font-size: 0.7rem;
+    border-radius: 2rem;
+    background-color: var(--orange);
+    outline: none;
+    border: none;
 }
