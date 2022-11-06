@@ -123,7 +123,7 @@ export default function Inbox() {
                     marginRight: "1em",
                   }}
                   onClick={clearInbox}
-                />{" "}
+                />
               </div>
             }
             position="bottom center"
@@ -169,7 +169,7 @@ export default function Inbox() {
                 <Tab.Pane eventKey="post">
                   {typeof posts !== "undefined" ? (
                     posts.length !== 0 ? (
-                      posts.map((item) => <PostCard post={item} />)
+                      posts.map((item, i) => <PostCard post={item} key={i}/>)
                     ) : (
                       <h4>No post yet! </h4>
                     )
@@ -180,7 +180,7 @@ export default function Inbox() {
                 <Tab.Pane eventKey="like">
                   {typeof likes !== "undefined" ? (
                     likes.length !== 0 ? (
-                      likes.map((item) => <LikeCard like={item} />)
+                      likes.map((item, i) => <LikeCard like={item} key={i}/>)
                     ) : (
                       <h4>No like yet! </h4>
                     )
@@ -191,8 +191,8 @@ export default function Inbox() {
                 <Tab.Pane eventKey="comment">
                   {typeof comments !== "undefined" ? (
                     comments.length !== 0 ? (
-                      comments.map((item) => (
-                        <InboxCommentCard comment={item} />
+                      comments.map((item, i) => (
+                        <InboxCommentCard comment={item} key={i}/>
                       ))
                     ) : (
                       <h4>No comment yet! </h4>
@@ -204,8 +204,8 @@ export default function Inbox() {
                 <Tab.Pane eventKey="follow">
                   {typeof followRequests !== "undefined" ? (
                     followRequests.length !== 0 ? (
-                      followRequests.map((item) => (
-                        <FollowRequestCard followRequest={item} />
+                      followRequests.map((item, i) => (
+                        <FollowRequestCard followRequest={item} kley={i}/>
                       ))
                     ) : (
                       <h4>No follow request yet! </h4>

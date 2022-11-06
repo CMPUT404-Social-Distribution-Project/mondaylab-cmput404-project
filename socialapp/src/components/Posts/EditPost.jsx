@@ -234,7 +234,7 @@ export default function EditPost(props) {
 
   return (
     <>
-      <div class="post-modal">
+      <div className="post-modal">
         <Modal
           size="lg"
           show={props.show}
@@ -270,7 +270,7 @@ export default function EditPost(props) {
                     setVisibility("PUBLIC");
                   }}
                 >
-                  Everyone{" "}
+                  Everyone
                 </Button>
                 <Button
                   type="button"
@@ -285,7 +285,7 @@ export default function EditPost(props) {
                     setVisibility("FRIENDS");
                   }}
                 >
-                  Friends-Only{" "}
+                  Friends-Only
                 </Button>
                 <Button
                   type="button"
@@ -422,8 +422,8 @@ export default function EditPost(props) {
                 props.onHide();
               }}
             >
-              {" "}
-              OK!{" "}
+              
+              OK!
             </Button>
           </Modal.Footer>
         </Modal>

@@ -11,7 +11,7 @@ export default function Main() {
       <TopNavBar />
       <div className="main">
           <SideNavBar />
-          <div class="main-content-container">
+          <div className="main-content-container">
             <Outlet />
           </div>
       </div>

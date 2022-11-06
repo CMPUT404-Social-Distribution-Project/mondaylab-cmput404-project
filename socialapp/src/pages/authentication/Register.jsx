@@ -58,7 +58,7 @@ export default function Register() {
                 <Form className='form'>
                     <h3 className="Auth-form-title">Signup</h3>
                     <div className="text-center">
-                        Already registered?{" "}
+                        Already registered?
                         <span id="reg-login" class="link-primary" onClick={() => navigate("/login")}>
                             Login
                         </span>

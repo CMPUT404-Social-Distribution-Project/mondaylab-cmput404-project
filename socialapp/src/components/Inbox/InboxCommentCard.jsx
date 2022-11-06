@@ -69,7 +69,7 @@ export default function InboxCommentCard(props) {
                       marginRight: "1em",
                     }}
                     onClick={postRouteChange}
-                  />{" "}
+                  />
                 </button>
               }
               position="right center"

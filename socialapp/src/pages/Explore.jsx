@@ -20,7 +20,7 @@ function RenderAuthors(props) {
       <div className="authors-explore-container">
         {typeof props.authors.items !== "undefined" ? (
           props.authors.items.length !== 0 ? (
-            props.authors.items.map((author) => <UserCard author={author} />)
+            props.authors.items.map((author) => <UserCard author={author} key={author.id}/>)
           ) : (
             <Card style={{ backgroundColor: "var(--darker-blue)" }}>
               <h1 style={{ marginLeft: "15px" }}>
@@ -101,8 +101,7 @@ export default function Explore() {
       {/* Stack the columns on mobile by making one full-width and the other half-width */}
       <Row>
         <Col>
-          {" "}
-          <h1>Explore</h1>{" "}
+          <h1>Explore</h1>
         </Col>
         <Col>
           <input
@@ -117,7 +116,7 @@ export default function Explore() {
         </Col>
       </Row>
       <div className="searchResult">
-        {value !== "" ? <RenderAuthors authors={authors} /> : null}{" "}
+        {value !== "" ? <RenderAuthors authors={authors} /> : null}
       </div>
 
       {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
@@ -130,8 +129,8 @@ export default function Explore() {
                 <p>Search posts:</p>
                 <Row>
                   {searchPostsArray.map((post) => (
-                    <Col>
-                      <ExplorePostCard post={post} key={post.id} />
+                    <Col key={post.id} >
+                      <ExplorePostCard post={post} />
                     </Col>
                   ))}
                 </Row>
@@ -144,8 +143,8 @@ export default function Explore() {
               <p>Current public posts</p>
               <Row>
                 {postsArray.map((post) => (
-                  <Col>
-                    <ExplorePostCard post={post} key={post.id} />
+                  <Col key={post.id}>
+                    <ExplorePostCard post={post} />
                   </Col>
                 ))}
               </Row>

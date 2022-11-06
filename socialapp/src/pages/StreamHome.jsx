@@ -61,7 +61,7 @@ export default function StreamHome() {
                     marginRight: "1em",
                   }}
                   onClick={routeChange}
-                />{" "}
+                />
               </button>
             }
             on="hover"
@@ -73,7 +73,7 @@ export default function StreamHome() {
         </Col>
       </Row>
       <Container style={{ zIndex: 10 }}>
-        <div classNme="posts">
+        <div className="posts">
           {postsArray.map((post) => (
             <PostCard post={post} key={post.id} />
           ))}

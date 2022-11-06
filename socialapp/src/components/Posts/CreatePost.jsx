@@ -165,9 +165,9 @@ export default function CreatePost(props) {
       );
     } else {
       if (input.length > 1) {
-        filteredArray.map((item) => {
+        filteredArray.map((item, i) => {
           return (
-            <Card>
+            <Card key={i}>
               <Card.Body>
                 {item.profileImage}
                 {item}
@@ -176,9 +176,9 @@ export default function CreatePost(props) {
           );
         });
       } else {
-        authorsArray.map((item) => {
+        authorsArray.map((item, i) => {
           return (
-            <Card>
+            <Card key={i}>
               <Card.Body>
                 {item.profileImage}
                 {item.displayName}
@@ -261,7 +261,7 @@ export default function CreatePost(props) {
 
   return (
     <>
-      <div class="post-modal">
+      <div className="post-modal">
         <Modal
           size="lg"
           show={props.show}
@@ -297,7 +297,7 @@ export default function CreatePost(props) {
                     setVisibility("PUBLIC");
                   }}
                 >
-                  Everyone{" "}
+                  Everyone
                 </Button>
                 <Button
                   type="button"
@@ -312,7 +312,7 @@ export default function CreatePost(props) {
                     setVisibility("FRIENDS");
                   }}
                 >
-                  Friends-Only{" "}
+                  Friends-Only
                 </Button>
                 <Button
                   type="button"
@@ -447,8 +447,7 @@ export default function CreatePost(props) {
                 props.onHide();
               }}
             >
-              {" "}
-              OK!{" "}
+              OK!
             </Button>
           </Modal.Footer>
         </Modal>

@@ -227,7 +227,7 @@ export default function PostCard(props) {
                   <BsCursorFill
                     style={{ color: "white" }}
                     onClick={postRouteChange}
-                  />{" "}
+                  />
                 </button>
               }
               position="bottom center"

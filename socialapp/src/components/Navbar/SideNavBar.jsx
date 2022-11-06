@@ -21,12 +21,11 @@ export default function Sidebar() {
     return (
         <ul
             id="sidebar"
-            class="nav nav-pills nav-flush flex-column mb-auto text-center"
+            className="nav nav-pills nav-flush flex-column mb-auto text-center"
         >
-            <li class="nav-item">
+            <li className="nav-item">
          
-                <div
-                    class="nav-link active py-3"
+                <div  
                     className="create-post-button"
                     aria-current="page"
                     title="Create Post"
@@ -43,7 +42,7 @@ export default function Sidebar() {
                 <Link to="/stream">
                     <a
                         href="/"
-                        class="nav-link py-3"
+                        className="nav-link py-3"
                         title="Stream"
                         data-bs-toggle="tooltip"
                         data-bs-placement="right"
@@ -56,7 +55,7 @@ export default function Sidebar() {
                 <Link to="/inbox">
                     <a
                         href="/"
-                        class="nav-link py-3"
+                        className="nav-link py-3"
                         title="Inbox"
                         data-bs-toggle="tooltip"
                         data-bs-placement="right"
@@ -69,7 +68,7 @@ export default function Sidebar() {
                 <Link to="/explore">
                     <a
                         href="/"
-                        class="nav-link py-3"
+                        className="nav-link py-3"
                         title="Explore"
                         data-bs-toggle="tooltip"
                         data-bs-placement="right"
@@ -78,7 +77,7 @@ export default function Sidebar() {
                     </a>
                 </Link>
             </li>
-            <hr class="solid" />
+            <hr className="solid" />
             <div className="signout">
                 <FaSignOutAlt 
                     onClick={() => logoutUser()}

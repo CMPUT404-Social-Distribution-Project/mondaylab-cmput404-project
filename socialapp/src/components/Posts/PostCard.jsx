@@ -281,8 +281,9 @@ export default function PostCard(props) {
                     } else {
                       return (
                         <div>
-                          {comments.map((comment) => (
+                          {comments.map((comment, i) => (
                             <CommentCard
+                              key={i}
                               author={comment.author}
                               comment={comment.comment}
                             />

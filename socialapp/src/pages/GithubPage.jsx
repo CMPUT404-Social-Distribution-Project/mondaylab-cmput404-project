@@ -135,7 +135,7 @@ User can see all githubs from all authors */
                       <div>
                         <p> To: {activity.repo.name}</p>
                         <p>
-                          Commit:{" "}
+                          Commit:
                           {typeof activity.payload.commits !== "undefined" ? (
                             activity.payload.commits[0].message
                           ) : (
@@ -181,7 +181,7 @@ User can see all githubs from all authors */
                       <div>
                         <p> To: {activity.repo.name}</p>
                         <p>
-                          Commit:{" "}
+                          Commit:
                           {typeof activity.payload.commits !== "undefined" ? (
                             activity.payload.commits[0].message
                           ) : (

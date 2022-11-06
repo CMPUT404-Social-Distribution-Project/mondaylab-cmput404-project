@@ -16,7 +16,7 @@ function ProfilePosts(props) {
     <div className="posts-container-profile">
     {
       typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard post={post} />)
+        props.postsArray.items.map((post) => <PostCard post={post} key={post.id}/>)
         : null
     }
     </div>
@@ -28,7 +28,7 @@ function ProfileFollowers(props) {
     <div className="followers-container-profile">
     {
       typeof props.followersArray.items !== 'undefined' ? 
-        props.followersArray.items.map((follower) => <UserCard author={follower}/>)
+        props.followersArray.items.map((follower,i) => <UserCard author={follower} key={i}/>)
         : null
     }
     </div>
@@ -40,7 +40,7 @@ function ProfileFriends(props) {
     <div className="friends-container-profile">
     {
       typeof props.friendsArray.items !== 'undefined' ? 
-        props.friendsArray.items.map((friend) => <UserCard author={friend}/>)
+        props.friendsArray.items.map((friend, i) => <UserCard author={friend} key={i}/>)
         : null
     }
     </div>
