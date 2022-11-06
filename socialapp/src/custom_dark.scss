@@ -32,7 +32,12 @@ $theme-colors: (
     "slightly-darker-blue": #1C212B,
     "darker-blue": #1A1C1E,
     "even-darker-blue": #111418,
-    "white-teal": #ECFAF8
+    "white-teal": #ECFAF8,
+    "primary": #BFEFE9,
+    "secondary": #FFC271,
+    "btn-color": #FFC271,
+    "danger": #f5a53d,
+    "bg-dark": #242A37,
 );
 
 :root {
@@ -41,7 +46,7 @@ $theme-colors: (
   --teal-alt: #84c2bb;
   --dark-blue: #242A37;
   --slightly-darker-blue: #1C212B;
-  --darker-blue: #14181f;
+  --darker-blue: #191d26;
   --even-darker-blue: #0e1016;
   --white-teal: #ECFAF8;
 }
