@@ -79,7 +79,6 @@ class InboxApiView(GenericAPIView):
         if the type is “like” then add that like to AUTHOR_ID’s inbox
         if the type is “comment” then add that comment to AUTHOR_ID’s inbox  
         """
-        print("===", request.data)
         try:
             author = get_author(author_id)
             inbox , created= Inbox.objects.get_or_create(author=author)

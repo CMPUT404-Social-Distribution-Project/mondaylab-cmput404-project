@@ -27,11 +27,9 @@ export default function Post() {
         .get(`${baseURL}/authors/${author_id}/posts/${post_id}`)
         .then((response) => {
           setPost(response.data);
-          console.log("Got post of author")
           console.log(response.data);
         })
         .catch((error) => {
-          console.log("Failed to get post of author. " + error);
           if (error.response && error.response.status === 404) {
             console.log(error.response.status);
             routeChange();

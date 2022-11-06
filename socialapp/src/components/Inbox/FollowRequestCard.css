@@ -33,7 +33,7 @@
     text-align: center;
     display: flex;
     color: var(--white-teal);
-    overflow:hidden;
+    overflow: hidden;
     place-content: center;
 }
 

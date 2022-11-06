@@ -1,7 +1,8 @@
 .post-card-explore {
-    width:20rem;
-    height:18rem;
+    width: 20rem;
+    height: 18rem;
     margin-block: 10px;
+    margin-left: 10px;
     border-color: none;
 }
 
@@ -10,7 +11,7 @@
     align-items: center;
     background-color: var(--slightly-darker-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-    
+
 }
 
 .post-card-explore .profile-pic-post {
@@ -22,7 +23,7 @@
     text-align: center;
     display: flex;
     color: var(--white-teal);
-    overflow:hidden;
+    overflow: hidden;
     place-content: center;
 }
 
@@ -30,26 +31,17 @@
     display: inline-flex;
     align-items: center;
     gap: 1rem;
-    
+
 }
+
 .post-card-explore .post-author-name {
     display: inline-flex;
     align-items: center;
     gap: 1rem;
-    width:100px;
+    width: 100px;
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;
-}
-.post-card-explore .card-title {
-    font-size: 2rem;
-    text-decoration: var(--teal);
-    white-space: pre-line;
-    min-block-size: 2rem;
-    max-block-size: 2rem;
-    overflow-y: hidden;
-    text-overflow: ellipsis;
-
 }
 
 .post-card-explore .card-body {
@@ -58,19 +50,34 @@
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
     border-radius: 0px 0px 2px 2px;
-    overflow-y: hidden;
-    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.post-card-explore .card-title {
+    font-size: 2rem;
+    text-decoration: var(--teal);
+    height: 2.5rem;
+    width: inherit;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 
 }
+
+
 .post-card-explore .card-text {
     text-decoration: var(--teal);
     white-space: pre-line;
     min-block-size: 6rem;
     max-block-size: 6rem;
-    overflow-y: hidden;
-    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 
 }
+
 .post-card-explore .comments-text {
     color: var(--teal);
 }

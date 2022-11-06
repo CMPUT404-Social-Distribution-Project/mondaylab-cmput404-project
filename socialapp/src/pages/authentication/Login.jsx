@@ -39,7 +39,6 @@ export default function Login() {
                 }}
                 validationSchema={validate}
                 onSubmit={(values) => {
-                    console.log(values);
                     const username = values.username;
                     const password = values.password;
                     loginUser(username, password);

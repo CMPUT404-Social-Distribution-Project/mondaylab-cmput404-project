@@ -55,7 +55,7 @@ def is_friends(request, author_id):
     if res is not None:
         user, token = res
         requesterID = user.id           # the current user that is viewing the author on the screen
-        print(f"YES OVVVVVVVVVVVVVVVVVVEEEEEEEEEEEEEEEEEEEEEEEER: {requesterID}")
+        
         try:
             author = Author.objects.get(id=author_id)
             requester_author = Author.objects.get(id=requesterID)
@@ -68,7 +68,6 @@ def is_friends(request, author_id):
             else:
                 return False
         except Exception as e:
-            print(f"ERRORrRRRRRRRRRRRRRRRRRRRRRRR: {e}")
             return False
 
 def check_friend(author_id, foreign_id):
