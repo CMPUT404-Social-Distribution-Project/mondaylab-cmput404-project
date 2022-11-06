@@ -8,6 +8,13 @@ import PostCard from "../components/Posts/PostCard";
 import InboxCommentCard from '../components/Inbox/InboxCommentCard';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import { BsFillTrashFill } from "react-icons/bs";
+import { confirmAlert } from 'react-confirm-alert';
+import "react-confirm-alert/src/react-confirm-alert.css";
+import Popup from 'reactjs-popup';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Toast from 'react-bootstrap/Toast';
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);      
   const [posts, setPosts] = useState([]);
@@ -17,7 +24,8 @@ export default function Inbox() {
   const { baseURL } = useContext(AuthContext);   // our api url http://127.0.0.1/service
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
   const api = useAxios();
-  const [key, setKey] = useState('post');    
+  const [key, setKey] = useState('post');  
+  const [show, setShow] = useState(false);  
 
   function RenderInboxItem(props, type) {
     // renders a single inbox item based on its type
@@ -69,9 +77,61 @@ export default function Inbox() {
     };
     fetchData();
   }, []);
+
+  const clearInbox = ()=>{
+    confirmAlert({
+      title: 'Confirm to delete',
+      message: 'Are you sure to clear inbox?',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => deleteInbox(),                        
+        },
+        {
+          label: 'No',
+        }
+      ]
+    });
+  }
+  const deleteInbox =()=>{
+    api.delete(`${baseURL}/authors/${user_id}/inbox/`)
+      .then((response)=>
+      setShow(true),
+      setPosts([]),
+      setComments([]),
+      setLikes([]),
+      setFollowRequests([]),
+      ).catch((error)=> {
+        console.log(error)
+      })
+  }
+
   return (
     <div className="inbox-container">
-      <h1>Inbox</h1>
+      <Row xs='auto'>
+        <Col>
+        <h1>Inbox</h1>
+        </Col>
+        <Col>
+        
+        <Popup
+            trigger={<div><BsFillTrashFill style={{color: 'white',marginTop: '1em',marginBottom: '1em', marginRight:'1em'}}
+            onClick={clearInbox}
+            /> </div>}
+            position="bottom center"
+            on="hover"
+            closeOnDocumentClick
+            contentStyle={{ padding: '0px', border: 'none', color:'black' }}
+            arrow={true}
+          >
+            <span> Click to clear inbox! </span>
+
+        </Popup>
+        </Col>
+      </Row>
+
+      
+      
       <div className="inbox-items-container">
       <Tabs id="controlled-tab-example"
       activeKey={key}
@@ -118,10 +178,19 @@ export default function Inbox() {
         }
         
       </Tab>
-
         </Tabs>
-     
       </div>
+      <Toast onClose={() => setShow(false)} show={show} delay={1500} autohide>
+          <Toast.Header>
+            <img
+              src="holder.js/20x20?text=%20"
+              className="rounded me-2"
+              alt=""
+            />
+            <strong className="me-auto">Bootstrap</strong>
+          </Toast.Header>
+          <Toast.Body>You successfully delet inbox!</Toast.Body>
+        </Toast>
     </div>
   );
 }
