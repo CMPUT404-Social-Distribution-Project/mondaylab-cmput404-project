@@ -306,6 +306,10 @@ class PostImageApiView(GenericAPIView):
             else:
                 image_post = Post.objects.get(uuid=post_id, contentType__contains="image", visibility="PUBLIC")
 
+            
+            if "base64" not in image_post.content:
+                return response.Response(f"Content of this post is not a base64 encoded string.", status=status.HTTP_400_BAD_REQUEST)
+                
             # decode the base64 image into binary 
             format, imgstr = image_post.content.split(';base64,')
             ext = format.split('/')[-1]
