@@ -47,7 +47,6 @@ export default function Register() {
             }}
             validationSchema={validate}
             onSubmit={(values)=> {
-                console.log(values);
                 const username = values.username;
                 const password = values.password;
                 const github = values.github;

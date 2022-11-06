@@ -63,7 +63,6 @@ export default function Inbox() {
             }
           }
 
-          console.log("Got inbox of author");
         })
         .catch((error) => {
           console.log("Failed to get inbox of author. " + error);

@@ -22,7 +22,6 @@ function TopNavbar() {
         axios
           .get(baseURL + `/authors/${user_id}/`)
           .then((response) => {
-            console.log(response.data);
             setRes(response.data);
           })
           .catch((error) => {

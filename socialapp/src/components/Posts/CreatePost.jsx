@@ -94,8 +94,6 @@ export default function CreatePost(props) {
       api
         .post(`${baseURL}/authors/${user_id}/posts/`, post)
         .then((response) => {
-          console.log(response.data);
-          console.log(post.unlisted);
           if (post.unlisted) {
             setURI(
               `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
@@ -114,7 +112,6 @@ export default function CreatePost(props) {
       await api
         .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
         .then((response) => {
-          console.log(response.data);
           // image post created successfully, now link the post with the image post
 
           // set the image field
@@ -126,7 +123,6 @@ export default function CreatePost(props) {
           return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
         })
         .then((response) => {
-          console.log("Created new post", response.data);
           if (post.unlisted) {
             setURI(
               `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
@@ -161,7 +157,6 @@ export default function CreatePost(props) {
   };
 
   function CheckInputLength() {
-    console.log(authorsArray);
     if (authorsArray.length === 0) {
       return (
         <Card>
@@ -203,7 +198,6 @@ export default function CreatePost(props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const onImageChange = (e) => {
-    console.log("file", e.target.files[0]);
     let file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -220,9 +214,7 @@ export default function CreatePost(props) {
   const onFileSubmit = (e) => {
     setIsLoading(true);
     e.preventDefault();
-    console.log("bine", base64);
     let payload = { image: base64 };
-    console.log("payload", payload);
 
     setTimeout(() => {
       setIsLoading(false);
@@ -232,8 +224,6 @@ export default function CreatePost(props) {
     e.preventDefault();
     const reader = new FileReader();
     const file = e.target.files[0];
-    console.log("reader", reader);
-    console.log("file", file);
     if (reader !== undefined && file !== undefined) {
       reader.onloadend = () => {
         setFile(file);

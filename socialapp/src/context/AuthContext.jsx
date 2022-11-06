@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("authTokens", JSON.stringify(data));
         setLoginLoading(false);
       } else {
-        console.log(data);
         alert("ERROR: " + data);
         setLoginLoading(null);
       }

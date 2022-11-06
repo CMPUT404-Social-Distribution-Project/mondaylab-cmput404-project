@@ -104,7 +104,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
             # check if the requested field(s) to change exists
             for key in request.data.keys():
-                print([f.name for f in Author._meta.get_fields()])
                 if key not in [f.name for f in Author._meta.get_fields()]:
                     return Response(data=f"Specified field {key} does not exist", status=status.HTTP_400_BAD_REQUEST)
                 elif key == "password":

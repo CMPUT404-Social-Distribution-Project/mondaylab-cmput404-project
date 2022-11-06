@@ -41,7 +41,6 @@ export default function FollowButton(props) {
         .then((response) => {
           if (response.data) {
             setIsFollowing(response.data);
-            console.log("IS FOLLOWING? " + response.data);
             setFollowState("following");
           } else {
             setFollowState("notFollowing");
@@ -71,7 +70,6 @@ export default function FollowButton(props) {
           console.log("Success sending a friend request: " + response);
         })
         .catch((error) => {
-          console.log("Failed to follow: " + error);
           setFollowState("notFollowing");
         });
     } else if (followState === "following") {

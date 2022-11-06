@@ -71,8 +71,6 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/posts/`)
         .then((response) => {
           setPostsArray(response.data);
-          console.log("Got posts of author")
-          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
@@ -81,8 +79,6 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/followers/`)
         .then((response) => {
           setFollowersArray(response.data);
-          console.log("Got followers of author")
-          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
@@ -91,8 +87,6 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/friends/`)
         .then((response) => {
           setFriendsArray(response.data);
-          console.log("Got friends of author")
-          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get friends of author. " + error);

@@ -40,8 +40,6 @@ function VerticallyCenteredModal(props) {
           }}
           validationSchema={validate}
           onSubmit={(values) => {
-            console.log(values);
-
             const username = values.username;
             const profileImage = values.profileImage;
             const github = values.github;
@@ -56,12 +54,10 @@ function VerticallyCenteredModal(props) {
                 ? {}
                 : { github: `${github}` }),
             };
-            console.log(toSend);
 
             api
               .post(`${baseURL}/authors/${props.author.uuid}/`, toSend)
               .then((response) => {
-                // console.log(response);
                 if (response.status === 202) {
                   props.onHide();
                   window.location.reload(); // refreshes page...not ideal.
