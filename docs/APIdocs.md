@@ -184,6 +184,10 @@ Example response:
     ]
 }
 ```
+# NOTE: 
+## In regards to image posts, it is assumed that the encoding of the image to base64 is done on the client end. If making a post with an image, the client can send two requests to create two posts: 
+### The first post is the image post, with the base64 image string in the content field with the correct contentType. Image posts are always unlisted. The client should then receive the JSON object of the new image post's info. In that JSON object, there should be an image field that contains the link to the image of the image post. 
+### The second post is a normal post (non-image) and the image field of this new post can be set to the same link in the image post's image field. 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
 `/service/authors/<author_id>/posts/<post_id>`
