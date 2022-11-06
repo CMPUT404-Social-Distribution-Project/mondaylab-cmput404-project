@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'post',
     'comments',
     'server',
+    'node',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

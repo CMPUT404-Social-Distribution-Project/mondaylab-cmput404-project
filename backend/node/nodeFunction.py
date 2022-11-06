@@ -25,9 +25,7 @@ def AuthenticateIncomingHost(node):
 
 
 def connectToOTherServer():
-   
-
-
+    
    pass 
 
 
