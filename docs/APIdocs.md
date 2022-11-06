@@ -243,7 +243,7 @@ Example response:
 `/service/authors/<author_id>/posts/<post_id>/image`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
-| ***GET*** | Gets the image of the post at <post_id>, if it exists. Result is a binary image, and can be used in html img tags. <br> Example: \<img src="//service/authors/<author_id>/posts/<post_id>/image"> | | 
+| ***GET*** | Gets the image of the IMAGE post at <post_id>, if it exists. Result is a binary image, and can be used in html img tags. <br> Example: \<img src="//service/authors/<author_id>/posts/<post_id>/image"><br> **NOTE: IT ONLY RETRIEVES THE IMAGE IF THE POST IS AN IMAGE POST i.e THE CONTENT OF THE POST IS A BASE64 ENCODED IMAGE STRING!** | | 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 ## Comments
 `/service/authors/<author_id>/posts/<post_id>/comments/`
