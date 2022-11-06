@@ -12,9 +12,7 @@ import "./EditProfileButton.css";
 function VerticallyCenteredModal(props) {
   const validate = Yup.object().shape({
     profileImage: Yup.string().url(),
-    username: Yup.string()
-      .required("Required")
-      .max(128, "Invalid username"),
+    username: Yup.string().required("Required").max(128, "Invalid username"),
     github: Yup.string().url(),
   });
 

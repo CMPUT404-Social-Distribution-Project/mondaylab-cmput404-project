@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function ProfileTabs(props) {
@@ -13,17 +13,15 @@ export default function ProfileTabs(props) {
       id="uncontrolled-tab-example"
       className="mb-3"
       fill
-      onSelect={(nextTab) => navigate(`/authors/${props.author_id}/${nextTab}/`)}
+      onSelect={(nextTab) =>
+        navigate(`/authors/${props.author_id}/${nextTab}/`)
+      }
     >
-      
-      <Tab eventKey="posts" title="Posts">
-      </Tab>
-  
-      <Tab eventKey="followers" title="Followers">
-      </Tab>
+      <Tab eventKey="posts" title="Posts"></Tab>
 
-      <Tab eventKey="friends" title="Friends">
-      </Tab>
+      <Tab eventKey="followers" title="Followers"></Tab>
+
+      <Tab eventKey="friends" title="Friends"></Tab>
     </Tabs>
   );
 }

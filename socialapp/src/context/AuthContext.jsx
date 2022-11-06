@@ -28,48 +28,46 @@ export const AuthProvider = ({ children }) => {
     const response = await fetch(baseURL + "/auth/login/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         displayName,
-        password
-      })
-      
+        password,
+      }),
     });
-    await response.json().then(function(data) {
+    await response.json().then(function (data) {
       if (response.status === 200) {
         setAuthTokens(data);
         setUser(jwt_decode(data.access));
         localStorage.setItem("authTokens", JSON.stringify(data));
         setLoginLoading(false);
       } else {
-        console.log(data)
+        console.log(data);
         alert("ERROR: " + data);
         setLoginLoading(null);
       }
     });
-
   };
-  
+
   const registerUser = async (displayName, password, github) => {
     const response = await fetch(baseURL + "/auth/register/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         displayName,
         password,
         github,
-      }) 
+      }),
     });
 
     if (response.status === 201) {
       navigate("/login");
     } else {
-      response.json().then(function(value) {
+      response.json().then(function (value) {
         alert("ERROR: " + value);
-      })
+      });
     }
   };
 
@@ -89,7 +87,7 @@ export const AuthProvider = ({ children }) => {
     registerUser,
     loginUser,
     logoutUser,
-    baseURL
+    baseURL,
   };
 
   useEffect(() => {

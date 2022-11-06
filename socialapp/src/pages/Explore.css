@@ -1,4 +1,3 @@
-
 .search-bar-explore {
     padding: 0.5em 3em;
     width: 20em;
@@ -6,16 +5,17 @@
     background-color: var(--slightly-darker-blue);
     color: var(--white-teal);
     border: none;
-    border-bottom:  solid 1px var(--orange);
+    border-bottom: solid 1px var(--orange);
     position: relative;
 }
+
 .FaSearch {
     color: var(--teal);
     margin-left: 0em;
     display: flex;
     align-items: center;
-    height:2em;
-    width:2em;
+    height: 2em;
+    width: 2em;
 
 }
 
@@ -24,13 +24,16 @@
     border: solid 3px var(--orange);
 
 }
-.custom{
-    width:20em;
+
+.custom {
+    width: 20em;
 }
-.searchResult{
+
+.searchResult {
     position: relative;
 }
-.public-post{
+
+.public-post {
     border-style: solid;
-  border-width: medium;
+    border-width: medium;
 }
