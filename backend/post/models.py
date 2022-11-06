@@ -29,6 +29,7 @@ class Post(Model):
     content = TextField(blank=True, null=True)
     author = ForeignKey(Author, blank=False, null=True, on_delete=CASCADE)
     categories = TextField(null=True, blank=True)
+    image = TextField(blank=True, null=True)
     #see this to send categories
     #https://stackoverflow.com/a/7151813 
     count = IntegerField(default=0)

@@ -9,7 +9,8 @@ import { BsGithub } from "react-icons/bs";
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Popup from 'reactjs-popup';
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 export default function StreamHome() {
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
@@ -36,7 +37,7 @@ export default function StreamHome() {
           console.log(error);
         });
       
-  }, []);
+  }, [useLocation().state]);
 
 
 

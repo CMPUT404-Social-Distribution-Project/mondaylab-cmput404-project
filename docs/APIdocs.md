@@ -1,7 +1,8 @@
-#### End Points
+# End Points
 🔶 - requires authentication with JWT (JSON Web Tokens). Token is given in a HTTP response when author is initially registered.
 **NOTE:** Fields with a bracket next to them indicates their default values. If not stated, assume the default will be blank/empty string (this only applies for optional fields, required fields are just that; they cannot be blank) 
 
+## Authentication (local)
 `/service/auth/register` 
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -66,6 +67,7 @@ Example response:
 Note here that the field `refresh` should be sent through the body, and is the token that is from the 'refresh' field received when registering/logging in, and NOT the token from the access/token field. 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
+## Authors
 `/service/authors/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -131,7 +133,7 @@ Example response:
 }
 ```
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
-
+## Posts
 `/service/authors/<author_id>/posts/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -182,6 +184,10 @@ Example response:
     ]
 }
 ```
+# NOTE: 
+## In regards to image posts, it is assumed that the encoding of the image to base64 is done on the client end. If making a post with an image, the client can send two requests to create two posts: 
+### The first post is the image post, with the base64 image string in the content field with the correct contentType. Image posts are always unlisted. The client should then receive the JSON object of the new image post's info. In that JSON object, there should be an image field that contains the link to the image of the image post. 
+### The second post is a normal post (non-image) and the image field of this new post can be set to the same link in the image post's image field. 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
 `/service/authors/<author_id>/posts/<post_id>`
@@ -234,6 +240,12 @@ Example response:
 ```
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
 
+`/service/authors/<author_id>/posts/<post_id>/image`
+|   Method   | Description | Required Fields | Optional Fields
+| ---------- | --------------------| - | - |
+| ***GET*** | Gets the image of the IMAGE post at <post_id>, if it exists. Result is a binary image, and can be used in html img tags. <br> Example: \<img src="//service/authors/<author_id>/posts/<post_id>/image"><br> **NOTE: IT ONLY RETRIEVES THE IMAGE IF THE POST IS AN IMAGE POST i.e THE CONTENT OF THE POST IS A BASE64 ENCODED IMAGE STRING!** | | 
+<hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
+## Comments
 `/service/authors/<author_id>/posts/<post_id>/comments/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -271,7 +283,7 @@ Example response:
 }
 ```
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
-
+## Likes
 `/service/authors/<author_id>/posts/<post_id>/likes`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -329,7 +341,7 @@ Example response:
 }
 ```
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
-
+## Followers
 `/service/authors/<author_id>/followers/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -362,7 +374,7 @@ Example response:
 | ***PUT🔶*** | Adds <foreign_author_id> as a follower of <author_id>.  | | 
 | ***DELETE🔶*** | Removes <foreign_author_id> from the followers list of <author_id>. **NOTE:** Only <foreign_author_id> needs to be authorized to use this method. This is so then <foreign_author_id> can unfollow without needing <author_id>'s permission. | | 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
-
+## Inbox
 `/service/authors/<author_id>/inbox/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
@@ -403,7 +415,7 @@ Example response:
 #### [Object types and their respective formats](inbox_objects.org)
 
 <hr style="height: 1px; margin: 0rem 0rem 2rem 0rem;"/>
-
+## Friends
 `/service/authors/<author_id>/friends/`
 |   Method   | Description | Required Fields | Optional Fields
 | ---------- | --------------------| - | - |
