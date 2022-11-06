@@ -144,7 +144,6 @@ export default function Inbox() {
               <Nav
                 variant="pills"
                 id="justify-tab-example"
-                transition={true}
                 justify
                 fill
               >
