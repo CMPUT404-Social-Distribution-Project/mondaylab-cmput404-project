@@ -14,10 +14,16 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 import Popup from 'reactjs-popup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Toast from 'react-bootstrap/Toast';
+import Toast from 'react-bootstrap/Toast'
+import Nav from 'react-bootstrap/Nav';
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);      
   const [posts, setPosts] = useState([]);
+  const [postNum, setPostNum] = useState(0);
+  const [likeNum, setlikeNum] = useState(0);
+  const [commentNum, setCommentNum] = useState(0);
+  const [followNum, setFollowNum] = useState(0);
+
   const [followRequests, setFollowRequests] = useState([]);
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
@@ -54,15 +60,19 @@ export default function Inbox() {
           setInboxItems(response.data.items);
             for (let i = 0; i < response.data.items.length; i++) {
               if (response.data.items[i].type.toLowerCase() === "follow") {
+                setFollowNum(followNum =>followNum+1);
                 setFollowRequests(followRequests=>[...followRequests, response.data.items[i]] );
               } else if (response.data.items[i].type.toLowerCase() === "like") {
+                setlikeNum(likeNum =>likeNum+1);
                 setLikes(likes => [...likes, response.data.items[i]]);
               } else if (response.data.items[i].type.toLowerCase() === "comment") {
                 if (response.data.items[i].author!=null){
+                  setCommentNum(commentNum =>commentNum+1);
                   setComments(comments => [...comments, response.data.items[i]]);
                 }
                 
               } else if (response.data.items[i].type.toLowerCase() === "post") {
+                setPostNum(postNum =>postNum+1);
                 setPosts(posts => [...posts, response.data.items[i]]);
               }
               
@@ -129,56 +139,68 @@ export default function Inbox() {
         </Popup>
         </Col>
       </Row>
-
-      
       
       <div className="inbox-items-container">
-      <Tabs id="controlled-tab-example"
-      activeKey={key}
-      onSelect={(k) => setKey(k)}
-      className="mb-3">
-        <Tab eventKey="post" title="Post">
-        {
-        typeof posts !== 'undefined' ? 
-        posts.length!==0 ?
-          posts.map((item) =><PostCard post={item} />)
-        :  <h4>No post yet! </h4>
-          :<h4>No post yet! </h4>
-        }
-
-        
-      </Tab>
-      <Tab eventKey="like" title="Like">
-      {
-        typeof likes !== 'undefined' ? 
-        likes.length!==0?
-          likes.map((item) =><LikeCard like={item} />)
-          : <h4>No like yet! </h4>
-        : <h4>No like yet! </h4>  
-        }
-        
-      </Tab>
-      <Tab eventKey="comment" title="Comment" >
-      {
-        typeof comments !== 'undefined' ? 
-        comments.length!==0?
-          comments.map((item) =><InboxCommentCard comment={item} />)
-          : <h4>No comment yet! </h4>
-        : <h4>No comment yet! </h4>
-        }
-        
-      </Tab>
-      <Tab eventKey="Follow-request" title="Follow Request" >
-      {
-        typeof followRequests !== 'undefined'? 
-        followRequests.length!==0?
-          followRequests.map((item) =><FollowRequestCard followRequest={item} />)
-          :<h4>No follow request yet! </h4>
-        : <h4>No follow request yet! </h4>
-        }
-        
-      </Tab>
-        </Tabs>
+      <Tab.Container id="left-tabs-example" defaultActiveKey="post">
+        <Row>
+          <Row >
+            <Nav variant="tabs" id="justify-tab-example"transition={true} justify fill>
+              <Nav.Item>
+                <Nav.Link eventKey="post">Post {postNum}</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="like">Like {likeNum}</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="comment">Comment  {commentNum}</Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="follow">Follow Request {followNum}</Nav.Link>
+              </Nav.Item>
+            </Nav>
+          </Row>
+          <Col>
+            <Tab.Content>
+              <Tab.Pane eventKey="post">
+              {
+                typeof posts !== 'undefined' ? 
+                posts.length!==0 ?
+                  posts.map((item) =><PostCard post={item} />)
+                :  <h4>No post yet! </h4>
+                  :<h4>No post yet! </h4>
+                }
+              </Tab.Pane>
+              <Tab.Pane eventKey="like">
+              {
+              typeof likes !== 'undefined' ? 
+              likes.length!==0?
+                likes.map((item) =><LikeCard like={item} />)
+                : <h4>No like yet! </h4>
+              : <h4>No like yet! </h4>  
+              }
+              </Tab.Pane>
+              <Tab.Pane eventKey="comment">
+              {
+                typeof comments !== 'undefined' ? 
+                comments.length!==0?
+                  comments.map((item) =><InboxCommentCard comment={item} />)
+                  : <h4>No comment yet! </h4>
+                : <h4>No comment yet! </h4>
+                }
+              </Tab.Pane>
+              <Tab.Pane eventKey="follow">
+              {
+                typeof followRequests !== 'undefined'? 
+                followRequests.length!==0?
+                  followRequests.map((item) =><FollowRequestCard followRequest={item} />)
+                  :<h4>No follow request yet! </h4>
+                : <h4>No follow request yet! </h4>
+                }
+              </Tab.Pane>
+            </Tab.Content>
+          </Col>
+        </Row>
+      </Tab.Container>
       </div>
       <Toast onClose={() => setShow(false)} show={show} delay={1500} autohide>
           <Toast.Header>
