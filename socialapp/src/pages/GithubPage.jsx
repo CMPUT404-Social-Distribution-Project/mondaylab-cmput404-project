@@ -102,7 +102,9 @@ useEffect(() => {
       <Tabs id="controlled-tab-example"
       activeKey={key}
       onSelect={(k) => setKey(k)}
-      className="mb-3">
+      className="mb-3"
+      variant="pills"
+      justify>
         <Tab eventKey="my" title="My Github">
         <div>
             {myGithubActivities.length!==0?

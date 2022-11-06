@@ -144,7 +144,7 @@ export default function Inbox() {
       <Tab.Container id="left-tabs-example" defaultActiveKey="post">
         <Row>
           <Row >
-            <Nav variant="tabs" id="justify-tab-example"transition={true} justify fill>
+            <Nav variant="pills" id="justify-tab-example"transition={true} justify fill>
               <Nav.Item>
                 <Nav.Link eventKey="post">Post {postNum}</Nav.Link>
               </Nav.Item>
