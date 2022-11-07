@@ -4,8 +4,8 @@ import { Container} from "react-bootstrap";
 
 function App() {
   return (
-    <div className="App" class="d-flex flex-column">
-      <Container classname=".ps-2">
+    <div className="App">
+      <Container className=".ps-2">
         <header className="App-header">
           <h1> Hello World!</h1>
         </header>

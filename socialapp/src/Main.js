@@ -1,7 +1,7 @@
 import React from 'react';
 import SideNavBar from './components/Navbar/SideNavBar';
 import TopNavBar from './components/Navbar/TopNavbar';
-import { BrowserRouter as Route, Outlet} from 'react-router-dom'
+import {Outlet} from 'react-router-dom'
 import './custom_dark.scss';
 
 export default function Main() {
@@ -11,7 +11,7 @@ export default function Main() {
       <TopNavBar />
       <div className="main">
           <SideNavBar />
-          <div class="main-content-container">
+          <div className="main-content-container">
             <Outlet />
           </div>
       </div>

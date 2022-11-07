@@ -25,7 +25,7 @@ cd socialapp
 npm install
 ```
 
-# [API Info](docs/APIdocs.md)
+# [API Info](https://github.com/CMPUT404-Social-Distribution-Project/mondaylab-cmput404-project/wiki/API-Documentation)
 
 
 ## References
@@ -39,3 +39,5 @@ https://sushil-kamble.medium.com/django-rest-framework-react-authentication-work
 https://blog.devgenius.io/django-rest-framework-react-authentication-workflow-2022-part-2-d299b7fef875
 
 https://www.digitalocean.com/community/tutorials/react-live-search-with-axios#conclusion
+
+https://github.com/GuScarpim/upload-image-react-base64#readme
