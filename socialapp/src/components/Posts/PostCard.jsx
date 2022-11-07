@@ -4,6 +4,7 @@ import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
+import { FaUserFriends } from "react-icons/fa";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
 import "./PostCard.css";
@@ -247,13 +248,28 @@ export default function PostCard(props) {
             {props.post.author.displayName}
           </div>
         </div>
+        {props.post.visibility === "FRIENDS" ? (
+          <div className="friends-indicator">
+            <FaUserFriends />
+            Friends-Only
+          </div>
+        ) : (
+          <div className="friends-indicator" style={{ background: "none" }} />
+        )}
         {props.post.unlisted === true ? (
-          <div className="unlisted-indicator">
+          <div className="unlisted-indicator" style={{
+            margin: props.post.visibility === "FRIENDS" ? "0 1rem 0 0" : "0 1rem 0 auto"
+          }}>
             <IoUnlink />
             Unlisted
           </div>
         ) : (
-          <div className="unlisted-indicator" style={{ background: "none" }} />
+          <div className="unlisted-indicator" style={{ 
+            background: "none",
+            margin: "0",
+            padding: "0" 
+            }} 
+          />
         )}
         <PostOptions />
         {showEditPost && (

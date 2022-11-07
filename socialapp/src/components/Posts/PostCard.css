@@ -88,6 +88,20 @@
     color: var(--teal);
 }
 
+.post-card .friends-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 1rem;
+    gap: 0.5rem;
+    background-color: var(--dark-blue);
+    border-radius: 2.5rem;
+    font-size: 0.9rem;
+    font-family: 'Readex Pro Light';
+    padding: 0.3rem 1rem;
+    color: var(--teal);
+}
+
 .post-card .options {
     display: inline-block;
     white-space: nowrap;

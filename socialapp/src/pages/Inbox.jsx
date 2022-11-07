@@ -15,6 +15,8 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Toast from "react-bootstrap/Toast";
 import Nav from "react-bootstrap/Nav";
+import "./Inbox.css";
+
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -73,14 +75,15 @@ export default function Inbox() {
 
   const clearInbox = () => {
     confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure to clear inbox?",
+      title: "Clear inbox?",
       buttons: [
         {
           label: "Yes",
+          className: "yes-button",
           onClick: () => deleteInbox(),
         },
         {
+          className: "no-button",
           label: "No",
         },
       ],

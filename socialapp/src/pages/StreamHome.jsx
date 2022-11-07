@@ -55,7 +55,7 @@ export default function StreamHome() {
               <button style={{ background: "none", border: "none" }}>
                 <BsGithub
                   style={{
-                    color: "white",
+                    color: "var(--white-teal)",
                     marginTop: "1em",
                     marginBottom: "1em",
                     marginRight: "1em",
