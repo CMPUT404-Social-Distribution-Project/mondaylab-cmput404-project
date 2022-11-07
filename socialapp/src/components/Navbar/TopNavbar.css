@@ -21,6 +21,7 @@
 #profilePicContainer:hover {
     outline: solid var(--teal) 5px;
     cursor: pointer;
+    transition: outline 0.2s ease-in-out;
 }
 
 .navbar-expand .navbar-nav .nav-link {

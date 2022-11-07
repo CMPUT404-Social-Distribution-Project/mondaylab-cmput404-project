@@ -10,7 +10,7 @@
     align-items: center;
     background-color: var(--slightly-darker-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-    
+    border: 2px solid var(--dark-blue);
 }
 
 .post-card .profile-pic-post {

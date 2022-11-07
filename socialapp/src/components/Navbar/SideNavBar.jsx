@@ -16,20 +16,17 @@ export default function Sidebar() {
     const refreshState = (navigate, location) => {
         navigate(`${location.pathname}`, {state: {refresh:true}});
     }
-    console.log(location.pathname);
     return (
         <ul
             id="sidebar"
             className="nav nav-pills nav-flush flex-column mb-auto text-center"
         >
-            <li className="nav-item">
+            <li className="side-nav-item">
          
                 <div  
                     className="create-post-button"
                     aria-current="page"
                     title="Create Post"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="right"
                     onClick={() => setNewPost(true)}
                 >
                     <MdEdit />
@@ -37,34 +34,31 @@ export default function Sidebar() {
                 {newPost && <CreatePost show={newPost} onHide={() => {setNewPost(false); refreshState(navigate, location);}}/>}
 
             </li>
-            <li>
-                <div onClick={() => navigate("/stream", {state: {refresh:true}})}>
-                    <div
-                        className="nav-link py-3"
-                        title="Stream"
-                    >
-                        <FaHome style={{ color: location.pathname === "/stream" || location.pathname === "/" }}/>
-                    </div>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Stream"
+                    onClick={() => navigate("/stream", {state: {refresh:true}})}
+                >
+                    <FaHome style={{ color: location.pathname === "/stream" ? "var(--orange)" : "var(--white-teal)" }}/>
                 </div>
             </li>
-            <li>
-                <div onClick={() => navigate("/inbox", {state: {refresh:true}})}>
-                    <div
-                        className="nav-link py-3"
-                        title="Inbox"
-                    >
-                        <FaInbox style={{ color: location.pathname === "/inbox" }}/>
-                    </div>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Inbox"
+                    onClick={() => navigate("/inbox", {state: {refresh:true}})}
+                >
+                    <FaInbox style={{ color: location.pathname === "/inbox" ? "var(--orange)" : "var(--white-teal)" }}/>
                 </div>
             </li>
-            <li>
-                <div onClick={() => navigate("/explore", {state: {refresh:true}})}>
-                    <div
-                        className="nav-link py-3"
-                        title="Explore"
-                    >
-                        <FaSearch style={{ color: location.pathname === "/explore" }}/>
-                    </div>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Explore"
+                    onClick={() => navigate("/explore", {state: {refresh:true}})}
+                >
+                    <FaSearch style={{ color: location.pathname === "/explore" ? "var(--orange)" : "var(--white-teal)" }}/>
                 </div>
             </li>
             <hr className="solid" />

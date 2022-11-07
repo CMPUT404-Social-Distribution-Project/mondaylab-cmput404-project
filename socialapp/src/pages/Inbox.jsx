@@ -157,7 +157,7 @@ export default function Inbox() {
             <Row>
               <Nav
                 variant="pills"
-                id="justify-tab-example"
+                id="inbox-tab-row"
                 justify
                 fill
               >
