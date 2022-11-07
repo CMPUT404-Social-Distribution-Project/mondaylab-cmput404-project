@@ -2,12 +2,11 @@ import React, { useContext, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Dropdown } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
-import { MdModeEdit, MdDelete } from "react-icons/md";
+import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
 import "./ExplorePostCard.css";
 import useAxios from "../../utils/useAxios";
-import { confirmAlert } from "react-confirm-alert";
 import { useEffect } from "react";
 import EditPost from "./EditPost";
 import { BsFillHeartFill, BsCursorFill } from "react-icons/bs";
@@ -27,11 +26,13 @@ export default function PostCard(props) {
   const [CommentCount, setCommentCount] = useState(0);
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState("");
+  const [followers, setFollowers] = useState([]);
 
   const navigate = useNavigate();
   const routeChange = () => {
     navigate(`/authors/${post_user_id}/`, { state: { refresh: true } });
   };
+
   const [showContent, setShowContent] = useState(() => {
     if (props.post.contentType.startsWith("image")) {
       return false;
@@ -99,6 +100,15 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/followers`
+        )
+        .then((response) => {
+          setFollowers(response.data.items)})
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
@@ -115,27 +125,28 @@ export default function PostCard(props) {
       });
   };
 
-  const confirmDelete = (uuid) => {
-    confirmAlert({
-      title: "Confirm to submit",
-      message: "Are you sure to do this.",
-      buttons: [
-        {
-          label: "Yes",
-          onClick: () => {
-            deletePost(uuid);
-          },
-        },
-        {
-          label: "No",
-        },
-      ],
-    });
+  const sharePost = (post) => {
+    console.log(post.id)
+    for(let index = 0; index < followers.length; index++) {
+      const sharedPost = {
+        type: "post",
+        summary: `${author.displayName} shared a post.`,
+        author: author,
+        object: post.id,
+      };
+      api
+        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log("Failed to get posts of author. " + error);
+        });
+    }
   };
 
   // only render options if the user viewing it is the author of it
   function PostOptions() {
-    if (user_id === props.post.author.uuid) {
       return (
         <div className="options">
           <Dropdown>
@@ -143,26 +154,32 @@ export default function PostCard(props) {
               <BiDotsVerticalRounded />
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {
-                <Dropdown.Item onClick={() => setShowEditPost(true)}>
-                  <MdModeEdit /> Edit Post
-                </Dropdown.Item>
+              <Dropdown.Item onClick={() => sharePost(props.post)}>
+                <MdShare /> Share Post
+              </Dropdown.Item>
+
+              {(() => {
+                if (user_id === props.post.author.uuid) {
+                    return (
+                      <div>
+                      <Dropdown.Item onClick={() => setShowEditPost(true)}>
+                        <MdModeEdit /> Edit Post
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        className="delete-post"
+                        onClick={() => deletePost(props.post.uuid)}
+                      >
+                        <MdDelete /> Delete Post
+                      </Dropdown.Item>
+                      </div>
+                    )
               }
-              {
-                <Dropdown.Item
-                  className="delete-post"
-                  onClick={() => deletePost(props.post.uuid)}
-                >
-                  <MdDelete /> Delete Post
-                </Dropdown.Item>
-              }
+              })()}
             </Dropdown.Menu>
           </Dropdown>
         </div>
       );
-    } else {
-      return <></>;
-    }
   }
 
   return (
