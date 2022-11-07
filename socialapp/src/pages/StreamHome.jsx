@@ -65,11 +65,11 @@ export default function StreamHome() {
               </button>
             }
             on="hover"
-            contentStyle={{ "background-color": "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5rem" }}
-            arrowStyle={{ "color": "var(--dark-blue)", stroke: "none"}}
+            contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5rem" }}
+            arrowStyle={{ color: "var(--dark-blue)", stroke: "none"}}
             arrow={true}
           >
-            <span style={{ "font-size": "0.8rem" }}> Click to see GitHub activities! </span>
+            <span style={{ fontSize: "0.8rem" }}> Click to see GitHub activities! </span>
           </Popup>
         </Col>
       </Row>

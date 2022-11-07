@@ -238,14 +238,14 @@ export default function PostCard(props) {
                   style={{
                     background: "none",
                     border: "none",
-                    "margin-left": "auto",
+                    marginLeft: "auto",
                     padding: "0.5rem",
                     width: "2rem",
                     height: "2rem",
                   }}
                 >
                   <BsCursorFill
-                    style={{ color: "var(--white-teal)", "vertical-align": "top" }}
+                    style={{ color: "var(--white-teal)", verticalAlign: "top" }}
                     onClick={postRouteChange}
                   />
                 </button>
@@ -256,10 +256,10 @@ export default function PostCard(props) {
               mouseLeaveDelay={300}
               mouseEnterDelay={0}
               arrow={true}
-              contentStyle={{ "background-color": "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5em" }}
-              arrowStyle={{ "color": "var(--dark-blue)", stroke: "none" }}
+              contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5em" }}
+              arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
             >
-              <span style={{ "font-size": "0.8rem"}}> View Post </span>
+              <span style={{ fontSize: "0.8rem"}}> View Post </span>
             </Popup>
           </Col>
         </Row>
