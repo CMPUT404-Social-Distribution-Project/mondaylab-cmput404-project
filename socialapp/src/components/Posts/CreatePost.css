@@ -151,8 +151,21 @@
     margin-top: 1rem;
 }
 
+.create-post-modal .link-icon {
+    width: 2.5rem;
+    height:auto;
+    padding: 0rem 0.5rem;
+    color: var(--teal);
+}
+
+.create-post-modal .link-icon:hover {
+    cursor: pointer;
+    color: var(--teal-alt);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
 .create-post-modal .image-upload {
-    width: 3rem;
+    width: 2.8rem;
     height:auto;
     padding: 0rem 0.5rem;
     color: var(--teal);
@@ -176,4 +189,8 @@
     background-color: var(--orange);
     outline: none;
     border: none;
+}
+
+.create-post-modal .link-form {
+    margin-top: 1rem;
 }
