@@ -17,8 +17,8 @@
 }
 
 .post-card-explore .profile-pic-post {
-    width: 3em;
-    height: 3em;
+    width: 2em;
+    height: 2em;
     aspect-ratio: 1/1;
     border-radius: 80%;
     outline: solid var(--orange) 2px;
@@ -33,7 +33,7 @@
     display: inline-flex;
     align-items: center;
     gap: 1rem;
-
+    color: var(--teal);
 }
 
 .post-card-explore .post-author-name {
