@@ -1,9 +1,11 @@
 .post-card-explore {
     width: 20rem;
-    height: 18rem;
+    height: fit-content;
+    max-height: 22rem;
     margin-block: 10px;
     margin-left: 10px;
     border-color: none;
+    --bs-card-bg: none;
 }
 
 .post-card-explore .card-header {
@@ -11,12 +13,12 @@
     align-items: center;
     background-color: var(--slightly-darker-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-
+    border-radius: 11px 11px 0px 0px;
 }
 
 .post-card-explore .profile-pic-post {
-    width: 3em;
-    height: 3em;
+    width: 2em;
+    height: 2em;
     aspect-ratio: 1/1;
     border-radius: 80%;
     outline: solid var(--orange) 2px;
@@ -31,7 +33,7 @@
     display: inline-flex;
     align-items: center;
     gap: 1rem;
-
+    color: var(--teal);
 }
 
 .post-card-explore .post-author-name {
@@ -49,7 +51,7 @@
     background-color: var(--dark-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
-    border-radius: 0px 0px 2px 2px;
+    border-radius: 0px 0px 11px 11px;
     overflow: hidden;
 }
 
@@ -80,6 +82,10 @@
 
 .post-card-explore .comments-text {
     color: var(--teal);
+}
+
+.post-card-explore .dropdown-toggle::after {
+    content: none;
 }
 
 .post-card-explore .options {
@@ -127,4 +133,26 @@
 
 .options .dropdown-item {
     padding: 0.8em var(--bs-dropdown-item-padding-x);
+}
+
+.post-card-explore .like-icon {
+    transition-duration: 300ms;
+    transition-property: color, transform;
+    transition-timing-function: ease-in-out;
+    width: 2rem;
+    height: auto;
+    padding: 0.5rem;
+}
+
+.post-card-explore .like-icon:hover {
+    color: var(--teal) !important;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
+}
+
+.post-card-explore .like-icon:active {
+    color: var(--orange) !important;
+    transform: rotate(10deg);
 }

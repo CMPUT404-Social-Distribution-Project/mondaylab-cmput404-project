@@ -9,7 +9,7 @@ import {
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
-import { FaImage } from "react-icons/fa";
+import { FaImage, FaLink } from "react-icons/fa";
 
 export default function CreatePost(props) {
   const [showURI, setShowURI] = useState(false);
@@ -21,6 +21,7 @@ export default function CreatePost(props) {
   const api = useAxios();
   const user_id = localStorage.getItem("user_id");
   const [imagePost, setImagePost] = useState(null);
+  const [showLinkForm, setShowLinkForm] = useState(false);
   const [uri, setURI] = useState("");
   const [post, setPost] = useState({
     title: "",
@@ -44,7 +45,11 @@ export default function CreatePost(props) {
 
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
-    setImagePost({ ...imagePost, visiblity: option });
+
+    // only set the visibility for imagePost if there is an image
+    if (imagePost) {
+      setImagePost({ ...imagePost, visiblity: option });
+    }
     if (option === "PUBLIC") {
       setEveActive(true);
       setFriActive(false);
@@ -87,6 +92,7 @@ export default function CreatePost(props) {
 
   const sendPost = async () => {
     // No image
+    console.log("ImagePost", imagePost);
     if (!imagePost) {
       api
         .post(`${baseURL}/authors/${user_id}/posts/`, post)
@@ -101,7 +107,7 @@ export default function CreatePost(props) {
           }
         })
         .catch((error) => {
-          alert(`Something went wrong posting! \n Error: ${error}`);
+          alert(`Something went wrong posting! \n Error: ${error.response.data}`);
           console.log(error);
         });
     } else {
@@ -131,7 +137,7 @@ export default function CreatePost(props) {
         })
         .catch((error) => {
           alert(
-            `Something went wrong posting the image post! \n Error: ${error.response}`
+            `Something went wrong posting the image post! \n Error: ${error.response.data}`
           );
           console.log(error.response);
         });
@@ -175,6 +181,7 @@ export default function CreatePost(props) {
     const file = e.target.files[0];
     if (reader !== undefined && file !== undefined) {
       reader.onloadend = () => {
+        setShowLinkForm(false);
         setFile(file);
         setSize(file.size);
         setFileName(file.name);
@@ -201,12 +208,21 @@ export default function CreatePost(props) {
     setFileName("");
     setSize("");
     setImagePost(null);
+    setPost({ ...post, image: "" });
   };
 
   const hiddenFileInput = React.useRef(null);
   const handleImageClick = () => {
     hiddenFileInput.current.click();
   };
+
+  const linkClickHandler = () => {
+    setShowLinkForm(!showLinkForm);
+    setImagePreview("");
+    delete post.image;
+    setPost(post);
+    setImagePost(null);
+  }
 
   return (
     <>
@@ -328,6 +344,21 @@ export default function CreatePost(props) {
                   Please choose a walk type.
                 </Form.Control.Feedback>
               </Form.Group>
+              {showLinkForm && <Form.Group className="link-form">
+                <Form.Control
+                  label="link"
+                  name="link"
+                  type="text"
+                  placeholder="Image URL link"
+                  onChange={(e) => {
+                    setPost({
+                      ...post,
+                      image: e.target.value,
+                    });
+                    setImagePreview(e.target.value);
+                  }}
+                />
+              </Form.Group>}
             </Modal.Body>
             {imagePreview === "" ? (
               <></>
@@ -354,14 +385,16 @@ export default function CreatePost(props) {
                     style={{ display: "none" }}
                   />
                 </form>
-                {imagePreview === "" ? (
-                  <></>
-                ) : (
+                {imagePost ? (
                   <Button className="remove-image" onClick={removeImage}>
                     Remove Image
                   </Button>
+                ) : (
+                  <></>
                 )}
+                <FaLink className="link-icon" onClick={() => linkClickHandler()}/>
               </div>
+              
               <Button className="postButton" onClick={sendPost}>
                 Post
               </Button>
