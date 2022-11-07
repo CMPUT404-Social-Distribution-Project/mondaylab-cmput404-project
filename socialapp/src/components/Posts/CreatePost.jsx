@@ -20,9 +20,6 @@ export default function CreatePost(props) {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const api = useAxios();
   const user_id = localStorage.getItem("user_id");
-  const [authorsArray, setAuthorsArray] = useState([]);
-  const [input, setInput] = useState("");
-  const [filteredArray, setFilteredArray] = useState([]);
   const [imagePost, setImagePost] = useState(null);
   const [uri, setURI] = useState("");
   const [post, setPost] = useState({
@@ -141,55 +138,6 @@ export default function CreatePost(props) {
     }
   };
 
-  const searchAuthors = (value) => {
-    setInput(value);
-    if (input !== "") {
-      const filteredData = authorsArray.filter((item) => {
-        return Object.values(item.displayName)
-          .join("")
-          .toLowerCase()
-          .includes(input.toLowerCase());
-      });
-      setFilteredArray(filteredData);
-    } else {
-      setFilteredArray(authorsArray);
-    }
-  };
-
-  function CheckInputLength() {
-    if (authorsArray.length === 0) {
-      return (
-        <Card>
-          <Card.Body>No authors available</Card.Body>
-        </Card>
-      );
-    } else {
-      if (input.length > 1) {
-        filteredArray.map((item, i) => {
-          return (
-            <Card key={i}>
-              <Card.Body>
-                {item.profileImage}
-                {item}
-              </Card.Body>
-            </Card>
-          );
-        });
-      } else {
-        authorsArray.map((item, i) => {
-          return (
-            <Card key={i}>
-              <Card.Body>
-                {item.profileImage}
-                {item.displayName}
-              </Card.Body>
-            </Card>
-          );
-        });
-      }
-    }
-  }
-
   const [file, setFile] = useState();
   const [imagePreview, setImagePreview] = useState("");
   const [base64, setBase64] = useState("");
@@ -220,6 +168,7 @@ export default function CreatePost(props) {
       setIsLoading(false);
     }, 2000);
   };
+
   const imageUpload = (e) => {
     e.preventDefault();
     const reader = new FileReader();
