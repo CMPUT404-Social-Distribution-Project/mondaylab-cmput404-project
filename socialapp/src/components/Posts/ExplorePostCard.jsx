@@ -27,7 +27,7 @@ export default function PostCard(props) {
   const [color, setColor] = useState("var(--white-teal)");
   const [author, setAuthor] = useState("");
   const [followers, setFollowers] = useState([]);
-
+  
   const navigate = useNavigate();
   const routeChange = () => {
     navigate(`/authors/${post_user_id}/`, { state: { refresh: true } });
@@ -126,23 +126,22 @@ export default function PostCard(props) {
   };
 
   const sharePost = (post) => {
-    console.log(post.id)
-    for(let index = 0; index < followers.length; index++) {
-      const sharedPost = {
-        type: "post",
-        summary: `${author.displayName} shared a post.`,
-        author: author,
-        object: post.id,
-      };
-      api
-        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log("Failed to get posts of author. " + error);
-        });
-    }
+      for(let index = 0; index < followers.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
   };
 
   // only render options if the user viewing it is the author of it

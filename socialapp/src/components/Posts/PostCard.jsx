@@ -32,6 +32,8 @@ export default function PostCard(props) {
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
+
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
   const [showContent, setShowContent] = useState(() => {
@@ -118,27 +120,55 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/friends/`
+        )
+        .then((response) => {
+          setFriends(response.data.items)})
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
 
   const sharePost = (post) => {
     console.log(post.id)
-    for(let index = 0; index < followers.length; index++) {
-      const sharedPost = {
-        type: "post",
-        summary: `${author.displayName} shared a post.`,
-        author: author,
-        object: post.id,
-      };
-      api
-        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log("Failed to get posts of author. " + error);
-        });
+    if (post.visibility === "PUBLIC") {
+      for(let index = 0; index < followers.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
+    } else if (post.visibility === "FRIENDS") {
+      for(let index = 0; index < friends.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
     }
   };
 
