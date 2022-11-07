@@ -1,3 +1,7 @@
+.explore-title-container {
+    padding-bottom: 1rem;
+}
+
 .search-bar-explore {
     padding: 0.5em 3em;
     width: 20em;
@@ -7,22 +11,32 @@
     border: none;
     border-bottom: solid 1px var(--orange);
     position: relative;
+    margin-left: -2em;
+    z-index: 2;
 }
 
 .FaSearch {
     color: var(--teal);
-    margin-left: 0em;
+    margin-left: -em;
+    height: 1em;
+    width: 1em;
+    z-index: 3;
+}
+
+.search-col {
     display: flex;
     align-items: center;
-    height: 2em;
-    width: 2em;
+}
 
+.authors-explore-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .search-bar-explore:focus {
     outline: none !important;
-    border: solid 3px var(--orange);
-
+    background: var(--dark-blue);
 }
 
 .custom {

@@ -44,7 +44,11 @@ export default function CreatePost(props) {
 
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
-    setImagePost({ ...imagePost, visiblity: option });
+
+    // only set the visibility for imagePost if there is an image
+    if (imagePost) {
+      setImagePost({ ...imagePost, visiblity: option });
+    }
     if (option === "PUBLIC") {
       setEveActive(true);
       setFriActive(false);
@@ -87,6 +91,7 @@ export default function CreatePost(props) {
 
   const sendPost = async () => {
     // No image
+    console.log("ImagePost", imagePost);
     if (!imagePost) {
       api
         .post(`${baseURL}/authors/${user_id}/posts/`, post)
@@ -101,7 +106,7 @@ export default function CreatePost(props) {
           }
         })
         .catch((error) => {
-          alert(`Something went wrong posting! \n Error: ${error}`);
+          alert(`Something went wrong posting! \n Error: ${error.response.data}`);
           console.log(error);
         });
     } else {
@@ -131,7 +136,7 @@ export default function CreatePost(props) {
         })
         .catch((error) => {
           alert(
-            `Something went wrong posting the image post! \n Error: ${error.response}`
+            `Something went wrong posting the image post! \n Error: ${error.response.data}`
           );
           console.log(error.response);
         });

@@ -39,32 +39,39 @@
     text-align: left;
 }
 
+.create-post-modal .form-control {
+    box-shadow: none;
+}
+
 
 .create-post-modal .unlist {
     background: transparent;
     border: none;
-    color: #BFEFE9;
-    margin-left: 1%;
-    margin-right: 1%;
-    font-size: 85%;
+    color: var(--teal);
+    font-size: 0.8rem;
+    border-radius: 2rem;
+    padding: 0rem 1rem;
 }
 
 .create-post-modal .header {
-    margin: 0px auto;
+    margin-right: 1rem;
 }
 
 .create-post-modal .header1 {
-    width: 40%;
-    font-size: 110%;
-    margin-top: 1%;
-    margin-right: -10%;
+    width: fit-content;
+    font-size: 1.1rem;
+    margin-right: 2rem;
+    align-self: center;
 }
 
 .create-post-modal .option {
     background: transparent;
     border: none;
-    color: #BFEFE9;
-    font-size: 85%;
+    color: var(--teal);
+    font-size: 0.8rem;
+    border-radius: 2rem;
+    padding: 0rem 1rem;
+    margin-right: 0.2rem;
 }
 
 .create-post-modal .radio input {

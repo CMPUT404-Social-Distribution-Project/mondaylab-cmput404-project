@@ -54,7 +54,9 @@ export default function EditPost(props) {
 
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
-    setImagePost({ ...imagePost, visiblity: option });
+    if (imagePost) {
+      setImagePost({ ...imagePost, visiblity: option });
+    }
     if (option === "PUBLIC") {
       setEveActive(true);
       setFriActive(false);

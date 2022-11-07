@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
-import { MdModeEdit, MdDelete } from "react-icons/md";
+import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
@@ -30,6 +30,7 @@ export default function PostCard(props) {
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
+  const [followers, setFollowers] = useState([]);
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
   const [showContent, setShowContent] = useState(() => {
@@ -107,9 +108,38 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/followers`
+        )
+        .then((response) => {
+          setFollowers(response.data.items)})
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
+
+  const sharePost = (post) => {
+    console.log(post.id)
+    for(let index = 0; index < followers.length; index++) {
+      const sharedPost = {
+        type: "post",
+        summary: `${author.displayName} shared a post.`,
+        author: author,
+        object: post.id,
+      };
+      api
+        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log("Failed to get posts of author. " + error);
+        });
+    }
+  };
 
   const deletePost = (uuid) => {
     api
@@ -268,6 +298,8 @@ export default function PostCard(props) {
             onClick={() => openComments(!open)}
           />
           {comments.length}
+
+          <MdShare className="share-icon" onClick={() => sharePost(props.post)}/>
         </div>
         <div>
           {open ? (

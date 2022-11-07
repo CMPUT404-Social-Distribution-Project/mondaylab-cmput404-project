@@ -23,9 +23,9 @@ function RenderAuthors(props) {
             props.authors.items.map((author) => <UserCard author={author} key={author.id}/>)
           ) : (
             <Card style={{ backgroundColor: "var(--darker-blue)" }}>
-              <h1 style={{ marginLeft: "15px" }}>
+              <h5 style={{ marginLeft: "15px" }}>
                 No match result for authors!
-              </h1>
+              </h5>
             </Card>
           )
         ) : null}
@@ -99,11 +99,12 @@ export default function Explore() {
   return (
     <Container>
       {/* Stack the columns on mobile by making one full-width and the other half-width */}
-      <Row>
+      <Row className="explore-title-container">
         <Col>
           <h1>Explore</h1>
         </Col>
-        <Col>
+        <Col className="search-col">
+          <FaSearch className="FaSearch" />
           <input
             className="search-bar-explore"
             value={value}
@@ -111,9 +112,7 @@ export default function Explore() {
             placeholder="Search for an author/post"
           />
         </Col>
-        <Col>
-          <FaSearch className="FaSearch" />
-        </Col>
+        <Col className="empty-rec" />
       </Row>
       <div className="searchResult">
         {value !== "" ? <RenderAuthors authors={authors} /> : null}
@@ -136,7 +135,7 @@ export default function Explore() {
                 </Row>
               </>
             ) : (
-              <h1> No match result for posts!</h1>
+              <h5> No match result for posts!</h5>
             )
           ) : (
             <>

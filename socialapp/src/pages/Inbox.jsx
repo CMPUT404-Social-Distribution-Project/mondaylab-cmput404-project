@@ -59,7 +59,7 @@ export default function Inbox() {
               }
             } else if (response.data.items[i].type.toLowerCase() === "post") {
               setPostNum((postNum) => postNum + 1);
-              setPosts((posts) => [...posts, response.data.items[i]]);
+              setPosts((posts) => [response.data.items[i], ...posts]);
             }
           }
 
@@ -117,7 +117,7 @@ export default function Inbox() {
               <div>
                 <BsFillTrashFill
                   style={{
-                    color: "white",
+                    color: "var(--orange)",
                     marginTop: "1em",
                     marginBottom: "1em",
                     marginRight: "1em",
@@ -126,13 +126,13 @@ export default function Inbox() {
                 />
               </div>
             }
-            position="bottom center"
+            position="right center"
             on="hover"
             closeOnDocumentClick
-            contentStyle={{ padding: "0px", border: "none", color: "black" }}
-            arrow={true}
+            contentStyle={{ padding: "0.5rem", "background-color": "var(--dark-blue)", border: "none", width: "fit-content" }}
+            arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
           >
-            <span> Click to clear inbox! </span>
+            <span> Clear Inbox </span>
           </Popup>
         </Col>
       </Row>
@@ -170,10 +170,10 @@ export default function Inbox() {
                     posts.length !== 0 ? (
                       posts.map((item, i) => <PostCard post={item} key={i}/>)
                     ) : (
-                      <h4>No post yet! </h4>
+                      <h4>No posts yet! </h4>
                     )
                   ) : (
-                    <h4>No post yet! </h4>
+                    <h4>No posts yet! </h4>
                   )}
                 </Tab.Pane>
                 <Tab.Pane eventKey="like">
@@ -194,23 +194,23 @@ export default function Inbox() {
                         <InboxCommentCard comment={item} key={i}/>
                       ))
                     ) : (
-                      <h4>No comment yet! </h4>
+                      <h4>No comments yet! </h4>
                     )
                   ) : (
-                    <h4>No comment yet! </h4>
+                    <h4>No comments yet! </h4>
                   )}
                 </Tab.Pane>
                 <Tab.Pane eventKey="follow">
                   {typeof followRequests !== "undefined" ? (
                     followRequests.length !== 0 ? (
                       followRequests.map((item, i) => (
-                        <FollowRequestCard followRequest={item} kley={i}/>
+                        <FollowRequestCard followRequest={item} key={i}/>
                       ))
                     ) : (
-                      <h4>No follow request yet! </h4>
+                      <h4>No follow requests yet! </h4>
                     )
                   ) : (
-                    <h4>No follow request yet! </h4>
+                    <h4>No follow requests yet! </h4>
                   )}
                 </Tab.Pane>
               </Tab.Content>
@@ -223,7 +223,7 @@ export default function Inbox() {
           <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
           <strong className="me-auto">Bootstrap</strong>
         </Toast.Header>
-        <Toast.Body>You successfully delet inbox!</Toast.Body>
+        <Toast.Body>Cleared inbox successfully</Toast.Body>
       </Toast>
     </div>
   );

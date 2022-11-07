@@ -24,7 +24,7 @@ export default function PostCard(props) {
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
-  const [color, setColor] = useState("white");
+  const [color, setColor] = useState("var(--white-teal)");
   const [author, setAuthor] = useState("");
   const [followers, setFollowers] = useState([]);
 
@@ -225,24 +225,27 @@ export default function PostCard(props) {
           <Col>
             <div>
               <BsFillHeartFill
-                style={{ color: likeCount != 0 ? "var(--orange)" : "white" }}
+                className="like-icon"
+                style={{ color: likeCount !== 0 ? "var(--orange)" : "var(--white-teal)" }}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>
           </Col>
-          <Col>
+          <Col style={{ display: "flex", height: "fit-content" }}>
             <Popup
               trigger={
                 <button
                   style={{
                     background: "none",
                     border: "none",
-                    right: "10px",
-                    position: "absolute",
+                    "margin-left": "auto",
+                    padding: "0.5rem",
+                    width: "2rem",
+                    height: "2rem",
                   }}
                 >
                   <BsCursorFill
-                    style={{ color: "white" }}
+                    style={{ color: "var(--white-teal)", "vertical-align": "top" }}
                     onClick={postRouteChange}
                   />
                 </button>
@@ -253,8 +256,10 @@ export default function PostCard(props) {
               mouseLeaveDelay={300}
               mouseEnterDelay={0}
               arrow={true}
+              contentStyle={{ "background-color": "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5em" }}
+              arrowStyle={{ "color": "var(--dark-blue)", stroke: "none" }}
             >
-              <span> Click for details! </span>
+              <span style={{ "font-size": "0.8rem"}}> View Post </span>
             </Popup>
           </Col>
         </Row>
