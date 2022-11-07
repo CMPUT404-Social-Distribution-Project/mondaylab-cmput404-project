@@ -86,6 +86,7 @@ export default function Inbox() {
       ],
     });
   };
+  
   const deleteInbox = () => {
     api
       .delete(`${baseURL}/authors/${user_id}/inbox/`)
@@ -223,7 +224,7 @@ export default function Inbox() {
           <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
           <strong className="me-auto">Bootstrap</strong>
         </Toast.Header>
-        <Toast.Body>You successfully delet inbox!</Toast.Body>
+        <Toast.Body>You successfully cleared the inbox!</Toast.Body>
       </Toast>
     </div>
   );

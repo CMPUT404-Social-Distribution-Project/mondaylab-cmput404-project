@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
-import { MdModeEdit, MdDelete } from "react-icons/md";
+import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
@@ -30,6 +30,7 @@ export default function PostCard(props) {
   const [color, setColor] = useState("white");
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
+  const [followers, setFollowers] = useState([]);
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
   const [showContent, setShowContent] = useState(() => {
@@ -107,6 +108,16 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/followers`
+        )
+        .then((response) => {
+          setFollowers(response.data.items)
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
@@ -126,7 +137,7 @@ export default function PostCard(props) {
   const confirmDelete = (uuid) => {
     confirmAlert({
       title: "Confirm to submit",
-      message: "Are you sure to do this.",
+      message: "Are you sure youn want to delete this post?",
       buttons: [
         {
           label: "Yes",
@@ -174,36 +185,60 @@ export default function PostCard(props) {
       });
   };
 
+  const sharePost = (post) => {
+    console.log(post.id)
+    for (let index = 0; index < followers.length; index++) {
+      const sharedPost = {
+        type: "post",
+        summary: `${author.displayName} shared a post.`,
+        author: author,
+        object: post.id,
+      };
+      api
+        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log("Failed to get posts of author. " + error);
+        });
+    }
+  };
+
   // only render options if the user viewing it is the author of it
   function PostOptions() {
-    if (user_id === props.post.author.uuid) {
-      return (
-        <div className="options">
-          <Dropdown>
-            <Dropdown.Toggle id="dropdown-basic">
-              <BiDotsVerticalRounded />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {
-                <Dropdown.Item onClick={() => setShowEditPost(true)}>
-                  <MdModeEdit /> Edit Post
-                </Dropdown.Item>
+    return (
+      <div className="options">
+        <Dropdown>
+          <Dropdown.Toggle id="dropdown-basic">
+            <BiDotsVerticalRounded />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => sharePost(props.post)}>
+              <MdShare /> Share Post
+            </Dropdown.Item>
+            {(() => {
+              if (user_id === props.post.author.uuid) {
+                return (
+                  <div>
+                    <Dropdown.Item onClick={() => setShowEditPost(true)}>
+                      <MdModeEdit /> Edit Post
+                    </Dropdown.Item>
+
+                    <Dropdown.Item
+                      className="delete-post"
+                      onClick={() => confirmDelete(props.post.uuid)}
+                    >
+                      <MdDelete /> Delete Post
+                    </Dropdown.Item>
+                  </div>
+                )
               }
-              {
-                <Dropdown.Item
-                  className="delete-post"
-                  onClick={() => deletePost(props.post.uuid)}
-                >
-                  <MdDelete /> Delete Post
-                </Dropdown.Item>
-              }
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-      );
-    } else {
-      return <></>;
-    }
+            })()}
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+    );
   }
 
   return (

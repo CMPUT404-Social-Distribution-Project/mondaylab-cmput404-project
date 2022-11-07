@@ -87,6 +87,7 @@ export default function CreatePost(props) {
 
   const sendPost = async () => {
     // No image
+    console.log(post)
     if (!imagePost) {
       api
         .post(`${baseURL}/authors/${user_id}/posts/`, post)
