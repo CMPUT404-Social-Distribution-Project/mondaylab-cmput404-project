@@ -10,14 +10,13 @@ import CreatePost from "../Posts/CreatePost";
 export default function Sidebar() {
     const { logoutUser } = useContext(AuthContext);
     const [newPost, setNewPost] = useState(false);
-    
     const navigate = useNavigate();
     const location = useLocation();
 
     const refreshState = (navigate, location) => {
         navigate(`${location.pathname}`, {state: {refresh:true}});
     }
-
+    console.log(location.pathname);
     return (
         <ul
             id="sidebar"
@@ -39,43 +38,34 @@ export default function Sidebar() {
 
             </li>
             <li>
-                <Link to="/stream">
-                    <a
-                        href="/"
+                <div onClick={() => navigate("/stream", {state: {refresh:true}})}>
+                    <div
                         className="nav-link py-3"
                         title="Stream"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
                     >
-                        <FaHome />
-                    </a>
-                </Link>
+                        <FaHome style={{ color: location.pathname === "/stream" || location.pathname === "/" }}/>
+                    </div>
+                </div>
             </li>
             <li>
-                <Link to="/inbox">
-                    <a
-                        href="/"
+                <div onClick={() => navigate("/inbox", {state: {refresh:true}})}>
+                    <div
                         className="nav-link py-3"
                         title="Inbox"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
                     >
-                        <FaInbox />
-                    </a>
-                </Link>
+                        <FaInbox style={{ color: location.pathname === "/inbox" }}/>
+                    </div>
+                </div>
             </li>
             <li>
-                <Link to="/explore">
-                    <a
-                        href="/"
+                <div onClick={() => navigate("/explore", {state: {refresh:true}})}>
+                    <div
                         className="nav-link py-3"
                         title="Explore"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
                     >
-                        <FaSearch />
-                    </a>
-                </Link>
+                        <FaSearch style={{ color: location.pathname === "/explore" }}/>
+                    </div>
+                </div>
             </li>
             <hr className="solid" />
             <div className="signout">

@@ -98,7 +98,10 @@ hr {
 }
 
 .create-post-button:hover {
-    
     cursor: pointer;
 }
 
+.nav-link:hover, .nav-link:focus {
+    color: var(--orange);
+    cursor: pointer;
+}
