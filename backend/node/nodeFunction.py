@@ -51,6 +51,8 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
         https://stackoverflow.com/questions/38016684/accessing-username-and-password-in-django-request-header-returns-none
 
         I WANT TO AUTHENTICATE INCOMING HTTP REQUEST TO GET OUR HOST FROM OTHER SERVER
+
+        WHENEVER USER GET 
         """
         if (request.META.get('HTTP_AUTHORIZATION') != None):
         
@@ -75,10 +77,13 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             #newNode = Node(hostName=hostName, authUsername=username, authPassword=password)
             #newNode.save()
 
+            # 
             # once a host exists in the node database, then they are authenticated
-            return response.Response(f"NODE CONNECTION ESTABLISHED", status=status.HTTP_200_OK)
+            
+            return ()  # need to return
         else:
             None
+
 
 
 
