@@ -69,6 +69,8 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             if username != "user" and password != "user":
                 raise exceptions.AuthenticationFailed("Node Credentials Incorrect.")
 
+
+
             # add the server to the connected server list
             # NOTE, idk if we should make other Host send their 'hostname' throught their get request body orsomething
             # NOTE, idk what is the purpose of having authUSername, authPassword in the model as we can hardcode
@@ -80,10 +82,15 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             # 
             # once a host exists in the node database, then they are authenticated
             
-            return ()  # need to return
+            return (Authenticated(), None)  # need to return what?
         else:
             None
-
+"""
+rest framework authenticator will check self.is_authenticated to be true. That is the only field that matters
+"""
+class Authenticated:
+    def __init__(self, id):
+        self.is_authenticated = True   
 
 
 
