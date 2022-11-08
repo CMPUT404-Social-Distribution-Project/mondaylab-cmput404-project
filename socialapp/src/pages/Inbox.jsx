@@ -100,6 +100,7 @@ export default function Inbox() {
       ],
     });
   };
+  
   const deleteInbox = () => {
     api
       .delete(`${baseURL}/authors/${user_id}/inbox/`)

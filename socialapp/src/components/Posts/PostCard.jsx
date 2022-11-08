@@ -129,7 +129,7 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
-    };
+    }
     fetchData();
   }, []);
 
@@ -187,7 +187,7 @@ export default function PostCard(props) {
   const confirmDelete = (uuid) => {
     confirmAlert({
       title: "Confirm to submit",
-      message: "Are you sure to do this.",
+      message: "Are you sure youn want to delete this post?",
       buttons: [
         {
           label: "Yes",
@@ -237,34 +237,38 @@ export default function PostCard(props) {
 
   // only render options if the user viewing it is the author of it
   function PostOptions() {
-    if (user_id === props.post.author.uuid) {
-      return (
-        <div className="options">
-          <Dropdown>
-            <Dropdown.Toggle id="dropdown-basic">
-              <BiDotsVerticalRounded />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              {
-                <Dropdown.Item onClick={() => setShowEditPost(true)}>
-                  <MdModeEdit /> Edit Post
-                </Dropdown.Item>
+    return (
+      <div className="options">
+        <Dropdown>
+          <Dropdown.Toggle id="dropdown-basic">
+            <BiDotsVerticalRounded />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => sharePost(props.post)}>
+              <MdShare /> Share Post
+            </Dropdown.Item>
+            {(() => {
+              if (user_id === props.post.author.uuid) {
+                return (
+                  <div>
+                    <Dropdown.Item onClick={() => setShowEditPost(true)}>
+                      <MdModeEdit /> Edit Post
+                    </Dropdown.Item>
+
+                    <Dropdown.Item
+                      className="delete-post"
+                      onClick={() => confirmDelete(props.post.uuid)}
+                    >
+                      <MdDelete /> Delete Post
+                    </Dropdown.Item>
+                  </div>
+                )
               }
-              {
-                <Dropdown.Item
-                  className="delete-post"
-                  onClick={() => deletePost(props.post.uuid)}
-                >
-                  <MdDelete /> Delete Post
-                </Dropdown.Item>
-              }
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-      );
-    } else {
-      return <></>;
-    }
+            })()}
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+    );
   }
 
   return (

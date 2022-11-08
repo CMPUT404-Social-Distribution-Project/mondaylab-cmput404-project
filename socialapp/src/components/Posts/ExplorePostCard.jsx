@@ -15,6 +15,8 @@ import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { confirmAlert } from "react-confirm-alert";
+
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_user_id = props.post.author.uuid;
@@ -113,6 +115,24 @@ export default function PostCard(props) {
     fetchData();
   }, []);
 
+  const confirmDelete = (uuid) => {
+    confirmAlert({
+      title: "Confirm to submit",
+      message: "Are you sure youn want to delete this post?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            deletePost(uuid);
+          },
+        },
+        {
+          label: "No",
+        },
+      ],
+    });
+  };
+
   const deletePost = (uuid) => {
     api
       .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
@@ -167,7 +187,7 @@ export default function PostCard(props) {
 
                       <Dropdown.Item
                         className="delete-post"
-                        onClick={() => deletePost(props.post.uuid)}
+                        onClick={() => confirmDelete(props.post.uuid)}
                       >
                         <MdDelete /> Delete Post
                       </Dropdown.Item>
