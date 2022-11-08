@@ -15,6 +15,8 @@ import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { confirmAlert } from "react-confirm-alert";
+
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_user_id = props.post.author.uuid;
