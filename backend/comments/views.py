@@ -89,8 +89,9 @@ class CommentsApiView(GenericAPIView):
 
                 authorObj = Author.objects.get(uuid=author_id)
                 commentId = author_id_full_path + '/' + "posts/" + post_id + "/comments/" +  commentUuid
-                #TODO: use correct format for published date
-                publishedDate = date.today().strftime('%Y-%m-%d %H:%M:%S')
+                # published date is in the following format 
+                # 2015-03-09T13:07:04+00:00
+                publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
                 
                 serialize.save(id=commentId, author=authorObj, published=publishedDate, uuid=commentUuid)  # save to db with additional field injected
                 
