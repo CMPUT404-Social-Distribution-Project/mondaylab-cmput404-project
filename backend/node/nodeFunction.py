@@ -14,7 +14,7 @@ from rest_framework import exceptions
 
 
 
-hardCodedcredential = {"username" : "hello", "password" : "world"}  # credential to connect
+credentialToConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 
 """
 naive authentication for now... Not sure if we should do one authentication check for incoming
@@ -67,14 +67,13 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             password = decodedCredentials[1]
 
 
-            if username == hardCodedcredential['username'] and password == hardCodedcredential['password']:
+            if username == credentialToConnect['username'] and password == credentialToConnect['password']:
                 #case: this is request to for connection. return not authenticated for now. so that it can redirect to node.view.py
                 return (Authenticated(False), None)
 
 
-
-            if username != "user" and password != "user":  # some hard coded username, password for each http request from 
-                raise exceptions.AuthenticationFailed("Node Credentials Incorrect.")
+            #if username != "user" and password != "user":  # some hard coded username, password for each http request from 
+            #    raise exceptions.AuthenticationFailed("Node Credentials Incorrect.")
 
 
             # once a host exists in the node database, then they are authenticated
@@ -85,12 +84,17 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             
             """ 
 
+            """
+            Note: lets make the remote host send their 'hostname' along this request
+            so we can   Node.objects.get(hostname) and then check if the credential in the db matches
+            the credential in the request
+            """
+
             remoteNode = Node.objects.filter(authUsername=username, authPassword=password)
             if not remoteNode.exists():
-                raise exceptions.AuthenticationFailed("This host is not connect")
-
-            
-            return (Authenticated(True), None)  # need to return what?
+                raise exceptions.AuthenticationFailed("in nodeFunction.py, incorrect credential or this host not connected to this server")
+            else:
+                return (Authenticated(True), None)
         else:
             None
 """
@@ -104,4 +108,7 @@ class Authenticated:
 
 
 
+def getRemoteHostName(request):
+    
+    pass
 

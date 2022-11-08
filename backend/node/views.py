@@ -56,7 +56,7 @@ def AcceptConnectionFromRemote(request, hostName):
             generatedUser = hostName
             generationpassword = hostName + "password"
             # ----------------------------------------------
-            newNode = Node(hostName=hostName, authUsername=generatedUser, authPassword=password)
+            newNode = Node(hostName=hostName, authUsername=generatedUser, authPassword=generationpassword)
             newNode.save()
 
             res = {
