@@ -24,10 +24,10 @@ export default function PostCard(props) {
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
-  const [color, setColor] = useState("white");
+  const [color, setColor] = useState("var(--white-teal)");
   const [author, setAuthor] = useState("");
   const [followers, setFollowers] = useState([]);
-
+  
   const navigate = useNavigate();
   const routeChange = () => {
     navigate(`/authors/${post_user_id}/`, { state: { refresh: true } });
@@ -113,6 +113,24 @@ export default function PostCard(props) {
     fetchData();
   }, []);
 
+  const confirmDelete = (uuid) => {
+    confirmAlert({
+      title: "Confirm to submit",
+      message: "Are you sure youn want to delete this post?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            deletePost(uuid);
+          },
+        },
+        {
+          label: "No",
+        },
+      ],
+    });
+  };
+
   const deletePost = (uuid) => {
     api
       .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
@@ -126,23 +144,22 @@ export default function PostCard(props) {
   };
 
   const sharePost = (post) => {
-    console.log(post.id)
-    for(let index = 0; index < followers.length; index++) {
-      const sharedPost = {
-        type: "post",
-        summary: `${author.displayName} shared a post.`,
-        author: author,
-        object: post.id,
-      };
-      api
-        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log("Failed to get posts of author. " + error);
-        });
-    }
+      for(let index = 0; index < followers.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
   };
 
   // only render options if the user viewing it is the author of it
@@ -168,7 +185,7 @@ export default function PostCard(props) {
 
                       <Dropdown.Item
                         className="delete-post"
-                        onClick={() => deletePost(props.post.uuid)}
+                        onClick={() => confirmDelete(props.post.uuid)}
                       >
                         <MdDelete /> Delete Post
                       </Dropdown.Item>
@@ -225,24 +242,27 @@ export default function PostCard(props) {
           <Col>
             <div>
               <BsFillHeartFill
-                style={{ color: likeCount != 0 ? "var(--orange)" : "white" }}
+                className="like-icon"
+                style={{ color: likeCount !== 0 ? "var(--orange)" : "var(--white-teal)" }}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>
           </Col>
-          <Col>
+          <Col style={{ display: "flex", height: "fit-content" }}>
             <Popup
               trigger={
                 <button
                   style={{
                     background: "none",
                     border: "none",
-                    right: "10px",
-                    position: "absolute",
+                    marginLeft: "auto",
+                    padding: "0.5rem",
+                    width: "2rem",
+                    height: "2rem",
                   }}
                 >
                   <BsCursorFill
-                    style={{ color: "white" }}
+                    style={{ color: "var(--white-teal)", verticalAlign: "top" }}
                     onClick={postRouteChange}
                   />
                 </button>
@@ -253,8 +273,10 @@ export default function PostCard(props) {
               mouseLeaveDelay={300}
               mouseEnterDelay={0}
               arrow={true}
+              contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5em" }}
+              arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
             >
-              <span> Click for details! </span>
+              <span style={{ fontSize: "0.8rem"}}> View Post </span>
             </Popup>
           </Col>
         </Row>

@@ -4,6 +4,7 @@ import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
+import { FaUserFriends } from "react-icons/fa";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
 import "./PostCard.css";
@@ -31,6 +32,8 @@ export default function PostCard(props) {
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
+
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
   const [showContent, setShowContent] = useState(() => {
@@ -113,14 +116,61 @@ export default function PostCard(props) {
           `${baseURL}/authors/${user_id}/followers`
         )
         .then((response) => {
-          setFollowers(response.data.items)
-        })
+          setFollowers(response.data.items)})
         .catch((error) => {
           console.log(error);
         });
-    };
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/friends/`
+        )
+        .then((response) => {
+          setFriends(response.data.items)})
+        .catch((error) => {
+          console.log(error);
+        });
+    }
     fetchData();
   }, []);
+
+  const sharePost = (post) => {
+    console.log(post.id)
+    if (post.visibility === "PUBLIC") {
+      for(let index = 0; index < followers.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
+    } else if (post.visibility === "FRIENDS") {
+      for(let index = 0; index < friends.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
+    }
+  };
 
   const deletePost = (uuid) => {
     api
@@ -185,26 +235,6 @@ export default function PostCard(props) {
       });
   };
 
-  const sharePost = (post) => {
-    console.log(post.id)
-    for (let index = 0; index < followers.length; index++) {
-      const sharedPost = {
-        type: "post",
-        summary: `${author.displayName} shared a post.`,
-        author: author,
-        object: post.id,
-      };
-      api
-        .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log("Failed to get posts of author. " + error);
-        });
-    }
-  };
-
   // only render options if the user viewing it is the author of it
   function PostOptions() {
     return (
@@ -252,13 +282,28 @@ export default function PostCard(props) {
             {props.post.author.displayName}
           </div>
         </div>
+        {props.post.visibility === "FRIENDS" ? (
+          <div className="friends-indicator">
+            <FaUserFriends />
+            Friends-Only
+          </div>
+        ) : (
+          <div className="friends-indicator" style={{ background: "none" }} />
+        )}
         {props.post.unlisted === true ? (
-          <div className="unlisted-indicator">
+          <div className="unlisted-indicator" style={{
+            margin: props.post.visibility === "FRIENDS" ? "0 1rem 0 0" : "0 1rem 0 auto"
+          }}>
             <IoUnlink />
             Unlisted
           </div>
         ) : (
-          <div className="unlisted-indicator" style={{ background: "none" }} />
+          <div className="unlisted-indicator" style={{ 
+            background: "none",
+            margin: "0",
+            padding: "0" 
+            }} 
+          />
         )}
         <PostOptions />
         {showEditPost && (
@@ -303,6 +348,8 @@ export default function PostCard(props) {
             onClick={() => openComments(!open)}
           />
           {comments.length}
+
+          <MdShare className="share-icon" onClick={() => sharePost(props.post)}/>
         </div>
         <div>
           {open ? (

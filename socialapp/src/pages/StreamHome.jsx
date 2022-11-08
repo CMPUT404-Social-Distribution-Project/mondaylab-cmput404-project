@@ -55,7 +55,7 @@ export default function StreamHome() {
               <button style={{ background: "none", border: "none" }}>
                 <BsGithub
                   style={{
-                    color: "white",
+                    color: "var(--white-teal)",
                     marginTop: "1em",
                     marginBottom: "1em",
                     marginRight: "1em",
@@ -65,10 +65,11 @@ export default function StreamHome() {
               </button>
             }
             on="hover"
-            contentStyle={{ color: "black" }}
+            contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5rem" }}
+            arrowStyle={{ color: "var(--dark-blue)", stroke: "none"}}
             arrow={true}
           >
-            <span> Click to see github activities! </span>
+            <span style={{ fontSize: "0.8rem" }}> Click to see GitHub activities! </span>
           </Popup>
         </Col>
       </Row>

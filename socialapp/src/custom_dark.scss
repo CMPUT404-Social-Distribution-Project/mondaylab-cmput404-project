@@ -81,15 +81,6 @@ $font-family-base: "Readex Pro" !important;
   --bs-nav-pills-link-active-bg: var(--teal-alt);
 }
 
-.main .nav-link {
-  color: var(--white-teal);
-  transition: color .15s ease-in-out,background-color .15s ease-in-out,var(--teal) .15s ease-in-out
-}
-
-.main .nav-link:hover, .main .nav-link:focus {
-  color: var(--orange);
-}
-
 
 // Move main page (where stream/inbox/explore pages are going to be) to the right...due to issues with sidebar
 .main .main-content-container {

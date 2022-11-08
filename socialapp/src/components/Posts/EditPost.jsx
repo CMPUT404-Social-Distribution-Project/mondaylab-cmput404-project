@@ -8,7 +8,7 @@ import {
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
-import { FaImage } from "react-icons/fa";
+import { FaImage, FaLink } from "react-icons/fa";
 
 export default function EditPost(props) {
   const [showURI, setShowURI] = useState(false);
@@ -29,20 +29,13 @@ export default function EditPost(props) {
   const user_id = localStorage.getItem("user_id");
   const [imagePost, setImagePost] = useState(null);
   const [uri, setURI] = useState("");
-  // const [post, setPost] = useState({
-  //     title: props.post.title,
-  //     source: props.post.source,
-  //     origin: props.post.origin,
-  //     description: props.post.description,
-  //     contentType: props.post.contentType,
-  //     content: props.post.content,
-  //     categories: props.post.categories,
-  //     visibility: props.post.visibility,
-  //     unlisted: props.post.unlisted,
-  // });
   const propsPost = props.post;
   delete propsPost.commentSrc; // causing issue with updating.
   const [post, setPost] = useState(propsPost);
+  const [showLinkForm, setShowLinkForm] = useState(() =>
+    props.post.image ? true : false
+  );
+
 
   /**
    * In order to change the color of the button when selecting a visibility option, whenever the user clicks on one of the options,
@@ -54,7 +47,9 @@ export default function EditPost(props) {
 
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
-    setImagePost({ ...imagePost, visiblity: option });
+    if (imagePost) {
+      setImagePost({ ...imagePost, visiblity: option });
+    }
     if (option === "PUBLIC") {
       setEveActive(true);
       setFriActive(false);
@@ -198,6 +193,7 @@ export default function EditPost(props) {
     const file = e.target.files[0];
     if (reader !== undefined && file !== undefined) {
       reader.onloadend = () => {
+        setShowLinkForm(false);
         setFile(file);
         setSize(file.size);
         setFileName(file.name);
@@ -224,13 +220,21 @@ export default function EditPost(props) {
     setFileName("");
     setSize("");
     setImagePost(null);
-    setPost({ ...post, image: null });
+    setPost({ ...post, image: "" });
   };
 
   const hiddenFileInput = React.useRef(null);
   const handleImageClick = () => {
     hiddenFileInput.current.click();
   };
+
+  const linkClickHandler = () => {
+    setShowLinkForm(!showLinkForm);
+    setImagePreview("");
+    delete post.image;
+    setPost(post);
+    setImagePost(null);
+  }
 
   return (
     <>
@@ -354,6 +358,22 @@ export default function EditPost(props) {
                   Please choose a walk type.
                 </Form.Control.Feedback>
               </Form.Group>
+              {showLinkForm && <Form.Group className="link-form">
+                <Form.Control
+                  label="link"
+                  name="link"
+                  type="text"
+                  placeholder="Image URL link"
+                  value={post.image}
+                  onChange={(e) => {
+                    setPost({
+                      ...post,
+                      image: e.target.value,
+                    });
+                    setImagePreview(e.target.value);
+                  }}
+                />
+              </Form.Group>}
             </Modal.Body>
             {imagePreview === null ? (
               <></>
@@ -387,6 +407,7 @@ export default function EditPost(props) {
                     Remove Image
                   </Button>
                 )}
+                <FaLink className="link-icon" onClick={() => linkClickHandler()}/>
               </div>
               <Button className="postButton" onClick={postIsSame}>
                 Post

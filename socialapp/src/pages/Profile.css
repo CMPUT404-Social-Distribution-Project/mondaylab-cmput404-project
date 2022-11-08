@@ -37,14 +37,15 @@
     --bs-nav-tabs-link-active-bg: var(--dark-blue);
     --bs-nav-tabs-link-active-border-color: transparent;
     --bs-nav-tabs-link-active-color: var(--teal);
-    --bs-nav-link-hover-color: transparent;
+    --bs-nav-link-hover-color: var(--orange);
 }
 .profileContainer .nav-link {
     border-bottom-left-radius: 11px;
     border-bottom-right-radius: 11px; 
     border-top-right-radius: 0;   
     border-top-left-radius: 0;
-    background-color: var(--slightly-darker-blue);
+    background-color: var(--darker-blue);
+    color: var(--white-teal);
 }
 .profileContainer .nav-link:hover {
     outline: transparent;
