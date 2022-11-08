@@ -5,13 +5,19 @@ import {
   Form,
   CloseButton,
   Card,
+  Container,
 } from "react-bootstrap";
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
-import { FaImage, FaLink } from "react-icons/fa";
+import { FaImage, FaLink, FaSearch } from "react-icons/fa";
+import { search2 } from "../../utils/searchUtil";
+import UserCard from "../UserCard.css";
+
 
 export default function CreatePost(props) {
+  const [authors, setAuthors] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [showURI, setShowURI] = useState(false);
   const [unlist, setUnlist] = useState(false);
   const [eveActive, setEveActive] = useState(true);
@@ -22,7 +28,9 @@ export default function CreatePost(props) {
   const user_id = localStorage.getItem("user_id");
   const [imagePost, setImagePost] = useState(null);
   const [showLinkForm, setShowLinkForm] = useState(false);
+  const [sendTo, setSentTo] = useState();
   const [uri, setURI] = useState("");
+  const [value, setValue] = useState("");
   const [post, setPost] = useState({
     title: "",
     source: "",
@@ -103,7 +111,23 @@ export default function CreatePost(props) {
             );
             setShowURI(true);
           } else {
-            props.onHide();
+            if(post.visibility === "PRIVATE"){
+              const sharedPost = {
+                type: "post",
+                summary: `${user_id} shared a post.`,
+                author: value,
+                object: post.id,
+              };
+              api
+                .post(`${baseURL}/authors/${value.uuid}/inbox/`, post)
+                .then((response) => {
+                  console.log(response)
+                })
+                .catch((error) => {
+                  console.log("Failed to send private post. " + error);
+                });
+              }
+              props.onHide();
           }
         })
         .catch((error) => {
@@ -224,6 +248,64 @@ export default function CreatePost(props) {
     setImagePost(null);
   }
 
+  const search = async (val) => {
+    setLoading(true);
+    const res = await search2(
+      `${baseURL}/authors?search=${val}` // TODO: need to search with pagination
+    );
+    setAuthors(res);
+
+    setLoading(false);
+  };
+
+  const onChangeHandler = async (e) => {
+    search(e.target.value);
+    setValue(e.target.value);
+  };
+
+  const privatePost = (author) => {
+    setValue(author)
+  }
+
+  function RenderAuthors(props) {
+    // given the list of authors from the query, creates the user cards
+    if (props.authors) {
+      return (
+        <div>
+          { props.authors.items != "undefined" ? (
+            props.authors.items.length !== 0 ? (
+              props.authors.items.map((author) =>
+                <div>
+                  {console.log(author.displayName)}
+                  <Card onClick={() => {privatePost(author)}} className="userCard">
+                    <Card.Body>
+                      <Card.Title>
+                        <div className="profilePicCard">
+                          <img
+                            id="profilePicCard"
+                            src={author.profileImage}
+                            alt="profilePic"
+                          />
+                        </div>
+                        <div className="text">{author.displayName}</div>
+                      </Card.Title>
+                    </Card.Body>
+                  </Card>
+                </div>)
+            ) : (
+              <Card style={{ backgroundColor: "var(--darker-blue)", width: "50%", paddingTop: "1%" }}>
+                <h5 className="no-author">
+                  No match result for authors!
+                </h5>
+              </Card>
+            )
+          ) : null}
+        </div>
+      );
+    }
+    return <></>;
+  }
+
   return (
     <>
       <div className="post-modal">
@@ -312,6 +394,36 @@ export default function CreatePost(props) {
                 />
               </div>
             </Modal.Header>
+            <Modal.Header className = "searchHeader">
+              <Container>
+                {(() => {
+                  if (post.visibility === "PRIVATE") {
+                    return (
+                      <div style={{ marginLeft: "3%" }}>
+                        <FaSearch style={{
+                        color: "#BFEFE9",
+                        height: "1em",
+                        width: "1em",
+                        zIndex: "3px", }} className="FaSearch" />
+                        <input
+                          style={{ color: "#BFEFE9", 
+                          backgroundColor: "#1C212B", 
+                          marginLeft: "1%", 
+                          borderRadius: "3%", 
+                          boderColor: "#1C212B"}}
+                          value={value.displayName}
+                          onChange={(e) => onChangeHandler(e)}
+                          placeholder="Search for an author"
+                        />
+                        <div style={{zIndex: "100px"}}>
+                          {value !== "" ? <RenderAuthors authors={authors} /> : null}
+                        </div>
+                      </div>
+                    )
+                  }
+                })()}
+              </Container>
+            </Modal.Header>
             <Modal.Body>
               <Form.Group className="title">
                 <Form.Control
@@ -340,9 +452,6 @@ export default function CreatePost(props) {
                     });
                   }}
                 />
-                <Form.Control.Feedback type="invalid">
-                  Please choose a walk type.
-                </Form.Control.Feedback>
               </Form.Group>
               {showLinkForm && <Form.Group className="link-form">
                 <Form.Control
