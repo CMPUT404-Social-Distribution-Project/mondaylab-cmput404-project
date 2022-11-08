@@ -4,16 +4,17 @@
 from .models import Node
 from backend.settings import ALLOWED_HOSTS
 
-
 #import 
 import requests
 from rest_framework import authentication
 from rest_framework import response, status
 import base64
 from rest_framework import exceptions
+#NOTE, from node.views import hardCodedcredential      # this errors
 
 
 
+hardCodedcredential = {"username" : "hello", "password" : "world"}  # credential to connect
 
 """
 naive authentication for now... Not sure if we should do one authentication check for incoming
@@ -65,8 +66,16 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             username = decodedCredentials[0]
             password = decodedCredentials[1]
 
-            if username != "user" and password != "user":  # some hard coded username, password for now
+
+            if username == hardCodedcredential['username'] and password == hardCodedcredential['password']:
+                #case: this is request to for connection. return not authenticated for now. so that it can redirect to node.view.py
+                return (Authenticated(False), None)
+
+
+
+            if username != "user" and password != "user":  # some hard coded username, password for each http request from 
                 raise exceptions.AuthenticationFailed("Node Credentials Incorrect.")
+
 
             # once a host exists in the node database, then they are authenticated
 
@@ -81,7 +90,7 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
                 raise exceptions.AuthenticationFailed("This host is not connect")
 
             
-            return (Authenticated(), None)  # need to return what?
+            return (Authenticated(True), None)  # need to return what?
         else:
             None
 """
@@ -89,8 +98,8 @@ custom class that tell rest framework authenticator to please authenticate this 
 rest framework authenticator will check self.is_authenticated to be true. That is the only field that matters
 """
 class Authenticated:
-    def __init__(self, id):
-        self.is_authenticated = True   
+    def __init__(self, flag):
+        self.is_authenticated = flag
 
 
 
