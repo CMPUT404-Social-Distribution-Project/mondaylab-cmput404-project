@@ -107,8 +107,11 @@ class Authenticated:
 
 
 
+"""
+TODO, helper function to get the hostName of the host we wanna send request to
 
+"""
 def getRemoteHostName(request):
-    
+
     pass
 

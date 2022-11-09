@@ -31,6 +31,11 @@ def AcceptConnectionFromRemote(request, hostName):
 
     usage [remote]   GET    /service/node/remoteHostName
           [local]    DELETE /service/node/remotehostname
+
+
+    NOTE, REFRACTOR IDEA, 
+          -we make remote host send 'Origin' header so we can shorten the path to    /service/node/
+          -having Origin is better for CustomAuthenticationCheck too because now I can query the host in db by their hostname
     """
 
     # TODO: need a way to restrict it only for LOCAL. its hard because this API doesnt require LOG IN
@@ -48,6 +53,9 @@ def AcceptConnectionFromRemote(request, hostName):
 
     """
     GET request here.
+
+
+
     """
     if (request.META.get('HTTP_AUTHORIZATION') != None):
     
