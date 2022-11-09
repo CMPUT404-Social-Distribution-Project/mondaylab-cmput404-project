@@ -33,7 +33,8 @@ def AcceptConnectionFromRemote(request, hostName):
           [local]    DELETE /service/node/remotehostname
     """
 
-
+    # TODO: need a way to restrict it only for LOCAL. its hard because this API doesnt require LOG IN
+    # NOTE, REQUIRE BASIC AUTH with username and password of this hostName for this request to be authenticated
     if (request.method == "DELETE"):
         # only our host can use this method.
         # NOTE, TO DO THAT, there should be a way to check if this this server's heroku host == our heroku host
@@ -42,10 +43,12 @@ def AcceptConnectionFromRemote(request, hostName):
 
         if hostToBeDeleted.exists():
             Node.objects.filter(hostName=hostName).delete()
-            return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_404_NOT_FOUND)
-        pass
-        return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_404_NOT_FOUND)
+            return response.Response(f"successfully severed the connection  ", status=status.HTTP_200_OK)
+        return response.Response(f"This host don't exist ", status=status.HTTP_404_NOT_FOUND)
 
+    """
+    GET request here.
+    """
     if (request.META.get('HTTP_AUTHORIZATION') != None):
     
         auth_header = request.META['HTTP_AUTHORIZATION']  # 'Basic aGVsbG86d29scmQ='
@@ -91,6 +94,7 @@ def AcceptConnectionFromRemote(request, hostName):
 
 
 """
+NOTE, I moved this inside  AcceptConnectionRemote() api
 sever a connection between this server and a remote host
 usage:
      [local]  DELETE /service/node/remotehostname
