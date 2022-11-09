@@ -18,16 +18,34 @@ I thought we didnt need generic view here
 
 """
 
-hardCodedcredential = {"username" : "hello", "password" : "world"}  # credential to connect
+credentialForConnect = {"username" : "hello", "password" : "world"}  # credential to connect
+credentialForDelete = {"", "", "", ""}
 
 
 # TODO:   this permission class DOES NOT WORK. get request still goes to my customAuthentication class in nodeFunction.py
-@api_view(['GET'])
+@api_view(['GET', 'DELETE'])
 @permission_classes((IsAuthenticatedOrReadOnly, ))
 def AcceptConnectionFromRemote(request, hostName):
     """
     https://stackoverflow.com/questions/38016684/accessing-username-and-password-in-django-request-header-returns-none
+
+    usage [remote]   GET    /service/node/remoteHostName
+          [local]    DELETE /service/node/remotehostname
     """
+
+
+    if (request.method == "DELETE"):
+        # only our host can use this method.
+        # NOTE, TO DO THAT, there should be a way to check if this this server's heroku host == our heroku host
+
+        hostToBeDeleted = Node.objects.filter(hostName=hostName)
+
+        if hostToBeDeleted.exists():
+            Node.objects.filter(hostName=hostName).delete()
+            return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_404_NOT_FOUND)
+        pass
+        return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_404_NOT_FOUND)
+
     if (request.META.get('HTTP_AUTHORIZATION') != None):
     
         auth_header = request.META['HTTP_AUTHORIZATION']  # 'Basic aGVsbG86d29scmQ='
@@ -50,7 +68,7 @@ def AcceptConnectionFromRemote(request, hostName):
 
 
 
-        if (username == hardCodedcredential['username'] and password == hardCodedcredential['password']):
+        if (username == credentialForConnect['username'] and password == credentialForConnect['password']):
             # generate a new password for them  ------------ 
             # rn its very basic username password generation
             generatedUser = hostName
@@ -73,8 +91,11 @@ def AcceptConnectionFromRemote(request, hostName):
 
 
 """
-remove node
+sever a connection between this server and a remote host
+usage:
+     [local]  DELETE /service/node/remotehostname
 """
 @api_view(['DELETE'])
-def removeNode():
+def removeNode(request, ):
+    
     pass
