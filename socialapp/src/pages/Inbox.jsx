@@ -15,14 +15,16 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Toast from "react-bootstrap/Toast";
 import Nav from "react-bootstrap/Nav";
+import { useLocation } from "react-router-dom";
+import "./Inbox.css";
+
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);
   const [posts, setPosts] = useState([]);
   const [postNum, setPostNum] = useState(0);
-  const [likeNum, setlikeNum] = useState(0);
+  const [likeNum, setLikeNum] = useState(0);
   const [commentNum, setCommentNum] = useState(0);
   const [followNum, setFollowNum] = useState(0);
-
   const [followRequests, setFollowRequests] = useState([]);
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
@@ -36,6 +38,17 @@ export default function Inbox() {
       await api
         .get(`${baseURL}/authors/${user_id}/inbox/all`)
         .then((response) => {
+          // Since clicking inbox icon in sidebar recalls this function,
+          // all these states need to be reset, otherwise one could
+          // infinitely click on inbox to add a lot duplicate posts/likes/etc.
+          setPostNum(0);
+          setLikeNum(0);
+          setCommentNum(0);
+          setFollowNum(0);
+          setPosts([]);
+          setLikes([]);
+          setComments([]);
+          setFollowRequests([]);
           setInboxItems(response.data.items);
           for (let i = 0; i < response.data.items.length; i++) {
             if (response.data.items[i].type.toLowerCase() === "follow") {
@@ -45,7 +58,7 @@ export default function Inbox() {
                 response.data.items[i],
               ]);
             } else if (response.data.items[i].type.toLowerCase() === "like") {
-              setlikeNum((likeNum) => likeNum + 1);
+              setLikeNum((likeNum) => likeNum + 1);
               setLikes((likes) => [...likes, response.data.items[i]]);
             } else if (
               response.data.items[i].type.toLowerCase() === "comment"
@@ -59,7 +72,7 @@ export default function Inbox() {
               }
             } else if (response.data.items[i].type.toLowerCase() === "post") {
               setPostNum((postNum) => postNum + 1);
-              setPosts((posts) => [...posts, response.data.items[i]]);
+              setPosts((posts) => [response.data.items[i], ...posts]);
             }
           }
 
@@ -69,23 +82,25 @@ export default function Inbox() {
         });
     };
     fetchData();
-  }, []);
+  }, [useLocation().state]);
 
   const clearInbox = () => {
     confirmAlert({
-      title: "Confirm to delete",
-      message: "Are you sure to clear inbox?",
+      title: "Clear inbox?",
       buttons: [
         {
           label: "Yes",
+          className: "yes-button",
           onClick: () => deleteInbox(),
         },
         {
+          className: "no-button",
           label: "No",
         },
       ],
     });
   };
+  
   const deleteInbox = () => {
     api
       .delete(`${baseURL}/authors/${user_id}/inbox/`)
@@ -96,7 +111,7 @@ export default function Inbox() {
         setLikes([]),
         setFollowRequests([]),
         setPostNum(0),
-        setlikeNum(0),
+        setLikeNum(0),
         setCommentNum(0),
         setFollowNum(0),
       )
@@ -117,7 +132,7 @@ export default function Inbox() {
               <div>
                 <BsFillTrashFill
                   style={{
-                    color: "white",
+                    color: "var(--orange)",
                     marginTop: "1em",
                     marginBottom: "1em",
                     marginRight: "1em",
@@ -126,13 +141,13 @@ export default function Inbox() {
                 />
               </div>
             }
-            position="bottom center"
+            position="right center"
             on="hover"
             closeOnDocumentClick
-            contentStyle={{ padding: "0px", border: "none", color: "black" }}
-            arrow={true}
+            contentStyle={{ padding: "0.5rem", "background-color": "var(--dark-blue)", border: "none", width: "fit-content" }}
+            arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
           >
-            <span> Click to clear inbox! </span>
+            <span> Clear Inbox </span>
           </Popup>
         </Col>
       </Row>
@@ -143,7 +158,7 @@ export default function Inbox() {
             <Row>
               <Nav
                 variant="pills"
-                id="justify-tab-example"
+                id="inbox-tab-row"
                 justify
                 fill
               >
@@ -170,10 +185,10 @@ export default function Inbox() {
                     posts.length !== 0 ? (
                       posts.map((item, i) => <PostCard post={item} key={i}/>)
                     ) : (
-                      <h4>No post yet! </h4>
+                      <h4>No posts yet! </h4>
                     )
                   ) : (
-                    <h4>No post yet! </h4>
+                    <h4>No posts yet! </h4>
                   )}
                 </Tab.Pane>
                 <Tab.Pane eventKey="like">
@@ -194,23 +209,23 @@ export default function Inbox() {
                         <InboxCommentCard comment={item} key={i}/>
                       ))
                     ) : (
-                      <h4>No comment yet! </h4>
+                      <h4>No comments yet! </h4>
                     )
                   ) : (
-                    <h4>No comment yet! </h4>
+                    <h4>No comments yet! </h4>
                   )}
                 </Tab.Pane>
                 <Tab.Pane eventKey="follow">
                   {typeof followRequests !== "undefined" ? (
                     followRequests.length !== 0 ? (
                       followRequests.map((item, i) => (
-                        <FollowRequestCard followRequest={item} kley={i}/>
+                        <FollowRequestCard followRequest={item} key={i}/>
                       ))
                     ) : (
-                      <h4>No follow request yet! </h4>
+                      <h4>No follow requests yet! </h4>
                     )
                   ) : (
-                    <h4>No follow request yet! </h4>
+                    <h4>No follow requests yet! </h4>
                   )}
                 </Tab.Pane>
               </Tab.Content>
@@ -223,7 +238,7 @@ export default function Inbox() {
           <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
           <strong className="me-auto">Bootstrap</strong>
         </Toast.Header>
-        <Toast.Body>You successfully delet inbox!</Toast.Body>
+        <Toast.Body>Cleared inbox successfully</Toast.Body>
       </Toast>
     </div>
   );

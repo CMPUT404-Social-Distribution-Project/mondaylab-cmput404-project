@@ -1,0 +1,36 @@
+.react-confirm-alert-overlay {
+    background: rgba(28, 33, 43, 0.8);
+}
+
+.react-confirm-alert-body {
+    background: var(--dark-blue);
+    color: var(--teal);
+}
+
+.react-confirm-alert-button-group .yes-button {
+    background-color: var(--teal);
+    font-family: "Readex Pro Bold";
+    color: var(--dark-blue);
+}
+
+.react-confirm-alert-button-group .no-button {
+    background-color: var(--orange);
+    font-family: "Readex Pro Bold";
+    color: var(--dark-blue);
+}
+
+.inbox-items-container .nav-item {
+    margin-right: 0.5rem;
+}
+
+.inbox-items-container .nav-item .nav-link {
+    outline: 2px solid var(--dark-blue);
+    --bs-nav-link-hover-color: var(--teal);
+    --bs-nav-link-color: var(--white-teal);
+    border-radius: 11px;
+}
+
+.inbox-items-container .nav-item .nav-link:hover {
+    background: var(--dark-blue);
+    transition: background-color 0.2s ease-in-out;
+}   

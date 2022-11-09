@@ -17,6 +17,7 @@ class Post(Model):
     class Visibility(TextChoices):
         PUBLIC = 'PUBLIC', 'PUBLIC'
         FRIENDS = 'FRIENDS', 'FRIENDS'
+        PRIVATE = 'PRIVATE', 'PRIVATE'
 
     type =CharField(blank=False, null=False, default="post", max_length=200)
     title = CharField(max_length=50, blank=True)

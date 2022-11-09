@@ -78,7 +78,7 @@ hr {
 
 /* Create Post Button */
 
-#sidebar .nav-item {
+#sidebar .side-nav-item {
     align-self: center;
 }
 
@@ -98,7 +98,26 @@ hr {
 }
 
 .create-post-button:hover {
-    
     cursor: pointer;
 }
 
+.side-nav-link {
+    width: 50px;
+    height: 50px;
+    padding: 0.5rem 0.5rem;
+    margin: 0.5rem 0.5rem;
+    border-radius: 11px;
+}
+
+.side-nav-link:hover {
+    cursor: pointer;
+    background: var(--slightly-darker-blue);
+    transition: background-color 0.5s ease-in-out;
+    border-radius: 11px;
+}
+
+.side-nav-link:hover svg {
+    color: var(--teal) !important;
+    transition: color 0.2s ease-in-out;
+    
+}
