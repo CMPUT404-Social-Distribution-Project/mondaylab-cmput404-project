@@ -27,14 +27,21 @@ export default function StreamHome() {
    */
 
   useEffect(() => {
-    api
-      .get(`${baseURL}/authors/${user_id}/posts/`)
-      .then((response) => {
-        setPostsArray(response.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    const fetchData = async () => {
+      await api
+        .get(`${baseURL}/authors/${user_id}/posts/`, {
+            params: {
+              visibility: "PRIVATE"
+            },
+        })
+        .then((response) => {
+          setPostsArray(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+    fetchData();
   }, [useLocation().state]);
 
   return (

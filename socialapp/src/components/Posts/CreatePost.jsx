@@ -102,70 +102,84 @@ export default function CreatePost(props) {
     // No image
     console.log("ImagePost", imagePost);
     if (!imagePost) {
-      api
-        .post(`${baseURL}/authors/${user_id}/posts/`, post)
-        .then((response) => {
-          if (post.unlisted) {
-            setURI(
-              `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
-            );
-            setShowURI(true);
-          } else {
-            if(post.visibility === "PRIVATE"){
-              const sharedPost = {
-                type: "post",
-                summary: `${user_id} shared a post.`,
-                author: value,
-                object: post.id,
-              };
-              api
-                .post(`${baseURL}/authors/${value.uuid}/inbox/`, post)
-                .then((response) => {
-                  console.log(response)
-                })
-                .catch((error) => {
-                  console.log("Failed to send private post. " + error);
+        api
+          .post(`${baseURL}/authors/${user_id}/posts/`, post)
+          .then((response) => {
+            if (post.unlisted) {
+              setURI(
+                `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
+              );
+              setShowURI(true);
+            } else {
+              if (post.visibility === "PRIVATE") {
+                const sharedPost = {
+                  type: "post",
+                  summary: `${user_id} shared a post.`,
+                  author: value,
+                  object: post,
+                };
+                api
+                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, post)
+                  .then((response) => {
+                    console.log(response)
+                  })
+                  .catch((error) => {
+                    console.log("Failed to send private post. " + error);
                 });
-              }
-              props.onHide();
-          }
-        })
-        .catch((error) => {
-          alert(`Something went wrong posting! \n Error: ${error.response.data}`);
-          console.log(error);
-        });
+                props.onHide();
+            }
+          }})
+          .catch((error) => {
+            alert(`Something went wrong posting! \n Error: ${error.response.data}`);
+            console.log(error);
+          });
     } else {
-      // there is an image, then we create an unlisted image post
-      await api
-        .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
-        .then((response) => {
-          // image post created successfully, now link the post with the image post
+        // there is an image, then we create an unlisted image post
+        await api
+          .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
+          .then((response) => {
+            // image post created successfully, now link the post with the image post
 
-          // set the image field
-          const new_post = {
-            ...post,
-            image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
-          };
+            // set the image field
+            const new_post = {
+              ...post,
+              image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
+            };
 
-          return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
-        })
-        .then((response) => {
-          if (post.unlisted) {
-            setURI(
-              `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
+            return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
+          })
+          .then((response) => {
+            if (post.unlisted) {
+              setURI(
+                `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
+              );
+              setShowURI(true);
+            } else {
+              if (post.visibility === "PRIVATE") {
+                const sharedPost = {
+                  type: "post",
+                  summary: `${user_id} shared a post.`,
+                  author: value,
+                  object: post.id,
+                };
+                api
+                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, post)
+                  .then((response) => {
+                    console.log(response)
+                  })
+                  .catch((error) => {
+                    console.log("Failed to send private post. " + error);
+                  });
+              props.onHide();
+            }
+          }})
+          .catch((error) => {
+            alert(
+              `Something went wrong posting the image post! \n Error: ${error.response.data}`
             );
-            setShowURI(true);
-          } else {
-            props.onHide();
-          }
-        })
-        .catch((error) => {
-          alert(
-            `Something went wrong posting the image post! \n Error: ${error.response.data}`
-          );
-          console.log(error.response);
-        });
-    }
+            console.log(error.response);
+          });
+      }
   };
 
   const [file, setFile] = useState();
