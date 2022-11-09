@@ -29,6 +29,8 @@ export default function PostCard(props) {
   const [color, setColor] = useState("var(--white-teal)");
   const [author, setAuthor] = useState("");
   const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
+
   
   const navigate = useNavigate();
   const routeChange = () => {
@@ -111,6 +113,16 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/friends/`
+        )
+        .then((response) => {
+          setFriends(response.data.items)
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
@@ -146,7 +158,8 @@ export default function PostCard(props) {
   };
 
   const sharePost = (post) => {
-      for(let index = 0; index < followers.length; index++) {
+    if (post.visibility === "PUBLIC") {
+      for (let index = 0; index < followers.length; index++) {
         const sharedPost = {
           type: "post",
           summary: `${author.displayName} shared a post.`,
@@ -162,6 +175,24 @@ export default function PostCard(props) {
             console.log("Failed to get posts of author. " + error);
           });
       }
+    } else if (post.visibility === "FRIENDS") {
+        for (let index = 0; index < friends.length; index++) {
+          const sharedPost = {
+            type: "post",
+            summary: `${author.displayName} shared a post.`,
+            author: author,
+            object: post.id,
+          };
+          api
+            .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
+            .then((response) => {
+              console.log(response)
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
+    }
   };
 
   // only render options if the user viewing it is the author of it

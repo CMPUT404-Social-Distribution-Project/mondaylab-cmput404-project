@@ -194,3 +194,10 @@
 .create-post-modal .link-form {
     margin-top: 1rem;
 }
+
+.searchHeader.modal-header {
+    min-height: 2em;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 1%;
+}
