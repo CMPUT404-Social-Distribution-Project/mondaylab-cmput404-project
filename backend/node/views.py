@@ -62,7 +62,7 @@ def AcceptConnectionFromRemote(request, hostName):
         auth_header = request.META['HTTP_AUTHORIZATION']  # 'Basic aGVsbG86d29scmQ='
 
         if ('Basic' not in auth_header):
-            return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_404_NOT_FOUND)
+            return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_401_UNAUTHORIZED)
 
         encodedCredentials = auth_header.split(' ')[1]  # remove the 'Basic' string
         decodedCredentials = base64.b64decode(encodedCredentials).decode('utf-8').split(':')
