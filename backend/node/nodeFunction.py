@@ -81,7 +81,7 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             else:
                 return (Authenticated(True), None)
         else:
-            None
+            return response.Response(f"NO AUTHORIZATION PROVIED ", status=status.HTTP_401_UNAUTHORIZED)
 """
 custom class that tell rest framework authenticator to please authenticate this request
 rest framework authenticator will check self.is_authenticated to be true. That is the only field that matters
