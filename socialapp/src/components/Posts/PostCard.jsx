@@ -18,6 +18,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
+  console.log("[[", user_id);
   const post_user_id = props.post.author.uuid;
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const [postComment, setPostComment] = useState({
@@ -28,7 +29,7 @@ export default function PostCard(props) {
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
-  const [color, setColor] = useState("white");
+  const [liked, setLiked] = useState(false);
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState([]);
@@ -66,7 +67,7 @@ export default function PostCard(props) {
     api
       .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
-        setColor("var(--orange)");
+        setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
       })
       .catch((error) => {
@@ -90,6 +91,11 @@ export default function PostCard(props) {
         )
         .then((response) => {
           setLikeCount((likeCount) => response.data.items.length);
+          for (let data of response.data.items) {
+            if (data.author.uuid===user_id){
+              setLiked(true);
+            }
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -332,7 +338,7 @@ export default function PostCard(props) {
           <BsFillHeartFill
             className="like-icon"
             style={{
-              color: likeCount !== 0 ? "var(--orange)" : "var(--white-teal)",
+              color: likeCount !== 0 && liked? "var(--orange)": "var(--white)",
             }}
             onClick={() => sendPostLike(props.post.uuid)}
           />

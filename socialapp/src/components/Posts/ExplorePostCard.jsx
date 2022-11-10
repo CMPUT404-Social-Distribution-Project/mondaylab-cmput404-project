@@ -26,7 +26,7 @@ export default function PostCard(props) {
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
-  const [color, setColor] = useState("var(--white-teal)");
+  const [liked, setLiked] = useState(false);
   const [author, setAuthor] = useState("");
   const [followers, setFollowers] = useState([]);
   const [friends, setFriends] = useState([]);
@@ -59,7 +59,7 @@ export default function PostCard(props) {
     api
       .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
-        setColor("var(--orange)");
+        setLiked(true)
         setLikeCount((likeCount) => likeCount + 1);
       })
       .catch((error) => {
@@ -83,6 +83,11 @@ export default function PostCard(props) {
         )
         .then((response) => {
           setLikeCount((likeCount) => response.data.items.length);
+          for (let data of response.data.items) {
+            if (data.author.uuid===user_id){
+              setLiked(true);
+            }
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -276,7 +281,7 @@ export default function PostCard(props) {
             <div>
               <BsFillHeartFill
                 className="like-icon"
-                style={{ color: likeCount !== 0 ? "var(--orange)" : "var(--white-teal)" }}
+                style={{color: likeCount !== 0 && liked? "var(--orange)": "var(--white)",}}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>
