@@ -13,6 +13,7 @@ from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
 from backend.utils import isUUID, isAuthorized, check_github_valid
+from backend.pagination import CustomPagination
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
@@ -21,6 +22,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     filter_backends = [filters.SearchFilter,]
     search_fields = ['displayName']
+    pagination_class = CustomPagination
 
     def filter_queryset(self, queryset):
         '''Issue with overriding list() method and needing to override filter_queryset
@@ -42,9 +44,24 @@ class UserViewSet(viewsets.ModelViewSet):
                 /service/authors/
         '''
         try:
-            serializer = self.serializer_class(self.filter_queryset(self.queryset), many=True, context={"request": request})
-            serializer = {"type": "authors", "items":serializer.data}
-            return Response(serializer, status=status.HTTP_200_OK)
+
+            authorsQuerySet = self.filter_queryset(self.queryset)
+            authorsPaginateQuerySet = self.paginate_queryset(authorsQuerySet)
+            authorsSerializer = AuthorSerializer(authorsPaginateQuerySet, many=True, context={"request": request})
+            authorsPaginationResult = self.get_paginated_response(authorsSerializer.data)
+            authors = authorsPaginationResult.data.get("results")
+            
+            result = {
+                "type": "authors",
+                "items": authors
+            }
+
+            return Response(result, status=status.HTTP_200_OK)
+
+            # serializer = self.serializer_class(self.filter_queryset(self.queryset), many=True, context={"request": request})
+            # serializer = {"type": "authors", "items":serializer.data}
+            # return Response(serializer, status=status.HTTP_200_OK)
+            
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
