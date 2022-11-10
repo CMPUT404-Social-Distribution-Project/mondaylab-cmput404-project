@@ -2,12 +2,11 @@ import React, { useContext, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Dropdown } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
-import { MdModeEdit, MdDelete } from "react-icons/md";
+import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
 import "./ExplorePostCard.css";
 import useAxios from "../../utils/useAxios";
-import { confirmAlert } from "react-confirm-alert";
 import { useEffect } from "react";
 import EditPost from "./EditPost";
 import { BsFillHeartFill, BsCursorFill } from "react-icons/bs";
@@ -16,6 +15,8 @@ import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { confirmAlert } from "react-confirm-alert";
+
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_user_id = props.post.author.uuid;
@@ -25,13 +26,17 @@ export default function PostCard(props) {
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
-  const [color, setColor] = useState("white");
+  const [color, setColor] = useState("var(--white-teal)");
   const [author, setAuthor] = useState("");
+  const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
 
+  
   const navigate = useNavigate();
   const routeChange = () => {
     navigate(`/authors/${post_user_id}/`, { state: { refresh: true } });
   };
+
   const [showContent, setShowContent] = useState(() => {
     if (props.post.contentType.startsWith("image")) {
       return false;
@@ -99,26 +104,33 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/followers`
+        )
+        .then((response) => {
+          setFollowers(response.data.items)})
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/friends/`
+        )
+        .then((response) => {
+          setFriends(response.data.items)
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
 
-  const deletePost = (uuid) => {
-    api
-      .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
-      .then((response) => {
-        window.location.reload(true);
-      })
-      .catch((error) => {
-        alert(`Something went wrong posting! \n Error: ${error}`);
-        console.log(error);
-      });
-  };
-
   const confirmDelete = (uuid) => {
     confirmAlert({
       title: "Confirm to submit",
-      message: "Are you sure to do this.",
+      message: "Are you sure youn want to delete this post?",
       buttons: [
         {
           label: "Yes",
@@ -133,9 +145,58 @@ export default function PostCard(props) {
     });
   };
 
+  const deletePost = (uuid) => {
+    api
+      .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
+      .then((response) => {
+        window.location.reload(true);
+      })
+      .catch((error) => {
+        alert(`Something went wrong posting! \n Error: ${error}`);
+        console.log(error);
+      });
+  };
+
+  const sharePost = (post) => {
+    if (post.visibility === "PUBLIC") {
+      for (let index = 0; index < followers.length; index++) {
+        const sharedPost = {
+          type: "post",
+          summary: `${author.displayName} shared a post.`,
+          author: author,
+          object: post.id,
+        };
+        api
+          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+          .then((response) => {
+            console.log(response)
+          })
+          .catch((error) => {
+            console.log("Failed to get posts of author. " + error);
+          });
+      }
+    } else if (post.visibility === "FRIENDS") {
+        for (let index = 0; index < friends.length; index++) {
+          const sharedPost = {
+            type: "post",
+            summary: `${author.displayName} shared a post.`,
+            author: author,
+            object: post.id,
+          };
+          api
+            .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
+            .then((response) => {
+              console.log(response)
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
+    }
+  };
+
   // only render options if the user viewing it is the author of it
   function PostOptions() {
-    if (user_id === props.post.author.uuid) {
       return (
         <div className="options">
           <Dropdown>
@@ -143,26 +204,32 @@ export default function PostCard(props) {
               <BiDotsVerticalRounded />
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              {
-                <Dropdown.Item onClick={() => setShowEditPost(true)}>
-                  <MdModeEdit /> Edit Post
-                </Dropdown.Item>
+              <Dropdown.Item onClick={() => sharePost(props.post)}>
+                <MdShare /> Share Post
+              </Dropdown.Item>
+
+              {(() => {
+                if (user_id === props.post.author.uuid) {
+                    return (
+                      <div>
+                      <Dropdown.Item onClick={() => setShowEditPost(true)}>
+                        <MdModeEdit /> Edit Post
+                      </Dropdown.Item>
+
+                      <Dropdown.Item
+                        className="delete-post"
+                        onClick={() => confirmDelete(props.post.uuid)}
+                      >
+                        <MdDelete /> Delete Post
+                      </Dropdown.Item>
+                      </div>
+                    )
               }
-              {
-                <Dropdown.Item
-                  className="delete-post"
-                  onClick={() => deletePost(props.post.uuid)}
-                >
-                  <MdDelete /> Delete Post
-                </Dropdown.Item>
-              }
+              })()}
             </Dropdown.Menu>
           </Dropdown>
         </div>
       );
-    } else {
-      return <></>;
-    }
   }
 
   return (
@@ -208,24 +275,27 @@ export default function PostCard(props) {
           <Col>
             <div>
               <BsFillHeartFill
-                style={{ color: likeCount != 0 ? "var(--orange)" : "white" }}
+                className="like-icon"
+                style={{ color: likeCount !== 0 ? "var(--orange)" : "var(--white-teal)" }}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>
           </Col>
-          <Col>
+          <Col style={{ display: "flex", height: "fit-content" }}>
             <Popup
               trigger={
                 <button
                   style={{
                     background: "none",
                     border: "none",
-                    right: "10px",
-                    position: "absolute",
+                    marginLeft: "auto",
+                    padding: "0.5rem",
+                    width: "2rem",
+                    height: "2rem",
                   }}
                 >
                   <BsCursorFill
-                    style={{ color: "white" }}
+                    style={{ color: "var(--white-teal)", verticalAlign: "top" }}
                     onClick={postRouteChange}
                   />
                 </button>
@@ -236,8 +306,10 @@ export default function PostCard(props) {
               mouseLeaveDelay={300}
               mouseEnterDelay={0}
               arrow={true}
+              contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5em" }}
+              arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
             >
-              <span> Click for details! </span>
+              <span style={{ fontSize: "0.8rem"}}> View Post </span>
             </Popup>
           </Col>
         </Row>

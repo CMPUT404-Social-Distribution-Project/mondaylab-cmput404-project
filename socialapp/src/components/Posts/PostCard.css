@@ -10,7 +10,7 @@
     align-items: center;
     background-color: var(--slightly-darker-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
-    
+    border: 2px solid var(--dark-blue);
 }
 
 .post-card .profile-pic-post {
@@ -48,6 +48,7 @@
     padding: 1em;
     width: 100%;
     white-space: pre-line;
+    font-family: "Readex Pro Light";
 }
 
 .post-card > .card-body {
@@ -74,6 +75,20 @@
 }
 
 .post-card .unlisted-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 1rem;
+    gap: 0.5rem;
+    background-color: var(--dark-blue);
+    border-radius: 2.5rem;
+    font-size: 0.9rem;
+    font-family: 'Readex Pro Light';
+    padding: 0.3rem 1rem;
+    color: var(--teal);
+}
+
+.post-card .friends-indicator {
     display: inline-flex;
     align-items: center;
     margin-left: auto;
@@ -165,18 +180,24 @@
 .post-card .like-comment-container {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.1rem;
 }
+
 .post-card .like-comment-container > .like-icon {
     transition-duration: 300ms;
     transition-property: color, transform;
     transition-timing-function: ease-in-out;
+    width: 2rem;
+    height: auto;
+    padding: 0.5rem;
 }
 
 .post-card .like-comment-container > .like-icon:hover {
     color: var(--teal) !important;
     cursor: pointer;
-    transition: color 0.2s ease-in-out;
+    transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
 }
 
 .post-card .like-comment-container > .like-icon:active {
@@ -184,8 +205,37 @@
     transform: rotate(10deg);
 }
 
+.post-card .like-comment-container > .comment-icon {
+    width: 2rem;
+    height: auto;
+    padding: 0.5rem;
+}
+
 .post-card .like-comment-container > .comment-icon:hover {
     color: var(--teal) !important;
     cursor: pointer;
-    transition: color 0.2s ease-in-out;
+    transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
+}
+
+.post-card .like-comment-container > .share-icon {
+    color: var(--white-teal);
+    margin-left: 1rem;
+    width: 2rem;
+    height: auto;
+    padding: 0.4rem;
+}
+
+.post-card .like-comment-container > .share-icon:hover {
+    color: var(--teal) !important;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
+}
+
+.post-card .like-comment-container > .share-icon:active {
+    color: var(--orange) !important;
+    transform: rotate(10deg);
 }

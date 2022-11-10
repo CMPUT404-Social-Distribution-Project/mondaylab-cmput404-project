@@ -22,6 +22,8 @@ from author.views import UserViewSet
 from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
 from followers.views import TrueFriendApiView, TrueFriendsApiView
 from like.views import LikesPostApiView, AuthorLikedApiView, LikesCommentApiView
+from node.views import AcceptConnectionFromRemote
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -47,4 +49,9 @@ urlpatterns = [
     path('service/authors/<str:author_id>/posts/<str:post_id>/likes', LikesPostApiView.as_view(), name="post like"),
     path('service/authors/<str:author_id>/posts/<str:post_id>/comments/<str:comment_id>/likes', LikesCommentApiView.as_view(), name="comment likes"),
     path('service/authors/<str:author_id>/liked', AuthorLikedApiView.as_view(), name="author like"),
+
+
+    # Node enpoint
+    path('service/node/<str:hostName>', AcceptConnectionFromRemote, name="connect to our server"),
+
 ]

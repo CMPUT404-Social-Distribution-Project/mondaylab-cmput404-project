@@ -1,7 +1,6 @@
 .userCard {
     width: 50%;
     height: fit-content;
-    margin: 0.2em 0em;
     --bs-card-bg: none;
 }
 
@@ -11,7 +10,6 @@
 
 .userCard .card-body {
     margin-bottom: 0;
-    padding: 1em;
     color: var(--white-teal);
     background-color: var(--dark-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
@@ -48,4 +46,18 @@
     gap: 0.5em;
     align-self: center;
     margin-bottom: 0;
+}
+
+.no-author {
+    margin-top: auto;
+    margin-bottom: auto;
+    color: var(--white-teal);
+    background-color: var(--dark-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border: transparent;
+    border-radius: 11px;
+    width: auto;
+    height: 50px;
+    padding-top: 1%;
+    padding-left: 3%;
 }

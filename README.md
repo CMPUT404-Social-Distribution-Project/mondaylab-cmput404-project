@@ -25,7 +25,7 @@ cd socialapp
 npm install
 ```
 
-# [API Info](docs/APIdocs.md)
+# [API Info](https://github.com/CMPUT404-Social-Distribution-Project/mondaylab-cmput404-project/wiki/API-Documentation)
 
 
 ## References
