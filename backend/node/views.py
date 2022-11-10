@@ -23,7 +23,7 @@ credentialForDelete = {"", "", "", ""}
 
 
 # TODO:   this permission class DOES NOT WORK. get request still goes to my customAuthentication class in nodeFunction.py
-@api_view(['GET', 'DELETE'])
+@api_view(['GET'])
 @permission_classes((IsAuthenticatedOrReadOnly, ))
 def AcceptConnectionFromRemote(request, hostName):
     """
@@ -40,16 +40,16 @@ def AcceptConnectionFromRemote(request, hostName):
 
     # TODO: need a way to restrict it only for LOCAL. its hard because this API doesnt require LOG IN
     # NOTE, REQUIRE BASIC AUTH with username and password of this hostName for this request to be authenticated
-    if (request.method == "DELETE"):
-        # only our host can use this method.
-        # NOTE, TO DO THAT, there should be a way to check if this this server's heroku host == our heroku host
+    #if (request.method == "DELETE"):
+    #    # only our host can use this method.
+    #    # NOTE, TO DO THAT, there should be a way to check if this this server's heroku host == our heroku host
 
-        hostToBeDeleted = Node.objects.filter(hostName=hostName)
+    #    hostToBeDeleted = Node.objects.filter(hostName=hostName)
 
-        if hostToBeDeleted.exists():
-            Node.objects.filter(hostName=hostName).delete()
-            return response.Response(f"successfully severed the connection  ", status=status.HTTP_200_OK)
-        return response.Response(f"This host don't exist ", status=status.HTTP_404_NOT_FOUND)
+    #    if hostToBeDeleted.exists():
+    #        Node.objects.filter(hostName=hostName).delete()
+    #        return response.Response(f"successfully severed the connection  ", status=status.HTTP_200_OK)
+    #    return response.Response(f"This host don't exist ", status=status.HTTP_404_NOT_FOUND)
 
     """
     GET request here.
