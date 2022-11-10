@@ -98,7 +98,7 @@ def AcceptConnectionFromRemote(request, hostName):
         # NOTE, what http response should i return here? 404?
         return response.Response(f"Node incoming credential incorrect ", status=status.HTTP_401_UNAUTHORIZED)
     else:
-        return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_404_NOT_FOUND)
+        return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_401_UNAUTHORIZED)
 
 
 """
