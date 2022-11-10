@@ -23,7 +23,7 @@ credentialForDelete = {"", "", "", ""}
 
 
 # TODO:   this permission class DOES NOT WORK. get request still goes to my customAuthentication class in nodeFunction.py
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes((IsAuthenticatedOrReadOnly, ))
 def AcceptConnectionFromRemote(request, hostName):
     """
