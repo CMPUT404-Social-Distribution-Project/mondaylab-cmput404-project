@@ -16,21 +16,6 @@ from rest_framework import exceptions
 
 credentialToConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 
-"""
-naive authentication for now... Not sure if we should do one authentication check for incoming
-connection only
-"""
-
-def AuthenticateIncomingHost(node):
-    if (node.Hostname in ALLOWED_HOSTS):
-        pass
-        # add their host in the db
-
-
-
-def connectToOTherServer():
-    
-   pass 
 
 
 
