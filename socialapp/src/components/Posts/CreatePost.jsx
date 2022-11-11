@@ -126,8 +126,9 @@ export default function CreatePost(props) {
                   .catch((error) => {
                     console.log("Failed to send private post. " + error);
                 });
-                props.onHide();
+                
             }
+            props.onHide();
           }})
           .catch((error) => {
             alert(`Something went wrong posting! \n Error: ${error.response.data}`);
