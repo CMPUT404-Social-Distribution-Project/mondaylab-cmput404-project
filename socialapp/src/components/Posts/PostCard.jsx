@@ -18,8 +18,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
-  console.log("[[", user_id);
+  console.log("user_id-----", user_id);
   const post_user_id = props.post.author.uuid;
+  console.log("post_user_id", post_user_id);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const [postComment, setPostComment] = useState({
     comment: "",
@@ -30,6 +31,8 @@ export default function PostCard(props) {
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
   const [liked, setLiked] = useState(false);
+  const [beOwner, setBeOwner] = useState(user_id===post_user_id);
+  const [beFriend, setBeFriend] = useState(false);
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState([]);
@@ -90,12 +93,37 @@ export default function PostCard(props) {
           `${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/likes`
         )
         .then((response) => {
+          let likers =[];
           setLikeCount((likeCount) => response.data.items.length);
           for (let data of response.data.items) {
-            if (data.author.uuid===user_id){
-              setLiked(true);
-            }
+              likers.push(data.author.uuid);
+              if (data.author.uuid===user_id){
+                setLiked(true);
+              }
+
           }
+
+          api
+            .get(
+              `${baseURL}/authors/${user_id}/friends/`
+            )
+            .then((response) => {
+              setFriends(response.data.items);
+              console.log("data-list--", response.data.items);
+              for (let data of response.data.items) {
+                console.log("data---", data);
+                if (likers.includes(data.uuid)){
+                  console.log("data-------------");
+                  setBeFriend(true);
+                }
+              }
+
+              })
+            .catch((error) => {
+              console.log(error);
+            });
+          
+          
         })
         .catch((error) => {
           console.log(error);
@@ -131,12 +159,17 @@ export default function PostCard(props) {
           `${baseURL}/authors/${user_id}/friends/`
         )
         .then((response) => {
-          setFriends(response.data.items)})
+          setFriends(response.data.items);
+          })
         .catch((error) => {
           console.log(error);
         });
+
+         
+    
     }
     fetchData();
+
   }, []);
 
   const sharePost = (post) => {
@@ -343,8 +376,7 @@ export default function PostCard(props) {
             onClick={() => sendPostLike(props.post.uuid)}
           />
 
-          {likeCount === 0 ? 0 : likeCount}
-
+          {beFriend || beOwner ?  likeCount: null}
           <BsFillChatFill
             className="comment-icon"
             style={{
