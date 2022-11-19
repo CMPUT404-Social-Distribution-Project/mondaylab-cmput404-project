@@ -41,3 +41,5 @@ https://blog.devgenius.io/django-rest-framework-react-authentication-workflow-20
 https://www.digitalocean.com/community/tutorials/react-live-search-with-axios#conclusion
 
 https://github.com/GuScarpim/upload-image-react-base64#readme
+
+https://michaellin.me/deploy-multiple-apps-in-monorepo-to-heroku/
