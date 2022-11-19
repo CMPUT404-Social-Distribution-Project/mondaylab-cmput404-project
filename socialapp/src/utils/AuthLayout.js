@@ -14,7 +14,7 @@ const AuthLayout = () => {
       return <Navigate to={"/login"} replace />
     }
     const userToken = jwt_decode(authTokens.access);
-    const isExpired = dayjs.unix(userToken.exp).diff(dayjs()) < 1;
+    let isExpired = dayjs.unix(userToken.exp).diff(dayjs()) < 1;
     
     // if token is expired, try to refresh it
     if (isExpired === true) {
@@ -35,8 +35,8 @@ const AuthLayout = () => {
                 console.log("Failed to refresh token.");
               });
         }
+        req();
     }
-
 
     if (user !== null ) {
         // if the token has expired or doesn't exist, log the user out, otherwise
