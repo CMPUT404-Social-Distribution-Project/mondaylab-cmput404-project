@@ -14,7 +14,7 @@ app.use(
     changeOrigin: true,
     ws: true,
     pathRewrite: {
-      '^/api': '',
+      '^/service': '',
     },
   })
 )
@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'build')))
 
 // https://facebook.github.io/create-react-app/docs/deployment#serving-apps-with-client-side-routing
 app.get('*', function(req, res) {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'))
+  res.sendFile(path.join(__dirname, 'build', 'index.js'))
 })
 
 app.listen(PORT, () => console.log(`Listening on :${PORT}`))

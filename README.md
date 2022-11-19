@@ -43,3 +43,6 @@ https://www.digitalocean.com/community/tutorials/react-live-search-with-axios#co
 https://github.com/GuScarpim/upload-image-react-base64#readme
 
 https://michaellin.me/deploy-multiple-apps-in-monorepo-to-heroku/
+
+https://stackoverflow.com/questions/72624239/error-error0308010cdigital-envelope-routinesunsupported-in-my-pod
+
