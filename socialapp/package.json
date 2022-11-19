@@ -27,13 +27,15 @@
     "react-router-dom": "^6.4.2",
     "react-scripts": "^5.0.1",
     "reactjs-popup": "^2.0.5",
+    "serve": "^14.1.2",
     "style-to-object": "^0.3.0",
     "web-vitals": "^2.1.4",
     "webpacks": "^1.0.0",
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "dev": "react-scripts start",
+    "start": "serve -s build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
