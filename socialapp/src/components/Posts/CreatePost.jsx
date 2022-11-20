@@ -100,7 +100,6 @@ export default function CreatePost(props) {
 
   const sendPost = async () => {
     // No image
-    console.log("ImagePost", imagePost);
     if (!imagePost) {
         api
           .post(`${baseURL}/authors/${user_id}/posts/`, post)
@@ -119,7 +118,7 @@ export default function CreatePost(props) {
                   object: post,
                 };
                 api
-                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, post)
+                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, response.data)
                   .then((response) => {
                     console.log(response)
                   })
@@ -164,7 +163,7 @@ export default function CreatePost(props) {
                   object: post.id,
                 };
                 api
-                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, post)
+                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, response.data)
                   .then((response) => {
                     console.log(response)
                   })
@@ -291,7 +290,6 @@ export default function CreatePost(props) {
             props.authors.items.length !== 0 ? (
               props.authors.items.map((author) =>
                 <div>
-                  {console.log(author.displayName)}
                   <Card onClick={() => {privatePost(author)}} className="userCard">
                     <Card.Body>
                       <Card.Title>
