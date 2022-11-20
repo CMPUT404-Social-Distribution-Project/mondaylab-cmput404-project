@@ -1,0 +1,158 @@
+.post-card-explore {
+    width: 20rem;
+    height: fit-content;
+    max-height: 22rem;
+    margin-block: 10px;
+    margin-left: 10px;
+    border-color: none;
+    --bs-card-bg: none;
+}
+
+.post-card-explore .card-header {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--slightly-darker-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border-radius: 11px 11px 0px 0px;
+}
+
+.post-card-explore .profile-pic-post {
+    width: 2em;
+    height: 2em;
+    aspect-ratio: 1/1;
+    border-radius: 80%;
+    outline: solid var(--orange) 2px;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow: hidden;
+    place-content: center;
+}
+
+.post-card-explore .post-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--teal);
+}
+
+.post-card-explore .post-author-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.post-card-explore .card-body {
+    color: var(--white-teal);
+    background-color: var(--dark-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    border: transparent;
+    border-radius: 0px 0px 11px 11px;
+    overflow: hidden;
+}
+
+.post-card-explore .card-title {
+    font-size: 2rem;
+    text-decoration: var(--teal);
+    height: 2.5rem;
+    width: inherit;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+}
+
+
+.post-card-explore .card-text {
+    text-decoration: var(--teal);
+    white-space: pre-line;
+    min-block-size: 6rem;
+    max-block-size: 6rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+}
+
+.post-card-explore .comments-text {
+    color: var(--teal);
+}
+
+.post-card-explore .dropdown-toggle::after {
+    content: none;
+}
+
+.post-card-explore .options {
+    display: inline-block;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+#dropdown-basic {
+
+    display: inline-block;
+    white-space: nowrap;
+    background-color: #1C212B;
+}
+
+.post-card .dropdown-toggle::after {
+    content: none;
+}
+
+.options .btn-primary {
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-border-color: var(--darker-blue);
+    border-radius: 2rem;
+    --bs-btn-hover-color: var(--teal);
+    --bs-btn-active-border-color: var(--teal);
+}
+
+.options .dropdown-menu {
+    background-color: var(--slightly-darker-blue);
+    box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+    --bs-dropdown-link-active-bg: var(--teal);
+    --bs-dropdown-link-hover-bg: var(--darker-blue);
+    --bs-dropdown-link-hover-color: var(--teal);
+    --bs-dropdown-link-color: var(--white-teal);
+}
+
+.options .dropdown-menu .delete-post {
+    --bs-dropdown-link-hover-color: var(--orange);
+}
+
+/* .options .dropdown-menu a {
+    color: var(--white-teal);
+
+} */
+
+.options .dropdown-item {
+    padding: 0.8em var(--bs-dropdown-item-padding-x);
+}
+
+.post-card-explore .like-icon {
+    transition-duration: 300ms;
+    transition-property: color, transform;
+    transition-timing-function: ease-in-out;
+    width: 2rem;
+    height: auto;
+    padding: 0.5rem;
+}
+
+.post-card-explore .like-icon:hover {
+    color: var(--teal) !important;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
+}
+
+.post-card-explore .like-icon:active {
+    color: var(--orange) !important;
+    transform: rotate(10deg);
+}

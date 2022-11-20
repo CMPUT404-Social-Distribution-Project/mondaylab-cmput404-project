@@ -8,14 +8,16 @@ from rest_framework import response, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import BasicAuthentication
 from post.serializers import PostSerializer
-from author.serializers import AuthorSerializer
+from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
 from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
-import json
+import base64
+from django.core.files.base import ContentFile
+from django.http import HttpResponse
 
 class PostApiView(GenericAPIView):
     """
@@ -82,7 +84,7 @@ class PostApiView(GenericAPIView):
                             # get author obj to be saved in author field of post
                             authorObj = Author.objects.get(uuid=author_id)
                             # create post ID and origin and source
-                            postId = get_post_url(request, author_id)+ post_id
+                            postId = request.build_absolute_uri() + post_id
                             origin = postId
             
                             serialize.save(
@@ -210,35 +212,137 @@ class PostsApiView(GenericAPIView):
                     authorObj = Author.objects.get(uuid=author_id)
                     # create post ID and origin and source
                     postUUID = str(uuid4())
-                    postId = get_post_url(request, author_id)+ postUUID
+                    postId = request.build_absolute_uri() + postUUID
                     origin = postId
+
+                    if serialize.validated_data.get("contentType").startswith("image"):
+                        # content type is an image, then the content SHOULD be a base64 string.
+                        # make image field the url link to the image
+                        image = request.build_absolute_uri() + postUUID + "/image"
+                        serialize.validated_data["image"] = image
 
                     serialize.save(
                         id=postId,
                         uuid=postUUID,
                         author=authorObj,
                         count=0,
-                        comments=postId+'/comments',
+                        comments= postId+ '/comments',
                         origin=origin,
                         source=origin,
+                        image=serialize.validated_data.get("image"),
                     )
 
-                    # if the visibility is 'FRIENDS' send the post to all follower's friends
-                    try:
-                        friends_list = get_friends_list(authorObj)
-                        for friend in friends_list:
-                            friend_inbox = Inbox.objects.get(author=friend["uuid"])
-                            friend_inbox.posts.add(Post.objects.get(id=postId))
-                    except Exception as e:
-                        result =f"Failed to send post {postId} to inbox of friend"
-                        return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
-                    
+                    # only send if it's not unlisted
+                    if serialize.data['unlisted'] == False:
+                        """
+                        SEND to friends only
+                        if visibility is friends, then send this post to every frineds
+                        """
+                        try:
+                            friends_list = get_friends_list(authorObj)
+                            for friend in friends_list:
+                                author = get_author(friend["uuid"])
+                                friend_inbox = Inbox.objects.get(author=author)
+                                friend_inbox.posts.add(Post.objects.get(id=postId))
+                        except Exception as e:
+                            result =f"Failed to send post {postId} to inbox of friend"
+                            return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+                        
+                        """
+                        SEND to followers
+                        if visibility is friends, then send this post to every follower
+                        """
+                        if serialize.data['visibility'].lower()=="public":
+                            try:
+                                followers_list = get_followers_list(authorObj)
+                                for follower in followers_list:
+                                    author = get_author(follower["uuid"])
+                                    follower_inbox = Inbox.objects.get(author=author)
+                                    follower_inbox.posts.add(Post.objects.get(id=postId))
+                            except Exception as e:
+                                result =f"Failed to send post {postId} to inbox of followers"
+                                return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+
+
+                        
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
+class AllPostsApiView(GenericAPIView):
+    """
+    Creation URL ://posts/
+    GET [local] get the all public posts 
+    """
+    permission_classes = [IsAuthenticatedOrReadOnly,]
+    serializer_class = PostSerializer
 
+    def get(self, request):
+        '''
+        Gets all public posts
+        '''
+        try:
+            posts_list = list(Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published'))
+
+            post_serializer = PostSerializer(posts_list, many=True)
+            result = {
+                "type":"posts",
+                "items": post_serializer.data
+            }
+            return response.Response(result, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
+class PostImageApiView(GenericAPIView):
+
+    def get(self, request, post_id, author_id):
+        try:
+            if isAuthorized(request, author_id): 
+                image_post = Post.objects.get(uuid=post_id, contentType__contains="image")
+            elif is_friends(request, author_id):
+                image_post = Post.objects.get(uuid=post_id, contentType__contains="image", visibility__in=['PUBLIC','FRIENDS'])
+            else:
+                image_post = Post.objects.get(uuid=post_id, contentType__contains="image", visibility="PUBLIC")
+
+            
+            if "base64" not in image_post.content:
+                return response.Response(f"Content of this post is not a base64 encoded string.", status=status.HTTP_400_BAD_REQUEST)
+                
+            # decode the base64 image into binary 
+            format, imgstr = image_post.content.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+
+            return HttpResponse(data, content_type=f'image/{ext}')
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+
+
+def get_followers_list(current_author):
+    followers_list = []
+    # Loop through followers and check if current author is following
+    # This will find all followers
+    try: 
+        for follower in current_author.followers.all():
+            followerObject = Author.objects.get(uuid=follower.uuid)
+            followers_list.append(LimitedAuthorSerializer(followerObject).data)
+    except Exception as e:
+        print(e)
+
+    return followers_list
+
+def get_author(author_id):
+    """
+    Given author id, check if the author exists in database
+    """
+    try:
+        author = Author.objects.get(uuid = author_id)
+        return author
+    except:
+        result = {'detail':"Author Not Found"}
+        return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
 def get_author_url_id(request):
     if "posts" in request.build_absolute_uri():

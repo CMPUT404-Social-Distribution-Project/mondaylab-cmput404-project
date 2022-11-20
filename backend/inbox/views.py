@@ -13,7 +13,7 @@ from author.serializers import AuthorSerializer, FollowerSerializer
 from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
-from comments.serializers import CommentsSerializer
+from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
@@ -158,7 +158,8 @@ class InboxApiView(GenericAPIView):
                     like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
                     if like == None:
                         like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
-
+                    else:
+                        return response.Response("Like already exist", status=status.HTTP_403_FORBIDDEN)
                     # add like object to inbox of author
                     inbox.likes.add(like)
 
@@ -202,7 +203,7 @@ class InboxApiView(GenericAPIView):
             if (request.data.get("author").get("id")) == None:
                 return response.Response("Author field is required or missing a field", status=status.HTTP_400_BAD_REQUEST)
             try:
-                comments_serializer = CommentsSerializer(data=request.data)
+                comments_serializer = CommentsInboxSerializer(data=request.data)
                 if comments_serializer.is_valid(raise_exception=True):
                     comment, create = Comment.objects.get_or_create(id = request.data.get("id"))
                     inbox.comments.add(comment)
@@ -211,6 +212,7 @@ class InboxApiView(GenericAPIView):
                         "detail": str(author) +" send comment successful"
                     }
             except Exception as e:
+
                 return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
 
@@ -258,6 +260,7 @@ class InboxAllApiView(GenericAPIView):
     fr_serializer_class = FriendRequestSerializer
     lk_serializer_class=LikePostSerializer
     ct_serializer_class=CommentsSerializer
+    
     def get(self, request, author_id):
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)

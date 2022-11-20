@@ -17,6 +17,7 @@ class Post(Model):
     class Visibility(TextChoices):
         PUBLIC = 'PUBLIC', 'PUBLIC'
         FRIENDS = 'FRIENDS', 'FRIENDS'
+        PRIVATE = 'PRIVATE', 'PRIVATE'
 
     type =CharField(blank=False, null=False, default="post", max_length=200)
     title = CharField(max_length=50, blank=True)
@@ -29,6 +30,7 @@ class Post(Model):
     content = TextField(blank=True, null=True)
     author = ForeignKey(Author, blank=False, null=True, on_delete=CASCADE)
     categories = TextField(null=True, blank=True)
+    image = TextField(blank=True, null=True)
     #see this to send categories
     #https://stackoverflow.com/a/7151813 
     count = IntegerField(default=0)

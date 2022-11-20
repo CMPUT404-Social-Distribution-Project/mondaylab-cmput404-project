@@ -16,7 +16,7 @@ function ProfilePosts(props) {
     <div className="posts-container-profile">
     {
       typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard post={post} />)
+        props.postsArray.items.map((post) => <PostCard post={post} key={post.id}/>)
         : null
     }
     </div>
@@ -28,7 +28,7 @@ function ProfileFollowers(props) {
     <div className="followers-container-profile">
     {
       typeof props.followersArray.items !== 'undefined' ? 
-        props.followersArray.items.map((follower) => <UserCard author={follower}/>)
+        props.followersArray.items.map((follower,i) => <UserCard author={follower} key={i}/>)
         : null
     }
     </div>
@@ -40,7 +40,7 @@ function ProfileFriends(props) {
     <div className="friends-container-profile">
     {
       typeof props.friendsArray.items !== 'undefined' ? 
-        props.friendsArray.items.map((friend) => <UserCard author={friend}/>)
+        props.friendsArray.items.map((friend, i) => <UserCard author={friend} key={i}/>)
         : null
     }
     </div>
@@ -53,7 +53,6 @@ export default function Profile() {
   const [followersArray, setFollowersArray] = useState(""); 
   const [friendsArray, setFriendsArray] = useState(""); 
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
-  const user_id = localStorage.getItem("user_id");  // the currently logged in author
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 
@@ -72,8 +71,6 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/posts/`)
         .then((response) => {
           setPostsArray(response.data);
-          console.log("Got posts of author")
-          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
@@ -82,8 +79,6 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/followers/`)
         .then((response) => {
           setFollowersArray(response.data);
-          console.log("Got followers of author")
-          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
@@ -92,8 +87,6 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/friends/`)
         .then((response) => {
           setFriendsArray(response.data);
-          console.log("Got friends of author")
-          console.log(response.data);
         })
         .catch((error) => {
           console.log("Failed to get friends of author. " + error);

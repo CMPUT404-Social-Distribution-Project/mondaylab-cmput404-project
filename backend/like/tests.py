@@ -31,9 +31,6 @@ class LikeTestCase(APITestCase):
         # 1st we have to create a fake 'like' instance for post
         
         postUUID, commentUUID = self.createPostAndComment()
-
-
-        print("POST ID AND COMMENT ID I S", postUUID, commentUUID)
         self.postUUID = postUUID
         self.commentUUID = commentUUID
         urlLike = f'service/authors/{self.mock_author.uuid}/posts/{self.postUUID}/likes/'
@@ -55,8 +52,6 @@ class LikeTestCase(APITestCase):
         
         # TODO:  
         AllLikesInPost = res.get('items')
-        print("ALL LIKE IS ", AllLikesInPost)
-        print("ALL LIKE IS ", AllLikesInPost)
         for x in AllLikesInPost:
             self.assertIn(str(self.mock_author.uuid), x.get('object')) 
         
@@ -83,7 +78,6 @@ class LikeTestCase(APITestCase):
         
         # TODO: check author uuid in each of like list object field
         AllLikesInComment = res.get('items')
-        print("ALL LIKE IS ", AllLikesInComment)
         for x in AllLikesInComment:
             self.assertIn(str(self.mock_author.uuid), x.get('object')) 
     

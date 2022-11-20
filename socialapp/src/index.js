@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './custom_dark.scss';
 import reportWebVitals from './reportWebVitals';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import StreamHome from './pages/StreamHome';
 import Inbox from './pages/Inbox';
@@ -14,10 +14,12 @@ import Login from "./pages/authentication/Login";
 import Register from "./pages/authentication/Register"
 import AuthLayout from "./utils/AuthLayout";
 import CreatePost from './components/Posts/CreatePost';
+import Post from "./pages/Post";
+import GithubPage from "./pages/GithubPage"
+import Page404 from "./pages/Page404";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <Router>
       <AuthProvider>
         <Routes>
@@ -25,11 +27,13 @@ root.render(
             <Route path="/" element={<Main />}>
               <Route path='post' element={<CreatePost/>} />
               <Route path='stream' element={<StreamHome/>} />
+              <Route path='stream/github' element={<GithubPage/>} />
               <Route path='inbox' element={<Inbox/>} />
               <Route path='explore' element={<Explore/>} />
               <Route path='authors/:author_id' element={<Profile/>} />
               <Route path='authors/:author_id/:dir/' element={<Profile/>} />
-
+              <Route path='authors/:author_id/posts/:post_id' element={<Post/>} />
+              <Route path='404' element={<Page404/>} />
             </Route>
           </Route>
           <Route path="/login" element={<Login />} />
@@ -37,7 +41,6 @@ root.render(
         </Routes>
       </AuthProvider>
     </Router>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

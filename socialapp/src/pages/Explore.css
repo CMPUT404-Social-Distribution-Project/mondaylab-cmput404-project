@@ -1,3 +1,33 @@
+.explore-title-container {
+    padding-bottom: 1rem;
+}
+
+.search-bar-explore {
+    padding: 0.5em 3em;
+    width: 20em;
+    text-align: center;
+    background-color: var(--slightly-darker-blue);
+    color: var(--white-teal);
+    border: none;
+    border-bottom: solid 1px var(--orange);
+    position: relative;
+    margin-left: -2em;
+    z-index: 2;
+    border-radius: 11px;
+}
+
+.FaSearch {
+    color: var(--teal);
+    margin-left: -em;
+    height: 1em;
+    width: 1em;
+    z-index: 3;
+}
+
+.search-col {
+    display: flex;
+    align-items: center;
+}
 
 .authors-explore-container {
     display: flex;
@@ -5,35 +35,20 @@
     align-items: center;
 }
 
-.search-bar-container {
-    padding: 1em 0em;
-    display: flex;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-}
-
-.search-bar-explore {
-    padding: 0.5em 3em;
-    border-radius: 2em;
-    width: 20em;
-    display: inline-flex;
-    align-self: center;
-    text-align: center;
-    border: solid 1px var(--orange);
-    background-color: var(--dark-blue);
-    color: var(--white-teal);
-    margin-left: -2em;
-    z-index: 1;
-}
-
-.FaSearch {
-    z-index: 2;
-    color: var(--teal);
-}
-
 .search-bar-explore:focus {
     outline: none !important;
-    border: solid 3px var(--orange);
+    background: var(--dark-blue);
+}
 
+.custom {
+    width: 20em;
+}
+
+.searchResult {
+    position: relative;
+}
+
+.public-post {
+    border-style: solid;
+    border-width: medium;
 }

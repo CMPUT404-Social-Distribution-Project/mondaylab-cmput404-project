@@ -1,77 +1,67 @@
-import React, { Component, useContext, useState } from "react";
-import { Modal, Button, InputGroup, Form } from "react-bootstrap";
+import React, { useContext, useState } from "react";
 import "./SideNavBar.css";
 import { FaHome, FaInbox, FaSearch, FaSignOutAlt } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import CreatePost from "../Posts/CreatePost";
+
 
 export default function Sidebar() {
     const { logoutUser } = useContext(AuthContext);
     const [newPost, setNewPost] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
 
+    const refreshState = (navigate, location) => {
+        navigate(`${location.pathname}`, {state: {refresh:true}});
+    }
     return (
         <ul
             id="sidebar"
-            class="nav nav-pills nav-flush flex-column mb-auto text-center"
+            className="nav nav-pills nav-flush flex-column mb-auto text-center"
         >
-            <li class="nav-item">
+            <li className="side-nav-item">
          
-                <div
-                    class="nav-link active py-3"
+                <div  
                     className="create-post-button"
                     aria-current="page"
                     title="Create Post"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="right"
                     onClick={() => setNewPost(true)}
                 >
                     <MdEdit />
                 </div>
-                {newPost && <CreatePost show={newPost} onHide={() => setNewPost(false)}/>}
+                {newPost && <CreatePost show={newPost} onHide={() => {setNewPost(false); refreshState(navigate, location);}}/>}
 
             </li>
-            <li>
-                <Link to="/stream">
-                    <a
-                        href="#"
-                        class="nav-link py-3"
-                        title="Stream"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
-                    >
-                        <FaHome />
-                    </a>
-                </Link>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Stream"
+                    onClick={() => navigate("/stream", {state: {refresh:true}})}
+                >
+                    <FaHome style={{ color: location.pathname === "/stream" ? "var(--orange)" : "var(--white-teal)" }}/>
+                </div>
             </li>
-            <li>
-                <Link to="/inbox">
-                    <a
-                        href="#"
-                        class="nav-link py-3"
-                        title="Inbox"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
-                    >
-                        <FaInbox />
-                    </a>
-                </Link>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Inbox"
+                    onClick={() => navigate("/inbox", {state: {refresh:true}})}
+                >
+                    <FaInbox style={{ color: location.pathname === "/inbox" ? "var(--orange)" : "var(--white-teal)" }}/>
+                </div>
             </li>
-            <li>
-                <Link to="/explore">
-                    <a
-                        href="#"
-                        class="nav-link py-3"
-                        title="Explore"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="right"
-                    >
-                        <FaSearch />
-                    </a>
-                </Link>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Explore"
+                    onClick={() => navigate("/explore", {state: {refresh:true}})}
+                >
+                    <FaSearch style={{ color: location.pathname === "/explore" ? "var(--orange)" : "var(--white-teal)" }}/>
+                </div>
             </li>
-            <hr class="solid" />
+            <hr className="solid" />
             <div className="signout">
                 <FaSignOutAlt 
                     onClick={() => logoutUser()}

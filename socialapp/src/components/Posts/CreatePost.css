@@ -7,90 +7,197 @@
     border: none;
 }
 
-.create-post-modal div.modal-header{
+.create-post-modal .modal-header {
     border: none;
 }
 
-.create-post-modal  .modal-footer {
-    min-height: 5em;
+.create-post-modal .modal-footer {
     border: none;
 }
 
-.create-post-modal  .modal-body {
+.create-post-modal .modal-body {
     height: 200%;
     width: auto;
     padding: 15px;
 }
 
-.create-post-modal  .modal-title {
+.create-post-modal .modal-title {
     font-size: 2em;
     color: #BFEFE9;
     border: none;
 }
 
-.create-post-modal  .title {
+.create-post-modal .title {
     font-size: 100em;
     margin-bottom: 1.5%;
 }
 
 
-.create-post-modal  .body {
+.create-post-modal .body {
     font-size: 1em;
     padding-bottom: 15em;
     text-align: left;
 }
 
+.create-post-modal .form-control {
+    box-shadow: none;
+}
 
-.create-post-modal  .unlist {
+
+.create-post-modal .unlist {
     background: transparent;
     border: none;
-    color: #BFEFE9;
-    margin-left: 1%;
-    margin-right: 1%;
-    font-size: 85%;
+    color: var(--teal);
+    font-size: 0.8rem;
+    border-radius: 2rem;
+    padding: 0rem 1rem;
 }
 
-.create-post-modal  .header {
-    margin: 0px auto;
+.create-post-modal .header {
+    margin-right: 1rem;
 }
 
-.create-post-modal  .header1 {
-    width: 40%;
-    font-size: 110%;
-    margin-top: 0.5%;
-    margin-right: -10%;
+.create-post-modal .header1 {
+    width: fit-content;
+    font-size: 1.1rem;
+    margin-right: 2rem;
+    align-self: center;
 }
 
-.create-post-modal  .option {
+.create-post-modal .option {
     background: transparent;
     border: none;
-    color: #BFEFE9;
-    font-size: 85%;
+    color: var(--teal);
+    font-size: 0.8rem;
+    border-radius: 2rem;
+    padding: 0rem 1rem;
+    margin-right: 0.2rem;
 }
 
-.create-post-modal  .radio input {
+.create-post-modal .radio input {
     display: none;
 }
 
-.create-post-modal  .option input[name="view"]:checked{
-    background-color: green;
-}
-
-.create-post-modal  .image {
+.create-post-modal .image {
     font-size: 200%;
     color: white;
 }
 
-.create-post-modal  .link {
+.create-post-modal .link {
     margin-left: 0.5em;
     font-size: 200%;
     margin-right: auto;
     color: white;
 }
 
-.create-post-modal  .postButton {
-    border-radius: 15px;    
-    font-size: 150%;
+.create-post-modal .postButton {
+    border-radius: 15px;
+    font-size: 1rem;
+    font-family: "Readex Pro Bold";
+    color: var(--dark-blue);
+    background-color: var(--teal);
+    border-radius: 2rem;
+}
+
+#modal-header {
+    min-height: 1em !important;
+    padding-left: 5%;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.uri-modal .modal-content {
+    padding-top: 5%;
+    padding-left: 2%;
+    background-color: #1C212B;
+    color: #BFEFE9;
+    min-height: 15em;
+    border: none;
+    min-width: auto;
+}
+
+.uri-modal .modal-header {
+    border: none;
+}
+
+.uri-modal .modal-footer {
+    border: none;
+}
+
+.uri-modal .modal-body {
+    color: #BFEFE9;
+    border: none;
+}
+
+.ok-button {
+    width: 25%;
+    height: 25%;
     color: black;
     background-color: #BFEFE9;
+    border-radius: 15px;
+}
+
+.create-post-modal .image-preview {
+    width: 8em;
+    height: auto;
+    /* aspect-ratio: 1/1; */
+    border-radius: 11px;
+    text-align: center;
+    display: flex;
+    overflow:hidden;
+    place-content: center;
+    outline: solid var(--orange) 2px;
+    margin-left: 1rem;
+    margin-top: 1rem;
+}
+
+.create-post-modal .link-icon {
+    width: 2.5rem;
+    height:auto;
+    padding: 0rem 0.5rem;
+    color: var(--teal);
+}
+
+.create-post-modal .link-icon:hover {
+    cursor: pointer;
+    color: var(--teal-alt);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.create-post-modal .image-upload {
+    width: 2.8rem;
+    height:auto;
+    padding: 0rem 0.5rem;
+    color: var(--teal);
+}
+
+.create-post-modal .image-upload:hover {
+    cursor: pointer;
+    color: var(--teal-alt);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.image-upload-container {
+    display: flex;
+    margin-right: auto;
+    gap: 0.5rem;
+}
+
+.remove-image {
+    font-size: 0.7rem;
+    border-radius: 2rem;
+    background-color: var(--orange);
+    outline: none;
+    border: none;
+}
+
+.create-post-modal .link-form {
+    margin-top: 1rem;
+}
+
+.searchHeader.modal-header {
+    min-height: 2em;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 1%;
 }

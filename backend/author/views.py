@@ -13,6 +13,7 @@ from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
 from backend.utils import isUUID, isAuthorized, check_github_valid
+from backend.pagination import CustomPagination
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
@@ -21,16 +22,46 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     filter_backends = [filters.SearchFilter,]
     search_fields = ['displayName']
+    pagination_class = CustomPagination
+
+    def filter_queryset(self, queryset):
+        '''Issue with overriding list() method and needing to override filter_queryset
+        to get proper search filter.
+        Ref: https://stackoverflow.com/questions/52366296/django-filters-does-not-work-with-the-viewset
+        Answer by Sparkp1ug
+        '''
+        filter_backends = (filters.SearchFilter, )
+
+        # Other condition for different filter backend goes here
+
+        for backend in list(filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, view=self)
+        return queryset
 
     def list(self, request, pk=None):
-        ''' Returns a queryset of all authors in the database
+        ''' Returns a queryset of all authors in the database.
             Use: Send a GET to
                 /service/authors/
         '''
         try:
-            serializer = self.serializer_class(self.queryset, many=True)
-            serializer = {"type": "authors", "items":serializer.data}
-            return Response(serializer, status=status.HTTP_200_OK)
+
+            authorsQuerySet = self.filter_queryset(self.queryset)
+            authorsPaginateQuerySet = self.paginate_queryset(authorsQuerySet)
+            authorsSerializer = AuthorSerializer(authorsPaginateQuerySet, many=True, context={"request": request})
+            authorsPaginationResult = self.get_paginated_response(authorsSerializer.data)
+            authors = authorsPaginationResult.data.get("results")
+            
+            result = {
+                "type": "authors",
+                "items": authors
+            }
+
+            return Response(result, status=status.HTTP_200_OK)
+
+            # serializer = self.serializer_class(self.filter_queryset(self.queryset), many=True, context={"request": request})
+            # serializer = {"type": "authors", "items":serializer.data}
+            # return Response(serializer, status=status.HTTP_200_OK)
+            
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
@@ -90,7 +121,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
             # check if the requested field(s) to change exists
             for key in request.data.keys():
-                print([f.name for f in Author._meta.get_fields()])
                 if key not in [f.name for f in Author._meta.get_fields()]:
                     return Response(data=f"Specified field {key} does not exist", status=status.HTTP_400_BAD_REQUEST)
                 elif key == "password":

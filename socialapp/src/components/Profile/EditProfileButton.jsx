@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useContext } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Formik, Form } from "formik";
@@ -6,15 +6,12 @@ import TextField from "../TextField";
 import * as Yup from "yup";
 import useAxios from "../../utils/useAxios.js";
 import AuthContext from "../../context/AuthContext";
-import Toast from "react-bootstrap/Toast";
 import "./EditProfileButton.css";
 
 function VerticallyCenteredModal(props) {
   const validate = Yup.object().shape({
     profileImage: Yup.string().url(),
-    username: Yup.string()
-      .required("Required")
-      .max(128, "Invalid username"),
+    username: Yup.string().required("Required").max(128, "Invalid username"),
     github: Yup.string().url(),
   });
 
@@ -43,8 +40,6 @@ function VerticallyCenteredModal(props) {
           }}
           validationSchema={validate}
           onSubmit={(values) => {
-            console.log(values);
-
             const username = values.username;
             const profileImage = values.profileImage;
             const github = values.github;
@@ -59,12 +54,10 @@ function VerticallyCenteredModal(props) {
                 ? {}
                 : { github: `${github}` }),
             };
-            console.log(toSend);
 
             api
               .post(`${baseURL}/authors/${props.author.uuid}/`, toSend)
               .then((response) => {
-                // console.log(response);
                 if (response.status === 202) {
                   props.onHide();
                   window.location.reload(); // refreshes page...not ideal.

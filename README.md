@@ -1,5 +1,10 @@
 # SocialDistribution: a social media app by Team01 
 ***Created in CMPUT-404 Fall 2022 course***
+
+# Site Links:
+***Frontend:*** https://superlative-gelato-dcf1b6.netlify.app  
+***Backend:*** https://cs404-project.herokuapp.com/
+
 ##  Team Members  
   
 | <img src="https://avatars.githubusercontent.com/u/49131259?v=4" width="120">| <img src="https://avatars.githubusercontent.com/u/57372321?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/66976914?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/77299977?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/98789620?v=4" width="120"> |
@@ -25,7 +30,7 @@ cd socialapp
 npm install
 ```
 
-# [API Info](docs/APIdocs.md)
+# [API Info](https://github.com/CMPUT404-Social-Distribution-Project/mondaylab-cmput404-project/wiki/API-Documentation)
 
 
 ## References
@@ -39,3 +44,10 @@ https://sushil-kamble.medium.com/django-rest-framework-react-authentication-work
 https://blog.devgenius.io/django-rest-framework-react-authentication-workflow-2022-part-2-d299b7fef875
 
 https://www.digitalocean.com/community/tutorials/react-live-search-with-axios#conclusion
+
+https://github.com/GuScarpim/upload-image-react-base64#readme
+
+https://michaellin.me/deploy-multiple-apps-in-monorepo-to-heroku/
+
+https://stackoverflow.com/questions/72624239/error-error0308010cdigital-envelope-routinesunsupported-in-my-pod
+
