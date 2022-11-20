@@ -10,6 +10,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Popup from "reactjs-popup";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 export default function StreamHome() {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -29,15 +30,16 @@ export default function StreamHome() {
    *
    */
 
+  const base = baseURL + /authors/ + user_id + /posts/;
+  const [nextUrl, setNextUrl] = useState();
+  const [previousUrl, setPreviousURL] = useState();
   useEffect(() => {
     const fetchData = async () => {
       await api
-        .get(`${baseURL}/authors/${user_id}/posts/`, {
-            params: {
-              visibility: "PRIVATE"
-            },
-        })
+        .get(`${baseURL}/authors/${user_id}/posts/`)
         .then((response) => {
+          setNextUrl(response.data.next);
+          setPreviousURL(response.data.previous);
           setPostsArray(response.data.items);
         })
         .catch((error) => {
@@ -47,6 +49,20 @@ export default function StreamHome() {
     fetchData();
   }, [useLocation().state]);
 
+  const paginationHandler = (url) => {
+    try{
+      axios.get(url)
+      .then((response) => {
+        setNextUrl(response.data.next);
+        setPreviousURL(response.data.previous);
+        setPostsArray(response.data.items);
+      });
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
+  
   useEffect(() => {
     const fetchData = async () => {
       await api
@@ -122,6 +138,21 @@ export default function StreamHome() {
           ))}
         </div>
       </Container>
+
+      <nav className="page">
+        <ul className="pagination justify-content-center">
+          {previousUrl &&
+            <li className="page-item">
+            <button className="page-link" onClick={()=>paginationHandler(previousUrl)}>{'<'}</button>
+            </li>
+          }
+          {nextUrl &&
+            <li className="page-item">
+              <button className="page-link" onClick={()=>paginationHandler(nextUrl)}>{'>'}</button>
+            </li> 
+          }   
+        </ul> 
+      </nav>
     </div>
   );
 }

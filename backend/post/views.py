@@ -151,6 +151,7 @@ class PostsApiView(GenericAPIView):
             else:
                 postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC', unlisted=False).order_by("published").reverse()
             postsPaginated = self.paginate_queryset(postsQuerySet)
+            links = self.get_paginated_response(postsPaginated).data.get("links")
             
             # Need to set the commentSrc of each post object in the paginated posts
             # so we loop through the paginated query set to do so
@@ -163,6 +164,7 @@ class PostsApiView(GenericAPIView):
                 commentsSerializer = CommentsSerializer(commentsPageQuerySet, many=True)
                 commentsPaginationResult = paginator.get_paginated_response(commentsSerializer.data)
                 comments = commentsPaginationResult.data.get("results")
+
  
                 # Need to check if the post already has a commentSrc
                 commentSrcExists = CommentSrc.objects.filter(id=postObj.comments).first()
@@ -199,7 +201,8 @@ class PostsApiView(GenericAPIView):
                             postObj.commentSrc.comments.add(comment["uuid"])
 
             postsSerializer = self.serializer_class(postsPaginated, many=True)
-            result = {"type": "posts", "items": postsSerializer.data}
+
+            result = {"next": links['next'], "previous": links["previous"], "type": "posts", "items": postsSerializer.data}
             
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
