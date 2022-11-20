@@ -44,7 +44,8 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             auth_header = request.META['HTTP_AUTHORIZATION']  # 'Basic aGVsbG86d29scmQ='
 
             if ('Basic' not in auth_header):  # this is not a basic AUTH
-                return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_401_UNAUTHORIZED)
+                #return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_401_UNAUTHORIZED)
+                return None
 
             encodedCredentials = auth_header.split(' ')[1]  # remove the 'Basic' string
             decodedCredentials = base64.b64decode(encodedCredentials).decode('utf-8').split(':')
@@ -81,7 +82,7 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             else:
                 return (Authenticated(True), None)
         else:
-            return response.Response(f"NO AUTHORIZATION PROVIED ", status=status.HTTP_401_UNAUTHORIZED)
+           None 
 """
 custom class that tell rest framework authenticator to please authenticate this request
 rest framework authenticator will check self.is_authenticated to be true. That is the only field that matters

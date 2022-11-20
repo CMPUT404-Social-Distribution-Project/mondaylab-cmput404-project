@@ -28,7 +28,9 @@ export default function PostCard(props) {
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(0);
   const [CommentCount, setCommentCount] = useState(0);
-  const [color, setColor] = useState("white");
+  const [liked, setLiked] = useState(false);
+  const [beOwner, setBeOwner] = useState(user_id === post_user_id);
+  const [beFriend, setBeFriend] = useState(false);
   const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState([]);
@@ -66,7 +68,7 @@ export default function PostCard(props) {
     api
       .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
-        setColor("var(--orange)");
+        setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
       })
       .catch((error) => {
@@ -89,7 +91,28 @@ export default function PostCard(props) {
           `${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/likes`
         )
         .then((response) => {
+          let likers = [];
           setLikeCount((likeCount) => response.data.items.length);
+          for (let data of response.data.items) {
+            likers.push(data.author.uuid);
+            if (data.author.uuid === user_id) {
+              setLiked(true);
+            }
+          }
+
+          api
+            .get(`${baseURL}/authors/${user_id}/friends/`)
+            .then((response) => {
+              setFriends(response.data.items);
+              for (let data of response.data.items) {
+                if (likers.includes(data.uuid)) {
+                  setBeFriend(true);
+                }
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
         })
         .catch((error) => {
           console.log(error);
@@ -112,31 +135,29 @@ export default function PostCard(props) {
           console.log(error);
         });
       await api
-        .get(
-          `${baseURL}/authors/${user_id}/followers`
-        )
+        .get(`${baseURL}/authors/${user_id}/followers`)
         .then((response) => {
-          setFollowers(response.data.items)})
+          setFollowers(response.data.items);
+        })
         .catch((error) => {
           console.log(error);
         });
       await api
-        .get(
-          `${baseURL}/authors/${user_id}/friends/`
-        )
+        .get(`${baseURL}/authors/${user_id}/friends/`)
         .then((response) => {
-          setFriends(response.data.items)})
+          setFriends(response.data.items);
+        })
         .catch((error) => {
           console.log(error);
         });
-    }
+    };
     fetchData();
   }, []);
 
   const sharePost = (post) => {
-    console.log(post.id)
+    console.log(post.id);
     if (post.visibility === "PUBLIC") {
-      for(let index = 0; index < followers.length; index++) {
+      for (let index = 0; index < followers.length; index++) {
         const sharedPost = {
           type: "post",
           summary: `${author.displayName} shared a post.`,
@@ -146,14 +167,14 @@ export default function PostCard(props) {
         api
           .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
           .then((response) => {
-            console.log(response)
+            console.log(response);
           })
           .catch((error) => {
             console.log("Failed to get posts of author. " + error);
           });
       }
     } else if (post.visibility === "FRIENDS") {
-      for(let index = 0; index < friends.length; index++) {
+      for (let index = 0; index < friends.length; index++) {
         const sharedPost = {
           type: "post",
           summary: `${author.displayName} shared a post.`,
@@ -163,7 +184,7 @@ export default function PostCard(props) {
         api
           .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
           .then((response) => {
-            console.log(response)
+            console.log(response);
           })
           .catch((error) => {
             console.log("Failed to get posts of author. " + error);
@@ -262,7 +283,7 @@ export default function PostCard(props) {
                       <MdDelete /> Delete Post
                     </Dropdown.Item>
                   </div>
-                )
+                );
               }
             })()}
           </Dropdown.Menu>
@@ -291,18 +312,26 @@ export default function PostCard(props) {
           <div className="friends-indicator" style={{ background: "none" }} />
         )}
         {props.post.unlisted === true ? (
-          <div className="unlisted-indicator" style={{
-            margin: props.post.visibility === "FRIENDS" ? "0 1rem 0 0" : "0 1rem 0 auto"
-          }}>
+          <div
+            className="unlisted-indicator"
+            style={{
+              margin:
+                props.post.visibility === "FRIENDS"
+                  ? "0 1rem 0 0"
+                  : "0 1rem 0 auto",
+            }}
+          >
             <IoUnlink />
             Unlisted
           </div>
         ) : (
-          <div className="unlisted-indicator" style={{ 
-            background: "none",
-            margin: "0",
-            padding: "0" 
-            }} 
+          <div
+            className="unlisted-indicator"
+            style={{
+              background: "none",
+              margin: "0",
+              padding: "0",
+            }}
           />
         )}
         <PostOptions />
@@ -332,13 +361,13 @@ export default function PostCard(props) {
           <BsFillHeartFill
             className="like-icon"
             style={{
-              color: likeCount !== 0 ? "var(--orange)" : "var(--white-teal)",
+              color:
+                likeCount !== 0 && liked ? "var(--orange)" : "var(--white)",
             }}
             onClick={() => sendPostLike(props.post.uuid)}
           />
 
-          {likeCount === 0 ? 0 : likeCount}
-
+          {beFriend || beOwner ? likeCount : null}
           <BsFillChatFill
             className="comment-icon"
             style={{
@@ -349,7 +378,10 @@ export default function PostCard(props) {
           />
           {comments.length}
 
-          <MdShare className="share-icon" onClick={() => sharePost(props.post)}/>
+          <MdShare
+            className="share-icon"
+            onClick={() => sharePost(props.post)}
+          />
         </div>
         <div>
           {open ? (
