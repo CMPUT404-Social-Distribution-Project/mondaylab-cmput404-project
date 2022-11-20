@@ -1,6 +1,4 @@
 # functions to interact with other groups's server
-
-
 from .models import Node
 from backend.settings import ALLOWED_HOSTS
 
@@ -10,14 +8,6 @@ from rest_framework import authentication
 from rest_framework import response, status
 import base64
 from rest_framework import exceptions
-#NOTE, from node.views import hardCodedcredential      # this errors
-
-
-
-credentialToConnect = {"username" : "hello", "password" : "world"}  # credential to connect
-
-
-
 
 """
 
@@ -37,50 +27,34 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
 
         I WANT TO AUTHENTICATE INCOMING HTTP REQUEST FROM OTHER HOST TO OUR.
         """
-        
 
-        if (request.META.get('HTTP_AUTHORIZATION') != None):
-        
+        if (request.META.get('HTTP_AUTHORIZATION') != None and
+         'Basic' in request.META.get('HTTP_AUTHORIZATION')):
             auth_header = request.META['HTTP_AUTHORIZATION']  # 'Basic aGVsbG86d29scmQ='
 
-            if ('Basic' not in auth_header):  # this is not a basic AUTH
-                #return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_401_UNAUTHORIZED)
-                return None
-
-            encodedCredentials = auth_header.split(' ')[1]  # remove the 'Basic' string
+            encodedCredentials = auth_header.split(' ')[1]  # remove the 'Basic' from string
             decodedCredentials = base64.b64decode(encodedCredentials).decode('utf-8').split(':')
             username = decodedCredentials[0]
             password = decodedCredentials[1]
 
-
-            if username == credentialToConnect['username'] and password == credentialToConnect['password']:
-                #case: this is request to for connection. return not authenticated for now. so that it can redirect to node.view.py
-                return (Authenticated(False), None)
-
-
-            #if username != "user" and password != "user":  # some hard coded username, password for each http request from 
-            #    raise exceptions.AuthenticationFailed("Node Credentials Incorrect.")
-
-
-            # once a host exists in the node database, then they are authenticated
-
-            """
-            we checkif this foreign host is in the database, then that means we are still  connecting to this host
-            
-            
-            """ 
-
-            """
-            Note: lets make the remote host send their 'hostname' along this request
-            so we can   Node.objects.get(hostname) and then check if the credential in the db matches
-            the credential in the request
-            """
-
-            remoteNode = Node.objects.filter(authUsername=username, authPassword=password)
-            if not remoteNode.exists():
-                raise exceptions.AuthenticationFailed("in nodeFunction.py, incorrect credential or this host not connected to this server")
-            else:
+            # this is for use for anyone. This is because part 2 submission requires
+            # an example cURL or httpie command, but obviously the TA
+            # won't have their host validated in our database. So really, this
+            # is only for the TA.
+            if username == "F22cmput404team1SD" and password == "ZuluACKAlpha":
                 return (Authenticated(True), None)
+
+            # get the remote node's host url, including schema and no end slash, e.g. http://localhost:8000
+            remote_node_host = request.build_absolute_uri('/')[:-1]     
+            remoteNode = Node.objects.filter(host=remote_node_host)
+            if not remoteNode.exists():
+                raise exceptions.AuthenticationFailed("This host has not been added by server admin")
+
+            if username == remoteNode.first().username and password == remoteNode.first().password:
+                return (Authenticated(True), None)
+            else:
+                raise exceptions.AuthenticationFailed("Incorrect credentials")
+
         else:
            None 
 """
@@ -90,14 +64,4 @@ rest framework authenticator will check self.is_authenticated to be true. That i
 class Authenticated:
     def __init__(self, flag):
         self.is_authenticated = flag
-
-
-
-"""
-TODO, helper function to get the hostName of the host we wanna send request to
-
-"""
-def getRemoteHostName(request):
-
-    pass
 
