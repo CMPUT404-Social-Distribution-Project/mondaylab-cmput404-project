@@ -170,8 +170,8 @@ export default function CreatePost(props) {
                   .catch((error) => {
                     console.log("Failed to send private post. " + error);
                   });
+              }
               props.onHide();
-            }
           }})
           .catch((error) => {
             alert(
