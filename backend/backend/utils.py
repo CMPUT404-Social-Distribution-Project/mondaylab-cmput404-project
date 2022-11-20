@@ -18,7 +18,7 @@ def isAuthorized(request, author_uuid):
     '''
     res = JWT_authenticator.authenticate(request)
     if res is not None:
-        user, token = res;
+        user, token = res
         requesterUUID = user.uuid
         
         # if the requester is not what they say they are (aren't the actual author)

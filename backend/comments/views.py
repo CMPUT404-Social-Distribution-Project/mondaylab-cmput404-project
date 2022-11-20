@@ -15,6 +15,7 @@ from datetime import date
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
+from backend.utils import isAuthorized
 
 class CommentsApiView(GenericAPIView):
     serializer_class = CommentsSerializer
@@ -30,14 +31,19 @@ class CommentsApiView(GenericAPIView):
     TODO: problem pos
     """
     def get(self, request, author_id, post_id):
-        # Just a test case
-        author_id_full_path = get_author_id(request)
         size = 5
         post_id_full_path = get_post_id(request)
-        if check_author_id(request) == False:
-            return response.Response(data="you are not the author", status=status.HTTP_401_UNAUTHORIZED)
-        elif check_post_id(request) == False:
-            return response.Response(data="invalid post id ", status=status.HTTP_401_UNAUTHORIZED)
+
+        # First try and get the post object
+        post_obj = Post.objects.filter(uuid=post_id)
+        if not post_obj.exists():
+            return response.Response(data="Post doesn't exists", status=status.HTTP_404_NOT_FOUND)
+        post_obj = post_obj.first()
+
+        if (post_obj.visibility == "FRIENDS" and
+            isAuthorized(request, author_id) == False):
+            return response.Response(data="Cannot view comments on FRIENDS-ONLY post, you are not the author",
+             status=status.HTTP_401_UNAUTHORIZED)
         else:
             try: 
                 """
@@ -65,7 +71,7 @@ class CommentsApiView(GenericAPIView):
                     "page": page,
                     "size": size,
                     "post": post_id_full_path,
-                    "id":post_id_full_path + "/comments",
+                    "id": post_id_full_path + "/comments",
                     'comments': comments
                 }
 
@@ -79,10 +85,6 @@ class CommentsApiView(GenericAPIView):
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-
-
-
-
     def post(self, request, author_id, post_id):
         """
         create a comment
@@ -94,11 +96,6 @@ class CommentsApiView(GenericAPIView):
         TODO: think of a field to type in the comment
         
         """
-        # check for authorid
-
-
-        author_id_full_path = get_author_id(request)
-        
      
         try:
             serialize = self.serializer_class(data=request.data)  # converts request.data to jsonlike object
@@ -110,7 +107,7 @@ class CommentsApiView(GenericAPIView):
                 commentUuid = str(uuid4())
 
                 authorObj = Author.objects.get(uuid=author_id)
-                commentId = author_id_full_path + '/' + "posts/" + post_id + "/comments/" +  commentUuid
+                commentId = request.build_absolute_uri() +  commentUuid
                 # published date is in the following format 
                 # 2015-03-09T13:07:04+00:00
                 publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
@@ -121,18 +118,33 @@ class CommentsApiView(GenericAPIView):
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_400_BAD_REQUEST)
 
+class CommentApiView(GenericAPIView):
+    def get(self, request, author_id, post_id, comment_id):
+        post_id_full_path = get_post_id(request)
+
+        # First try and get the post object
+        post_obj = Post.objects.filter(uuid=post_id)
+        if not post_obj.exists():
+            return response.Response(data="Post doesn't exists", status=status.HTTP_404_NOT_FOUND)
+        post_obj = post_obj.first()
+
+        if (post_obj.visibility == "FRIENDS" and
+            not isAuthorized(request, author_id)):
+            return response.Response(data="Cannot view comments on FRIENDS-ONLY post, you are not the author",
+             status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            try: 
+                comment_object = Comment.objects.get(uuid=comment_id)
+                serializer = CommentsSerializer(comment_object)
+                return response.Response(serializer.data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 def get_author_id(request):
-#xx is  ['http://127.0.0.1:8000/', 'authors/5548b3f8-016b-4719-be48-0f40ffbbddde/posts/3ad3daa5-9ff0-4024-8f85-8332caad59c4/comments/']
-    if "posts" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/posts")
-        author_id= xx[0]+yy[0]
-        return author_id
-    else:
-        xx=request.build_absolute_uri()[:-7].split('service/')
-        author_id= xx[0]+xx[1]
-        return author_id
+    # splits on authors/ then grabs the uuid next to it
+    abs_uri=request.build_absolute_uri()
+    author_id = abs_uri.split('authors/')[1].split('/')[0]
+    return author_id
 
 
 """
@@ -141,19 +153,11 @@ output   http...../authors/.../comments/
 """ 
 def get_post_id(request):
 #xx is  ['http://127.0.0.1:8000/', 'authors/5548b3f8-016b-4719-be48-0f40ffbbddde/posts/3ad3daa5-9ff0-4024-8f85-8332caad59c4/comments/']
-    xx=request.build_absolute_uri().split('service/')
+    xx=request.build_absolute_uri().split('authors/')
     noComment = xx[1].split("/comments")
 #  after comment split is  ['authors/5548b3f8-016b-4719-be48-0f40ffbbddde/posts/3ad3daa5-9ff0-4024-8f85-8332caad59c4', '/']
     post_id= xx[0]+noComment[0]
     return post_id
-
-
-def check_author_id(request):
-    author_id= get_author_id(request)
-    author = Author.objects.filter(id = author_id)
-    return author.exists()
-
-
 
 def check_post_id(request):
     post_id = get_post_id(request)
@@ -162,27 +166,3 @@ def check_post_id(request):
         return True
     else:
         return False
-
-
-def get_post_url(request, author_id):
-    """
-    Delete <service> in url, return post url without post uuid
-    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
-    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
-    """
-
-    xx=request.build_absolute_uri().split('service/')
-    author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
-    return str(author_url_id)
-
-
-def get_comment_url(request, author_id, post_id):
-    """
-    Delete <service> in url, return post url without post uuid
-    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
-    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
-    """
-
-    xx=request.build_absolute_uri().split('service/')
-    author_url_id= xx[0]+ 'authors/'+author_id+"/posts/" + post_id + "/" + "comments/"
-    return str(author_url_id)
