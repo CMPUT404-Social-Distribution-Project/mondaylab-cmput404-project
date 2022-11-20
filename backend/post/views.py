@@ -84,7 +84,7 @@ class PostApiView(GenericAPIView):
                             # get author obj to be saved in author field of post
                             authorObj = Author.objects.get(uuid=author_id)
                             # create post ID and origin and source
-                            postId = get_post_url(request, author_id)+ post_id
+                            postId = request.build_absolute_uri() + post_id
                             origin = postId
             
                             serialize.save(
@@ -212,7 +212,7 @@ class PostsApiView(GenericAPIView):
                     authorObj = Author.objects.get(uuid=author_id)
                     # create post ID and origin and source
                     postUUID = str(uuid4())
-                    postId = get_post_url(request, author_id)+ postUUID
+                    postId = request.build_absolute_uri() + postUUID
                     origin = postId
 
                     if serialize.validated_data.get("contentType").startswith("image"):
@@ -226,7 +226,7 @@ class PostsApiView(GenericAPIView):
                         uuid=postUUID,
                         author=authorObj,
                         count=0,
-                        comments=postId+'/comments',
+                        comments= postId+ '/comments',
                         origin=origin,
                         source=origin,
                         image=serialize.validated_data.get("image"),
