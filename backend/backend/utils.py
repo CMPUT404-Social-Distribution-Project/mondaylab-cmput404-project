@@ -110,17 +110,15 @@ def get_author_url_id(request):
     '''
     if "posts" in request.build_absolute_uri():
         author_url_id = request.build_absolute_uri().split('posts/')[0]
-        return author_url_id
-    if "followers" in request.build_absolute_uri():
+    elif "followers" in request.build_absolute_uri():
         author_url_id = request.build_absolute_uri().split('followers/')[0]
-        return author_url_id
-    if "friends" in request.build_absolute_uri():
+    elif "friends" in request.build_absolute_uri():
         author_url_id = request.build_absolute_uri().split('friends/')[0]
-        return author_url_id
     else:
         xx=request.build_absolute_uri()[:-7].split('service/')
-        author_id= xx[0]+xx[1]
-        return author_id
+        author_id_url= xx[0]+xx[1]
+        
+    return author_url_id[:-1]
 
 def get_foreign_id(request):
     xx=request.build_absolute_uri().split('service/')

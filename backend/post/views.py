@@ -12,7 +12,7 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list
+from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list, get_author_url_id
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64
