@@ -73,6 +73,9 @@ def is_friends(request, author_id):
 def check_friend(author_id, foreign_id):
     '''Checks if the two authors with the given id's are friends'''
     try:
+        #TODO: when checking if our author is following foreign author,
+        # fetch to the foreign author's host API url's followers/ endpoint
+        # and check if our author is in their followers. 
         current_author = Author.objects.get(id = author_id)
         foreign_author = Author.objects.get(id = foreign_id)
         followers = current_author.followers.get(id = foreign_id)
@@ -121,24 +124,19 @@ def get_author_url_id(request):
     return author_url_id[:-1]
 
 def get_foreign_id(request):
-    xx=request.build_absolute_uri().split('service/')
-    yy = xx[1].split("/followers")
-    author_url_id= xx[0]+'authors'+yy[1]
-    return author_url_id
+    split_followers = request.build_absolute_uri().split("followers/")
+    foreign_author_id = split_followers[1].split('/')[0]
+    foreign_author_url_id = split_followers[0].split('authors')[0] + "authors/" + foreign_author_id
+    return foreign_author_url_id
 
 def get_friend_id(request):
-    xx=request.build_absolute_uri().split('service/')
-    yy = xx[1].split("/friends")
-    author_url_id= xx[0]+'authors'+yy[1]
+    author_url_id=request.build_absolute_uri().split("/friends")[0]
     return author_url_id  
 
 def get_post_id(request):
     if "likes" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/likes")
-        author_url_id= xx[0]+yy[0]
-        return author_url_id
+        post_url_id=request.build_absolute_uri().split("/likes")[0]
     else:
-        xx=request.build_absolute_uri().split('service/')
-        author_url_id= xx[0]+xx[1]
-        return author_url_id
+        post_url_id=request.build_absolute_uri()
+    
+    return post_url_id
