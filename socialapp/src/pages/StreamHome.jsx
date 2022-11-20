@@ -139,7 +139,7 @@ export default function StreamHome() {
         </div>
       </Container>
 
-      <nav className="page">
+      <nav className="posts col-md-6">
         <ul className="pagination justify-content-center">
           {previousUrl &&
             <li className="page-item">
