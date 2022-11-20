@@ -42,7 +42,7 @@ export default function Post() {
   return (
     <div className="post-container">
         {post && <PostCard post={post} />}
-
+      <p>here</p>
     </div>
   );
 }
