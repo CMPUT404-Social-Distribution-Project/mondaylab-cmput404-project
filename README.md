@@ -1,5 +1,10 @@
 # SocialDistribution: a social media app by Team01 
 ***Created in CMPUT-404 Fall 2022 course***
+
+# Site Links:
+***Frontend:*** https://superlative-gelato-dcf1b6.netlify.app  
+***Backend:*** https://cs404-project.herokuapp.com/
+
 ##  Team Members  
   
 | <img src="https://avatars.githubusercontent.com/u/49131259?v=4" width="120">| <img src="https://avatars.githubusercontent.com/u/57372321?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/66976914?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/77299977?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/98789620?v=4" width="120"> |

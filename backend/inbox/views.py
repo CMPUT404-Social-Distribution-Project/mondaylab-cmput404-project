@@ -260,6 +260,7 @@ class InboxAllApiView(GenericAPIView):
     fr_serializer_class = FriendRequestSerializer
     lk_serializer_class=LikePostSerializer
     ct_serializer_class=CommentsSerializer
+    
     def get(self, request, author_id):
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
