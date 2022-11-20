@@ -224,7 +224,7 @@ class PostsApiView(GenericAPIView):
                         uuid=postUUID,
                         author=authorObj,
                         count=0,
-                        comments=postId+'/comments',
+                        comments= postId+ '/comments',
                         origin=origin,
                         source=origin,
                         image=serialize.validated_data.get("image"),
