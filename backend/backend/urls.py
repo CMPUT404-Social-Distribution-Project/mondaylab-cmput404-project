@@ -23,6 +23,8 @@ from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
 from followers.views import TrueFriendApiView, TrueFriendsApiView
 from like.views import LikesPostApiView, AuthorLikedApiView, LikesCommentApiView
 from node.views import AcceptConnectionFromRemote
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -54,4 +56,5 @@ urlpatterns = [
     # Node enpoint
     path('service/node/<str:hostName>', AcceptConnectionFromRemote, name="connect to our server"),
 
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
