@@ -4,14 +4,13 @@ from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework import response, status
-from post.views import get_author_url_id, get_post_id, check_author_id
 from post.models import Post
 from author.models import Author
 from like.models import Like
 from comments.models import Comment
 from django.db.models import Q
 from like.serializers import LikeCommentSerializer, LikePostSerializer, LikeAuthorSerializer
-from backend.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized, get_author_url_id, get_post_id
 
 class LikesPostApiView(GenericAPIView):
     """

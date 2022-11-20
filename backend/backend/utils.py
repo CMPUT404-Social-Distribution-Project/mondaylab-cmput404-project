@@ -98,3 +98,49 @@ def get_friends_list(current_author):
         print(e)
 
     return friends_list
+
+def get_author_url_id(request):
+    '''
+    Gets the author id url from the request depending
+    on the type
+    example:
+    http://localhost:8000/service/authors/123/posts/555
+    gets turned into:
+    http://localhost:8000/service/authors/
+    '''
+    if "posts" in request.build_absolute_uri():
+        author_url_id = request.build_absolute_uri().split('posts/')[0]
+        return author_url_id
+    if "followers" in request.build_absolute_uri():
+        author_url_id = request.build_absolute_uri().split('followers/')[0]
+        return author_url_id
+    if "friends" in request.build_absolute_uri():
+        author_url_id = request.build_absolute_uri().split('friends/')[0]
+        return author_url_id
+    else:
+        xx=request.build_absolute_uri()[:-7].split('service/')
+        author_id= xx[0]+xx[1]
+        return author_id
+
+def get_foreign_id(request):
+    xx=request.build_absolute_uri().split('service/')
+    yy = xx[1].split("/followers")
+    author_url_id= xx[0]+'authors'+yy[1]
+    return author_url_id
+
+def get_friend_id(request):
+    xx=request.build_absolute_uri().split('service/')
+    yy = xx[1].split("/friends")
+    author_url_id= xx[0]+'authors'+yy[1]
+    return author_url_id  
+
+def get_post_id(request):
+    if "likes" in request.build_absolute_uri():
+        xx=request.build_absolute_uri().split('service/')
+        yy = xx[1].split("/likes")
+        author_url_id= xx[0]+yy[0]
+        return author_url_id
+    else:
+        xx=request.build_absolute_uri().split('service/')
+        author_url_id= xx[0]+xx[1]
+        return author_url_id

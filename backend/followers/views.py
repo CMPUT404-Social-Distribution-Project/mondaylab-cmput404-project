@@ -7,8 +7,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
-from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
-from backend.utils import isUUID, isAuthorized, check_friend, get_friends_list
+from backend.utils import isUUID, isAuthorized, check_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
 
 class FollowersApiView(GenericAPIView):
     """
