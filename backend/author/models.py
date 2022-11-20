@@ -1,4 +1,3 @@
-
 from django.db.models import (Model, CharField, URLField, TextChoices, TextField,
 ForeignKey, CASCADE, IntegerField, DateTimeField,BooleanField, ManyToManyField, UUIDField
 )

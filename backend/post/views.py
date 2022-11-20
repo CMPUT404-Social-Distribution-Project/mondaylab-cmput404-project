@@ -1,5 +1,3 @@
-
-
 from post.models import Post
 from author.models import Author
 from comments.models import Comment, CommentSrc
@@ -404,5 +402,3 @@ def get_post_url(request, author_id):
     xx=request.build_absolute_uri().split('service/')
     author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
     return str(author_url_id)
-
-
