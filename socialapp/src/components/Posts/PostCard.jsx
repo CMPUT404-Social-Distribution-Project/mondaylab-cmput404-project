@@ -295,12 +295,12 @@ export default function PostCard(props) {
   function FriendsIndicator() {
     return (
       props.post.visibility === "FRIENDS" ? (
-        <div className="friends-indicator">
+        <div className="friends-indicator" style={{ marginLeft: "auto", padding: "0.3rem 1rem", marginRight: "1em" }}>
           <FaUserFriends />
           Friends-Only
         </div>
       ) : (
-        <div className="friends-indicator" style={{ background: "none" }} />
+        <div className="friends-indicator" style={{ background: "none", marginLeft: "auto" }} />
       )
     );
   }
@@ -308,12 +308,13 @@ export default function PostCard(props) {
   function PrivateIndicator() {
     return (
       props.post.visibility === "PRIVATE" ? (
-        <div className="private-indicator">
+        <div className="private-indicator" style={{ marginRight: "1em", padding: "0.3rem 1rem" }}>
           <FaLock />
           Private
         </div>
       ) : (
-        <div className="private-indicator" style={{ background: "none" }} />
+        <div className="private-indicator" 
+        style={{ background: "none", marginLeft: "none", marginRight: "none", padding: "none !important" }} />
       )
     );
   }
@@ -325,7 +326,7 @@ export default function PostCard(props) {
           className="unlisted-indicator"
           style={{
             margin:
-              props.post.visibility === "FRIENDS"
+              props.post.visibility === "FRIENDS" || props.post.visibility === "PRIVATE"
                 ? "0 1rem 0 0"
                 : "0 1rem 0 auto",
           }}
