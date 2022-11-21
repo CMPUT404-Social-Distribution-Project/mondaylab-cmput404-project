@@ -154,6 +154,13 @@ export default function PostCard(props) {
     fetchData();
   }, []);
 
+  /**
+   * 
+   * @param {*} post
+   * When we share a post, we look at two different scenarios. If the post is public, we will send it to the backend and send it 
+   * to all other authors inbox who follow us. If the post visibility is friends, then we will send it to the backend and send it
+   * to all other authors inbox who we are friends with (we follow them and they follow us).
+   */
   const sharePost = (post) => {
     console.log(post.id);
     if (post.visibility === "PUBLIC") {
@@ -193,6 +200,13 @@ export default function PostCard(props) {
     }
   };
 
+  /**
+   * 
+   * @param {*} uuid 
+   * When we confirm we want to delete a post, we then send a request to the backend using the uuid of the post 
+   * and then reload the page. 
+   */
+
   const deletePost = (uuid) => {
     api
       .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
@@ -204,6 +218,13 @@ export default function PostCard(props) {
         console.log(error);
       });
   };
+
+  /**
+   * 
+   * @param {*} uuid 
+   * If we want to delete a post, we first open up this confirmAlert. If the user clicks yes, then we go to the
+   * deletePost function. If they click no, then we return to previous state. 
+   */
 
   const confirmDelete = (uuid) => {
     confirmAlert({
@@ -223,6 +244,13 @@ export default function PostCard(props) {
     });
   };
 
+  /**
+   * 
+   * @param {*} uuid 
+   * Using the uuid of the post given to us, we send all comments in the post to the comments section of backend
+   * after that, we then reload the page and set all variables of commentObject to the appropriate value and send
+   * that comment object to the backend of the original post author inbox (to the comments section)
+   */
   const sendComment = (uuid) => {
     var commentObject = {};
     api

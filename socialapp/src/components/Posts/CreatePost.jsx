@@ -91,10 +91,13 @@ export default function CreatePost(props) {
   };
 
   /**
-   * When the users click the button "Post", we will use the information created in the variable post to send it to the API.
-   * We use the user_id (created using useCOntext of the current autheticated user) to create a path to posts, and we autheticated
-   * it using our auth token. If the request is successful we send a response to the console and call the function closePost. If not
-   * we will send the error to the console and the error will not be logged.
+   * When the users click the button "Post", we will use the information created in the variable post to send it to the API. We first
+   * check if the post is an image post, if its not, We use the user_id (created using useCOntext of the current autheticated user) to 
+   * create a path to posts, and we autheticated it using our auth token. If the request is successful we send a response to the console 
+   * and call the function closePost. If not we will send the error to the console and the error will not be logged. If the post is unlisted, 
+   * we then show a URI for the user so they can view the post privately. If the post is set to private, we send the post to the inbox of the 
+   * author specificied by the user (inside the value variable). If the post does have an image, we first send the image to the users backend 
+   * then, we add that image to the post (using a new variable called image) and send that post with the image to the backend.  
    *
    */
 
@@ -262,6 +265,12 @@ export default function CreatePost(props) {
     setImagePost(null);
   }
 
+  /** 
+   * Similar to the search in the exploration page, we first set loading to true (loading users) and then we use a promise
+   * to search for the user using the given input (if none, then the search results remain empty). Once a user has been found, we
+   * set the authors array to the search results and stop loading.
+   */
+
   const search = async (val) => {
     setLoading(true);
     const res = await search2(
@@ -271,12 +280,19 @@ export default function CreatePost(props) {
 
     setLoading(false);
   };
-
+  
+  /**
+   * Whenever we type inside the search bar (for private post), we set the value of search (what we are searching for) and value (what is
+   * going to be sent with the post) to the search value. 
+  */
   const onChangeHandler = async (e) => {
     search(e.target.value);
     setValue(e.target.value);
   };
 
+  /**
+  * If we are sending a private post, then we set the variable "value" (object being sent in the backend) to whatever author object we are given. 
+  */
   const privatePost = (author) => {
     setValue(author)
   }
