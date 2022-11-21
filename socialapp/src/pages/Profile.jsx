@@ -15,6 +15,8 @@ import { CgRemote } from "react-icons/cg";
 import ProfilePicture from '../components/ProfilePicture';
 
 function ProfilePosts(props) {
+  console.log('-----props-----');
+  console.log(props.postsArray.next);
   return (
     <div className="posts-container-profile">
     {
@@ -24,6 +26,22 @@ function ProfilePosts(props) {
         loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
         : null
     }
+    <nav>
+        <ul className="pagination justify-content-center">
+          {/* {previousUrl && */}
+            <li className="page-item">
+            {/* <button className="page-link" >{'<'}{props.postsArray.previous}</button> */}
+            <button className="page-link" onClick={()=>paginationHandler(props.postsArray.next)}>{'<'}</button>
+            </li>
+          {/* } */}
+          {/* {nextUrl && */}
+            <li className="page-item">
+              {/* <button className="page-link">{'>'}{props.postsArray.next}</button> */}
+              <button className="page-link" onClick={()=>paginationHandler(props.postsArray.next)}>{'>'}</button>
+            </li> 
+          {/* }     */}
+        </ul> 
+      </nav>
     </div>
   )
 }
@@ -65,6 +83,9 @@ export default function Profile() {
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 
+  const [nextUrl, setNextUrl] = useState();
+  const [previousUrl, setPreviousURL] = useState();
+  
   useEffect(() => {
     const loggedInUserData = async () => {
       await api
@@ -113,6 +134,13 @@ export default function Profile() {
         )
         .then((response) => {
           setPostsArray(response.data);
+          console.log('--');
+          console.log(response.data);
+          setPreviousURL(response.data.previous);
+          setNextUrl(response.data.next);
+          console.log(response.data.previous);
+          console.log(response.data.next);
+          console.log('...');
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
@@ -129,7 +157,21 @@ export default function Profile() {
         });
     };
     fetchData();
-  }, [useLocation().state]);
+  }, [useLocation().state, dir]);
+
+  var paginationHandler = (url) => {
+    try{
+      axios.get(url)
+      .then((response) => {
+        setNextUrl(response.data.next);
+        setPreviousURL(response.data.previous);
+        setPostsArray(response.data.items);
+      });
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div className="profileContainer">
@@ -170,6 +212,7 @@ export default function Profile() {
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
 
+      
     </div>
   );
 }
