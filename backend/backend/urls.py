@@ -22,7 +22,11 @@ from author.views import UserViewSet
 from auth.views import LoginViewSet, RegistrationViewSet, RefreshViewSet
 from followers.views import TrueFriendApiView, TrueFriendsApiView
 from like.views import LikesPostApiView, AuthorLikedApiView, LikesCommentApiView
+<<<<<<< HEAD
 from node.views import AcceptConnectionFromRemote
+=======
+from node.views import AcceptConnectionFromRemote, getNode, getNodeAuthors
+>>>>>>> origin/main
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -55,6 +59,14 @@ urlpatterns = [
 
     # Node enpoint
     path('service/node/<str:hostName>', AcceptConnectionFromRemote, name="connect to our server"),
+    path('service/node/', getNode, name="retrieves node object"),
+    path('service/node/authors/', getNodeAuthors, name="retrieves all authors from all nodes"),
+
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+<<<<<<< HEAD
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+=======
+>>>>>>> origin/main

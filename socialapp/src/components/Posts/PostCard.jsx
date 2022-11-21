@@ -4,7 +4,7 @@ import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
-import { FaUserFriends } from "react-icons/fa";
+import { FaUserFriends, FaLock } from "react-icons/fa";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
 import "./PostCard.css";
@@ -15,11 +15,18 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs } from "../../utils/utils";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
-  const post_user_id = props.post.author.uuid;
+  const post_user_id = extractAuthorUUID(props.post.author.id);
+  const post_id = extractPostUUID(props.post.id)
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
+
+  // node
+  const [postAuthorNode, setPostAuthorNode] = useState(null);     // the node object of post's author
+  const [postAuthorBaseApiURL, setPostAuthorBaseAPI] = useState("");
+
   const [postComment, setPostComment] = useState({
     comment: "",
   });
@@ -58,7 +65,7 @@ export default function PostCard(props) {
     navigate(`${location.pathname}`, { state: { refresh: true } });
   };
 
-  const sendPostLike = (uuid) => {
+  const sendPostLike = () => {
     const postLike = {
       type: "like",
       summary: `${author.displayName} Likes your post.`,
@@ -66,7 +73,7 @@ export default function PostCard(props) {
       object: props.post.id,
     };
     api
-      .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
+      .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -76,60 +83,78 @@ export default function PostCard(props) {
       });
   };
 
+
+  // Needed to separate this from the others fetches, because
+  // postAuthorNode is sometimes null. Doing it this way,
+  // these fetch calls are only called once postAuthorNode changes
+  // to not null. 
   useEffect(() => {
+    const fetchPostAuthorData = async () => {
+      await api
+      .get(
+        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+        {headers: postAuthorNode.headers}
+      )
+      .then((response) => {
+        let likers = [];
+        setLikeCount((likeCount) => response.data.items.length);
+        for (let data of response.data.items) {
+          likers.push(extractAuthorUUID(data.author.id));
+          if (extractAuthorUUID(data.author.id) === user_id) {
+            setLiked(true);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    await api
+      .get(
+        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments/`,
+        {headers: postAuthorNode.headers}
+      )
+      .then((response) => {
+        const commentArray = response.data.comments;
+        setCommentCount(commentArray.length);
+        if (commentArray.length !== 0) {
+          for (let i = 0; i < commentArray.length; i++) {
+            const comment = commentArray[i];
+            setComments((comments) => [...comments, comment]);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+    if (postAuthorNode !== null) {
+      fetchPostAuthorData();
+    }
+  }, [postAuthorNode])
+
+  useEffect(() => {
+    
     const fetchData = async () => {
+      await api
+        .get(`${baseURL}/node/?host=${props.post.author.host}`)
+        .then((response) => {
+          const b64Credentials = btoa(`${response.data.username}:${response.data.password}`)
+          let node = {...response.data, headers:{}};
+          if (!authorHostIsOurs(props.post.author.host)) {
+            // Post author's host is a remote host (not ours), add in HTTP Basic auth
+            const authHeader = `Basic ${b64Credentials}`;
+            node = {...node, headers: {'Authorization': authHeader}};
+          }
+          setPostAuthorNode(node);
+          setPostAuthorBaseAPI(node.host);
+        })
+        .catch((err) => {
+          console.log(err.response.data);
+        })
       await api
         .get(`${baseURL}/authors/${user_id}/`)
         .then((response) => {
           setAuthor(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await api
-        .get(
-          `${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/likes`
-        )
-        .then((response) => {
-          let likers = [];
-          setLikeCount((likeCount) => response.data.items.length);
-          for (let data of response.data.items) {
-            likers.push(data.author.uuid);
-            if (data.author.uuid === user_id) {
-              setLiked(true);
-            }
-          }
-
-          api
-            .get(`${baseURL}/authors/${user_id}/friends/`)
-            .then((response) => {
-              setFriends(response.data.items);
-              for (let data of response.data.items) {
-                if (likers.includes(data.uuid)) {
-                  setBeFriend(true);
-                }
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await api
-        .get(
-          `${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/comments/`
-        )
-        .then((response) => {
-          const commentArray = response.data.comments;
-          setCommentCount(commentArray.length);
-          if (commentArray.length !== 0) {
-            for (let i = 0; i < commentArray.length; i++) {
-              const comment = commentArray[i];
-              setComments((comments) => [...comments, comment]);
-            }
-          }
         })
         .catch((error) => {
           console.log(error);
@@ -150,17 +175,18 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/${post_user_id}`)
+        .then((response) => {
+          setBeFriend(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, []);
 
-  /**
-   * 
-   * @param {*} post
-   * When we share a post, we look at two different scenarios. If the post is public, we will send it to the backend and send it 
-   * to all other authors inbox who follow us. If the post visibility is friends, then we will send it to the backend and send it
-   * to all other authors inbox who we are friends with (we follow them and they follow us).
-   */
   const sharePost = (post) => {
     console.log(post.id);
     if (post.visibility === "PUBLIC") {
@@ -172,7 +198,7 @@ export default function PostCard(props) {
           object: post.id,
         };
         api
-          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
+          .post(`${baseURL}/authors/${extractAuthorUUID(followers[index].id)}/inbox/`, post)
           .then((response) => {
             console.log(response);
           })
@@ -189,7 +215,7 @@ export default function PostCard(props) {
           object: post.id,
         };
         api
-          .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
+          .post(`${baseURL}/authors/${extractAuthorUUID(friends[index].id)}/inbox/`, post)
           .then((response) => {
             console.log(response);
           })
@@ -199,13 +225,6 @@ export default function PostCard(props) {
       }
     }
   };
-
-  /**
-   * 
-   * @param {*} uuid 
-   * When we confirm we want to delete a post, we then send a request to the backend using the uuid of the post 
-   * and then reload the page. 
-   */
 
   const deletePost = (uuid) => {
     api
@@ -218,13 +237,6 @@ export default function PostCard(props) {
         console.log(error);
       });
   };
-
-  /**
-   * 
-   * @param {*} uuid 
-   * If we want to delete a post, we first open up this confirmAlert. If the user clicks yes, then we go to the
-   * deletePost function. If they click no, then we return to previous state. 
-   */
 
   const confirmDelete = (uuid) => {
     confirmAlert({
@@ -244,13 +256,6 @@ export default function PostCard(props) {
     });
   };
 
-  /**
-   * 
-   * @param {*} uuid 
-   * Using the uuid of the post given to us, we send all comments in the post to the comments section of backend
-   * after that, we then reload the page and set all variables of commentObject to the appropriate value and send
-   * that comment object to the backend of the original post author inbox (to the comments section)
-   */
   const sendComment = (uuid) => {
     var commentObject = {};
     api
@@ -267,7 +272,7 @@ export default function PostCard(props) {
         commentObject["id"] = response.data.id;
         commentObject["contentType"] = response.data.contentType;
         commentObject["published"] = response.data.published;
-        commentObject["uuid"] = response.data.uui;
+        commentObject["uuid"] = response.data.uuid;
 
         api
           .post(`${baseURL}/authors/${post_user_id}/inbox/`, commentObject)
@@ -297,7 +302,7 @@ export default function PostCard(props) {
               <MdShare /> Share Post
             </Dropdown.Item>
             {(() => {
-              if (user_id === props.post.author.uuid) {
+              if (user_id === post_user_id) {
                 return (
                   <div>
                     <Dropdown.Item onClick={() => setShowEditPost(true)}>
@@ -306,7 +311,7 @@ export default function PostCard(props) {
 
                     <Dropdown.Item
                       className="delete-post"
-                      onClick={() => confirmDelete(props.post.uuid)}
+                      onClick={() => confirmDelete(post_id)}
                     >
                       <MdDelete /> Delete Post
                     </Dropdown.Item>
@@ -317,6 +322,61 @@ export default function PostCard(props) {
           </Dropdown.Menu>
         </Dropdown>
       </div>
+    );
+  }
+
+  function FriendsIndicator() {
+    return (
+      props.post.visibility === "FRIENDS" ? (
+        <div className="friends-indicator" style={{ marginLeft: "auto", padding: "0.3rem 1rem", marginRight: "1em" }}>
+          <FaUserFriends />
+          Friends-Only
+        </div>
+      ) : (
+        <div className="friends-indicator" style={{ background: "none", marginLeft: "auto" }} />
+      )
+    );
+  }
+
+  function PrivateIndicator() {
+    return (
+      props.post.visibility === "PRIVATE" ? (
+        <div className="private-indicator" style={{ marginRight: "1em", padding: "0.3rem 1rem" }}>
+          <FaLock />
+          Private
+        </div>
+      ) : (
+        <div className="private-indicator" 
+        style={{ background: "none", marginLeft: "none", marginRight: "none", padding: "none !important" }} />
+      )
+    );
+  }
+
+  function UnlistedIndicator() {
+    return (
+      props.post.unlisted === true ? (
+        <div
+          className="unlisted-indicator"
+          style={{
+            margin:
+              props.post.visibility === "FRIENDS" || props.post.visibility === "PRIVATE"
+                ? "0 1rem 0 0"
+                : "0 1rem 0 auto",
+          }}
+        >
+          <IoUnlink />
+          Unlisted
+        </div>
+      ) : (
+        <div
+          className="unlisted-indicator"
+          style={{
+            background: "none",
+            margin: "0",
+            padding: "0",
+          }}
+        />
+      )
     );
   }
 
@@ -331,37 +391,9 @@ export default function PostCard(props) {
             {props.post.author.displayName}
           </div>
         </div>
-        {props.post.visibility === "FRIENDS" ? (
-          <div className="friends-indicator">
-            <FaUserFriends />
-            Friends-Only
-          </div>
-        ) : (
-          <div className="friends-indicator" style={{ background: "none" }} />
-        )}
-        {props.post.unlisted === true ? (
-          <div
-            className="unlisted-indicator"
-            style={{
-              margin:
-                props.post.visibility === "FRIENDS"
-                  ? "0 1rem 0 0"
-                  : "0 1rem 0 auto",
-            }}
-          >
-            <IoUnlink />
-            Unlisted
-          </div>
-        ) : (
-          <div
-            className="unlisted-indicator"
-            style={{
-              background: "none",
-              margin: "0",
-              padding: "0",
-            }}
-          />
-        )}
+        <FriendsIndicator />
+        <PrivateIndicator />
+        <UnlistedIndicator />
         <PostOptions />
         {showEditPost && (
           <EditPost
@@ -392,7 +424,7 @@ export default function PostCard(props) {
               color:
                 likeCount !== 0 && liked ? "var(--orange)" : "var(--white)",
             }}
-            onClick={() => sendPostLike(props.post.uuid)}
+            onClick={() => sendPostLike(post_id)}
           />
 
           {beFriend || beOwner ? likeCount : null}
@@ -455,7 +487,7 @@ export default function PostCard(props) {
                   color: "black",
                   backgroundColor: "#BFEFE9",
                 }}
-                onClick={() => sendComment(props.post.uuid)}
+                onClick={() => sendComment(post_id)}
               >
                 Send
               </Button>

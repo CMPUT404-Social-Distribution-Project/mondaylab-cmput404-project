@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   );
   const [loading, setLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(null);
-  const baseURL = "http://127.0.0.1:8000/service";
+  const baseURL = "http://localhost:8000/service";
 
   const navigate = useNavigate();
 
