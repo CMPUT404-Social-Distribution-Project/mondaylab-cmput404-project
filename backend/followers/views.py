@@ -7,8 +7,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
-from post.views import check_author_id, get_author_url_id, get_foreign_id, get_friend_id
-from backend.utils import isUUID, isAuthorized, check_friend, get_friends_list
+from backend.utils import isUUID, isAuthorized, check_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
 
 class FollowersApiView(GenericAPIView):
     """
@@ -53,7 +52,7 @@ class FollowersForeignApiView(GenericAPIView):
         try:
             author_id = get_author_url_id(request)
             foreign_id = get_foreign_id(request)
-            
+
             current_author = Author.objects.get(id = author_id)
             followers = current_author.followers.all()
             if followers.exists():
@@ -64,10 +63,6 @@ class FollowersForeignApiView(GenericAPIView):
                 else:
                     return response.Response(False, status=status.HTTP_200_OK)
             else:
-                followers_serializer_list = {
-                "type": "followers",
-                "items": []
-                }
                 return response.Response(False, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -78,28 +73,28 @@ class FollowersForeignApiView(GenericAPIView):
             return response.Response(f"Unauthorized: You are not the author", status=status.HTTP_401_UNAUTHORIZED)
         else:
             try:
-                author_id = get_author_url_id(request)
-                foreign_id = get_foreign_id(request)
-                current_author = Author.objects.get(id = author_id)
-                foreign_author = Author.objects.get(id = foreign_id)
-                if foreign_author is not None:
-                    current_author.followers.add(foreign_author)
-                    followers = current_author.followers.all().order_by('displayName')
-                    followers_serializer = self.serializer_class(followers, many=True)
-                    result = {
-                        'result': "Foreign author add successfully",
-                        'followers': followers_serializer.data
-                    }
-                    
-                    # remove request from inbox if it exists
-                    inbox = Inbox.objects.filter(author=current_author).first()
-                    follow_request = inbox.follow_requests.filter(actor__uuid= foreign_author_id).first()
-                    if inbox and follow_request:
-                        inbox.follow_requests.remove(follow_request)
+                current_author = Author.objects.get(uuid = author_id)
+                # TODO: Need to create function that tries to get foreign_author_uuid in DB
+                # if unsuccessful, then check request's host -> if req host is a node in our DB
+                # then get it's API url, try and fetch this foreign author from their DB.
+                # If foreign author is retrieved from their DB, create that author
+                # in our DB. 
+                foreign_author = Author.objects.get(uuid = foreign_author_id)
 
-                else:
-                    return response.Response("Error: Foreign author not found", status=status.HTTP_404_NOT_FOUND)
-               
+                current_author.followers.add(foreign_author)
+                followers = current_author.followers.all().order_by('displayName')
+                followers_serializer = self.serializer_class(followers, many=True)
+                result = {
+                    'result': "Foreign author add successfully",
+                    'followers': followers_serializer.data
+                }
+                
+                # remove request from inbox if it exists
+                inbox = Inbox.objects.filter(author=current_author).first()
+                follow_request = inbox.follow_requests.filter(actor__uuid= foreign_author_id).first()
+                if inbox and follow_request:
+                    inbox.follow_requests.remove(follow_request)
+     
                 return response.Response(result, status=status.HTTP_200_OK)
 
             except Exception as e:
@@ -107,22 +102,18 @@ class FollowersForeignApiView(GenericAPIView):
 
     def delete(self, request, author_id, foreign_author_id):
         try:
-            author_id = get_author_url_id(request)
-            foreign_id = get_foreign_id(request)
             
-            current_author = Author.objects.get(id = author_id)
-            foreign_author = Author.objects.get(id = foreign_id)
-            if foreign_author is not None:
-                current_author.followers.remove(foreign_author)
-                followers = current_author.followers.all().order_by('displayName')
-                followers_serializer = self.serializer_class(followers, many=True)
-                result = {
-                    'result': "Foreign author delete successfully",
-                    'followers': followers_serializer.data
-                }
-            else:
-                return response.Response("Error: Foreign author not found", status=status.HTTP_404_NOT_FOUND)
-            
+            current_author = Author.objects.get(uuid = author_id)
+            foreign_author = Author.objects.get(uuid = foreign_author_id)
+
+            current_author.followers.remove(foreign_author)
+            followers = current_author.followers.all().order_by('displayName')
+            followers_serializer = self.serializer_class(followers, many=True)
+            result = {
+                'result': "Foreign author delete successfully",
+                'followers': followers_serializer.data
+            }
+
             return response.Response(result, status=status.HTTP_200_OK)
 
         except Exception as e:

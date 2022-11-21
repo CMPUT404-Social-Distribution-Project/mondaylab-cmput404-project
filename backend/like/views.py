@@ -4,14 +4,13 @@ from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework import response, status
-from post.views import get_author_url_id, get_post_id, check_author_id
 from post.models import Post
 from author.models import Author
 from like.models import Like
 from comments.models import Comment
 from django.db.models import Q
 from like.serializers import LikeCommentSerializer, LikePostSerializer, LikeAuthorSerializer
-from backend.utils import isUUID, isAuthorized
+from backend.utils import isUUID, isAuthorized, get_author_url_id, get_post_id
 
 class LikesPostApiView(GenericAPIView):
     """
@@ -27,13 +26,9 @@ class LikesPostApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikePostSerializer
     def get(self, request, author_id, post_id):
-        post_id = get_post_id(request)
-        author_url_id = get_author_url_id(request)
+
         try:
-            author = Author.objects.get(id = author_url_id)
-            post = Post.objects.get(id = post_id, author=author)
-            if post ==None:
-                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            post = Post.objects.get(uuid=post_id) 
             post_like = Like.objects.filter(object = post.id)
             post_likes = self.serializer_class(post_like, many=True)
             result = {"type": "likes", "items": post_likes.data}
@@ -54,8 +49,6 @@ class LikesPostApiView(GenericAPIView):
             if serialize.is_valid(raise_exception=True):
                 authorObj = Author.objects.get(uuid=author_id)
                 post = Post.objects.get(uuid = post_id, author=authorObj)
-                if post == None:
-                    return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
                 # id field of the post obj is exactly the id field in like obj
                 objectField = post.id  
 

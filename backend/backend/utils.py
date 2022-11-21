@@ -18,7 +18,7 @@ def isAuthorized(request, author_uuid):
     '''
     res = JWT_authenticator.authenticate(request)
     if res is not None:
-        user, token = res;
+        user, token = res
         requesterUUID = user.uuid
         
         # if the requester is not what they say they are (aren't the actual author)
@@ -73,6 +73,9 @@ def is_friends(request, author_id):
 def check_friend(author_id, foreign_id):
     '''Checks if the two authors with the given id's are friends'''
     try:
+        #TODO: when checking if our author is following foreign author,
+        # fetch to the foreign author's host API url's followers/ endpoint
+        # and check if our author is in their followers. 
         current_author = Author.objects.get(id = author_id)
         foreign_author = Author.objects.get(id = foreign_id)
         followers = current_author.followers.get(id = foreign_id)
@@ -98,3 +101,42 @@ def get_friends_list(current_author):
         print(e)
 
     return friends_list
+
+def get_author_url_id(request):
+    '''
+    Gets the author id url from the request depending
+    on the type
+    example:
+    http://localhost:8000/service/authors/123/posts/555
+    gets turned into:
+    http://localhost:8000/service/authors/
+    '''
+    if "posts" in request.build_absolute_uri():
+        author_url_id = request.build_absolute_uri().split('posts/')[0]
+    elif "followers" in request.build_absolute_uri():
+        author_url_id = request.build_absolute_uri().split('followers/')[0]
+    elif "friends" in request.build_absolute_uri():
+        author_url_id = request.build_absolute_uri().split('friends/')[0]
+    else:
+        xx=request.build_absolute_uri()[:-7].split('service/')
+        author_id_url= xx[0]+xx[1]
+        
+    return author_url_id[:-1]
+
+def get_foreign_id(request):
+    split_followers = request.build_absolute_uri().split("followers/")
+    foreign_author_id = split_followers[1].split('/')[0]
+    foreign_author_url_id = split_followers[0].split('authors')[0] + "authors/" + foreign_author_id
+    return foreign_author_url_id
+
+def get_friend_id(request):
+    author_url_id=request.build_absolute_uri().split("/friends")[0]
+    return author_url_id  
+
+def get_post_id(request):
+    if "likes" in request.build_absolute_uri():
+        post_url_id=request.build_absolute_uri().split("/likes")[0]
+    else:
+        post_url_id=request.build_absolute_uri()
+    
+    return post_url_id

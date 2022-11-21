@@ -4,7 +4,7 @@ import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
-import { FaUserFriends } from "react-icons/fa";
+import { FaUserFriends, FaLock } from "react-icons/fa";
 import Card from "react-bootstrap/Card";
 import AuthContext from "../../context/AuthContext";
 import "./PostCard.css";
@@ -292,6 +292,61 @@ export default function PostCard(props) {
     );
   }
 
+  function FriendsIndicator() {
+    return (
+      props.post.visibility === "FRIENDS" ? (
+        <div className="friends-indicator" style={{ marginLeft: "auto", padding: "0.3rem 1rem", marginRight: "1em" }}>
+          <FaUserFriends />
+          Friends-Only
+        </div>
+      ) : (
+        <div className="friends-indicator" style={{ background: "none", marginLeft: "auto" }} />
+      )
+    );
+  }
+
+  function PrivateIndicator() {
+    return (
+      props.post.visibility === "PRIVATE" ? (
+        <div className="private-indicator" style={{ marginRight: "1em", padding: "0.3rem 1rem" }}>
+          <FaLock />
+          Private
+        </div>
+      ) : (
+        <div className="private-indicator" 
+        style={{ background: "none", marginLeft: "none", marginRight: "none", padding: "none !important" }} />
+      )
+    );
+  }
+
+  function UnlistedIndicator() {
+    return (
+      props.post.unlisted === true ? (
+        <div
+          className="unlisted-indicator"
+          style={{
+            margin:
+              props.post.visibility === "FRIENDS" || props.post.visibility === "PRIVATE"
+                ? "0 1rem 0 0"
+                : "0 1rem 0 auto",
+          }}
+        >
+          <IoUnlink />
+          Unlisted
+        </div>
+      ) : (
+        <div
+          className="unlisted-indicator"
+          style={{
+            background: "none",
+            margin: "0",
+            padding: "0",
+          }}
+        />
+      )
+    );
+  }
+
   return (
     <Card className="post-card">
       <Card.Header>
@@ -303,37 +358,9 @@ export default function PostCard(props) {
             {props.post.author.displayName}
           </div>
         </div>
-        {props.post.visibility === "FRIENDS" ? (
-          <div className="friends-indicator">
-            <FaUserFriends />
-            Friends-Only
-          </div>
-        ) : (
-          <div className="friends-indicator" style={{ background: "none" }} />
-        )}
-        {props.post.unlisted === true ? (
-          <div
-            className="unlisted-indicator"
-            style={{
-              margin:
-                props.post.visibility === "FRIENDS"
-                  ? "0 1rem 0 0"
-                  : "0 1rem 0 auto",
-            }}
-          >
-            <IoUnlink />
-            Unlisted
-          </div>
-        ) : (
-          <div
-            className="unlisted-indicator"
-            style={{
-              background: "none",
-              margin: "0",
-              padding: "0",
-            }}
-          />
-        )}
+        <FriendsIndicator />
+        <PrivateIndicator />
+        <UnlistedIndicator />
         <PostOptions />
         {showEditPost && (
           <EditPost
