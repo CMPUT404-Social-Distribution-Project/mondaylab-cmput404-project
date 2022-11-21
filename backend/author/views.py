@@ -55,7 +55,6 @@ class UserViewSet(viewsets.ModelViewSet):
                 "type": "authors",
                 "items": authors
             }
-
             return Response(result, status=status.HTTP_200_OK)
 
             # serializer = self.serializer_class(self.filter_queryset(self.queryset), many=True, context={"request": request})

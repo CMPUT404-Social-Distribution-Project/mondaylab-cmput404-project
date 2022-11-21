@@ -12,12 +12,13 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list
+from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list, get_author_url_id
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 class PostApiView(GenericAPIView):
     """
@@ -84,7 +85,7 @@ class PostApiView(GenericAPIView):
                             # get author obj to be saved in author field of post
                             authorObj = Author.objects.get(uuid=author_id)
                             # create post ID and origin and source
-                            postId = get_post_url(request, author_id)+ post_id
+                            postId = request.build_absolute_uri() + post_id
                             origin = postId
             
                             serialize.save(
@@ -220,7 +221,7 @@ class PostsApiView(GenericAPIView):
                     authorObj = Author.objects.get(uuid=author_id)
                     # create post ID and origin and source
                     postUUID = str(uuid4())
-                    postId = get_post_url(request, author_id)+ postUUID
+                    postId = request.build_absolute_uri() + postUUID
                     origin = postId
 
                     if serialize.validated_data.get("contentType").startswith("image"):
@@ -234,7 +235,7 @@ class PostsApiView(GenericAPIView):
                         uuid=postUUID,
                         author=authorObj,
                         count=0,
-                        comments=postId+'/comments',
+                        comments= postId+ '/comments',
                         origin=origin,
                         source=origin,
                         image=serialize.validated_data.get("image"),
@@ -249,7 +250,7 @@ class PostsApiView(GenericAPIView):
                         try:
                             friends_list = get_friends_list(authorObj)
                             for friend in friends_list:
-                                author = get_author(friend["uuid"])
+                                author = get_object_or_404(Author, pk=friend["uuid"])
                                 friend_inbox = Inbox.objects.get(author=author)
                                 friend_inbox.posts.add(Post.objects.get(id=postId))
                         except Exception as e:
@@ -264,7 +265,7 @@ class PostsApiView(GenericAPIView):
                             try:
                                 followers_list = get_followers_list(authorObj)
                                 for follower in followers_list:
-                                    author = get_author(follower["uuid"])
+                                    author = get_object_or_404(Author, pk=follower["uuid"])
                                     follower_inbox = Inbox.objects.get(author=author)
                                     follower_inbox.posts.add(Post.objects.get(id=postId))
                             except Exception as e:
@@ -340,62 +341,6 @@ def get_followers_list(current_author):
         print(e)
 
     return followers_list
-
-def get_author(author_id):
-    """
-    Given author id, check if the author exists in database
-    """
-    try:
-        author = Author.objects.get(uuid = author_id)
-        return author
-    except:
-        result = {'detail':"Author Not Found"}
-        return response.Response(result, status=status.HTTP_404_NOT_FOUND)
-
-def get_author_url_id(request):
-    if "posts" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/posts")
-        author_url_id= xx[0]+yy[0]
-        return author_url_id
-    if "followers" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/followers")
-        author_url_id= xx[0]+yy[0]
-        return author_url_id
-    if "friends" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/friends")
-        author_url_id= xx[0]+yy[0]
-        return author_url_id
-    else:
-        xx=request.build_absolute_uri()[:-7].split('service/')
-        author_id= xx[0]+xx[1]
-        return author_id
-
-
-def get_foreign_id(request):
-    xx=request.build_absolute_uri().split('service/')
-    yy = xx[1].split("/followers")
-    author_url_id= xx[0]+'authors'+yy[1]
-    return author_url_id
-
-def get_friend_id(request):
-    xx=request.build_absolute_uri().split('service/')
-    yy = xx[1].split("/friends")
-    author_url_id= xx[0]+'authors'+yy[1]
-    return author_url_id    
-
-def get_post_id(request):
-    if "likes" in request.build_absolute_uri():
-        xx=request.build_absolute_uri().split('service/')
-        yy = xx[1].split("/likes")
-        author_url_id= xx[0]+yy[0]
-        return author_url_id
-    else:
-        xx=request.build_absolute_uri().split('service/')
-        author_url_id= xx[0]+xx[1]
-        return author_url_id
 
 def check_author_id(request):
     author_url_id= get_author_url_id(request)

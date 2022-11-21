@@ -34,9 +34,9 @@ class AuthorManager(BaseUserManager):
         """
         Create and return a `User` with superuser (admin) permissions.
         """
-        host = 'http://127.0.0.1:8000/'         # temporary solution...need to figure out a way to get host later on
+        host = 'https://cs404-project.herokuapp.com/'         # temporary solution...need to figure out a way to get host later on
         uuid = uuid4()
-        url = host + 'authors/' + str(uuid)
+        url = host + 'service/authors/' + str(uuid)
         user = self.create_user_uuid(displayName, password, uuid)
         user.is_staff = True
         user.is_superuser = True
