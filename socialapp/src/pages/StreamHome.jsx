@@ -27,9 +27,14 @@ export default function StreamHome() {
    *
    */
 
+  // get next pages looks something like this:
+  // "http://127.0.0.1:8000/service/authors/23682607-5a7f-494c-975a-a0a7d711060d/posts/?page=2"
   const base = baseURL + /authors/ + user_id + /posts/;
   const [nextUrl, setNextUrl] = useState();
   const [previousUrl, setPreviousURL] = useState();
+
+
+  
   useEffect(() => {
     api
       .get(base)
@@ -56,6 +61,37 @@ export default function StreamHome() {
       console.log(error);
     }
   }
+
+  // Using next and previous links
+  // const base = baseURL + /authors/ + user_id + /posts/;
+  // const [nextUrl, setNextUrl] = useState();
+  // const [previousUrl, setPreviousURL] = useState();
+  // useEffect(() => {
+  //   api
+  //     .get(base)
+  //     .then((response) => {
+  //       setNextUrl(response.data.next);
+  //       setPreviousURL(response.data.previous);
+  //       setPostsArray(response.data.items);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // }, [useLocation().state]);
+
+  // const paginationHandler = (url) => {
+  //   try{
+  //     axios.get(url)
+  //     .then((response) => {
+  //       setNextUrl(response.data.next);
+  //       setPreviousURL(response.data.previous);
+  //       setPostsArray(response.data.items);
+  //     });
+  //   }
+  //   catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   // useEffect(() => {
   //   api

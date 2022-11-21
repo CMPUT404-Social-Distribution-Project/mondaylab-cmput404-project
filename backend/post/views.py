@@ -139,8 +139,8 @@ class PostsApiView(GenericAPIView):
 
 
             links = self.get_paginated_response(postsPaginated).data.get("links")
-
-            
+            pg = self.get_paginated_response(postsPaginated).data.get("page")
+            sz = self.get_paginated_response(postsPaginated).data.get("size")
 
             
             # Need to set the commentSrc of each post object in the paginated posts
@@ -193,7 +193,7 @@ class PostsApiView(GenericAPIView):
             postsSerializer = self.serializer_class(postsPaginated, many=True)
             # whatisthis = postsSerializer.data
 
-            result = {"next": links['next'], "previous": links["previous"], "type": "posts", "items": postsSerializer.data}
+            result = {"next": links['next'], "previous": links["previous"], "pg": pg, "sz": sz, "type": "posts", "items": postsSerializer.data}
             
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
