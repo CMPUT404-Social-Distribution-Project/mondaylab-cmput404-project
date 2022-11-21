@@ -79,7 +79,7 @@ export default function Explore() {
     api
       .get(`${baseURL}/node/authors/`)
       .then((response) => {
-        setRemoteAuthors(response.data.items[0]);
+        setRemoteAuthors(response.data.items);
       })
       .catch((error) => {
         console.log(error);

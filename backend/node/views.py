@@ -126,7 +126,7 @@ def getNodeAuthors(request):
         node_authors_endpoint = f"{node.host}authors/"
         res = authenticated_GET(node_authors_endpoint, node)
         if (res.status_code == 200):
-            all_nodes_authors.append(res.json()["items"])
+            all_nodes_authors.extend(res.json()["items"])
 
     result = {"type": "authors", "items": all_nodes_authors}
     return response.Response(result, status=status.HTTP_200_OK)
