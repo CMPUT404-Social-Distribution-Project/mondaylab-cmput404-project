@@ -127,7 +127,9 @@ export default function PostCard(props) {
         console.log(error);
       });
     }
-    fetchPostAuthorData();
+    if (postAuthorNode !== null) {
+      fetchPostAuthorData();
+    }
   }, [postAuthorNode])
 
   useEffect(() => {
