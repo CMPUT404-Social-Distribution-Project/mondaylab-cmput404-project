@@ -1,2 +1,2 @@
-web: gunicorn --pythonpath backend/wsgi.py --log-file -
+web: gunicorn --pythonpath backend/wsgi.py --log-file --
 release: python manage.py migrate
