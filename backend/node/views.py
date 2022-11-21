@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 import requests
 from rest_framework import authentication
 import base64
+from .nodeUtil import authenticated_GET
+import json
 
 credentialForConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 credentialForDelete = {"", "", "", ""}
@@ -111,6 +113,23 @@ def getNode(request):
         except Exception as e:
             return response.Response(e, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['GET'])
+def getNodeAuthors(request):
+    '''
+    /service/node/authors
+    Fetches to each node in DB to get their authors,
+    then returns those authors
+    '''
+    all_nodes = Node.objects.all()
+    all_nodes_authors = list()
+    for node in all_nodes:
+        node_authors_endpoint = f"{node.host}authors/"
+        res = authenticated_GET(node_authors_endpoint, node)
+        if (res.status_code == 200):
+            all_nodes_authors.append(res.json()["items"])
+
+    result = {"type": "authors", "items": all_nodes_authors}
+    return response.Response(result, status=status.HTTP_200_OK)
 
 """
 NOTE, I moved this inside  AcceptConnectionRemote() api
