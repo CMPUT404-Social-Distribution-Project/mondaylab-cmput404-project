@@ -131,18 +131,14 @@ class TrueFriendApiView(GenericAPIView):
         try:
             author_id = get_author_url_id(request)
             friend_id = get_friend_id(request)
-            current_author = Author.objects.get(id = author_id)
-            followers = current_author.followers.get(id = friend_id)
             result = check_friend(author_id, friend_id)
             if result ==True:
-                followers = self.serializer_class(followers)
                 return response.Response(True, status=status.HTTP_200_OK)
             else:
                 return response.Response(False, status=status.HTTP_200_OK)
         
-
         except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            return response.Response(False, status=status.HTTP_404_NOT_FOUND)
 
 class TrueFriendsApiView(GenericAPIView):
     """
