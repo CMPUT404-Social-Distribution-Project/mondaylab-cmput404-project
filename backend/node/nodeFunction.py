@@ -44,9 +44,9 @@ class CustomBasicAuthentication(authentication.BasicAuthentication):
             if username == "F22cmput404team1SD" and password == "ZuluACKAlpha":
                 return (Authenticated(True), None)
 
-            # get the remote node's host url, including schema and no end slash, e.g. http://localhost:8000
-            remote_node_host = request.build_absolute_uri('/')[:-1]     
-            remoteNode = Node.objects.filter(host=remote_node_host)
+            # get the remote node's host url, including schema, e.g. http://localhost:8000/
+            remote_node_host = request.build_absolute_uri('/')
+            remoteNode = Node.objects.filter(host__contains=remote_node_host)
             if not remoteNode.exists():
                 raise exceptions.AuthenticationFailed("This host has not been added by server admin")
 

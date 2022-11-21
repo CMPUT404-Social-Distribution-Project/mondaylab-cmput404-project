@@ -1,28 +1,22 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from .models import Node
-# Create your views here.
+from .serializers import NodeSerializer
 from rest_framework.decorators import api_view, permission_classes
-
 from rest_framework import response, status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-#import 
 import requests
 from rest_framework import authentication
-
 import base64
-
-"""
-I thought we didnt need generic view here
-
-"""
+from .nodeUtil import authenticated_GET
+import json
 
 credentialForConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 credentialForDelete = {"", "", "", ""}
 
 
-# TODO:   this permission class DOES NOT WORK. get request still goes to my customAuthentication class in nodeFunction.py
+# Deprecated for now? - Ray 2022-11-21
 @api_view(['POST'])
 @permission_classes((IsAuthenticatedOrReadOnly, ))
 def AcceptConnectionFromRemote(request, hostName):
@@ -100,6 +94,42 @@ def AcceptConnectionFromRemote(request, hostName):
     else:
         return response.Response(f"NO BASIC AUTH PROVIDED ", status=status.HTTP_401_UNAUTHORIZED)
 
+
+@api_view(['GET'])
+def getNode(request):
+    '''
+    /service/node/?host=http://localhost:8000/
+    Grabs the query and checks if the given host is in the Node objects
+    '''
+    # TODO: add isAuthorization
+    host_param = request.GET.get("host")
+    if host_param:
+        try:
+            node_object = Node.objects.filter(host__contains=host_param)
+            if not node_object.exists():
+                return response.Response("Host is not an accepted node", status=status.HTTP_404_NOT_FOUND)
+            node_serializer = NodeSerializer(node_object.first())
+            return response.Response(node_serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return response.Response(e, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def getNodeAuthors(request):
+    '''
+    /service/node/authors
+    Fetches to each node in DB to get their authors,
+    then returns those authors
+    '''
+    all_nodes = Node.objects.all()
+    all_nodes_authors = list()
+    for node in all_nodes:
+        node_authors_endpoint = f"{node.host}authors/"
+        res = authenticated_GET(node_authors_endpoint, node)
+        if (res.status_code == 200):
+            all_nodes_authors.append(res.json()["items"])
+
+    result = {"type": "authors", "items": all_nodes_authors}
+    return response.Response(result, status=status.HTTP_200_OK)
 
 """
 NOTE, I moved this inside  AcceptConnectionRemote() api
