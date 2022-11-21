@@ -281,7 +281,7 @@ class AllPostsApiView(GenericAPIView):
 
     def get(self, request):
         '''
-        Gets all public posts
+        Gets all public posts.
         '''
         try:
             posts_list = list(Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published'))
