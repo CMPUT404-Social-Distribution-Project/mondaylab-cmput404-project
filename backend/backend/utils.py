@@ -140,3 +140,21 @@ def get_post_id(request):
         post_url_id=request.build_absolute_uri()
     
     return post_url_id
+
+def get_uuid_from_id(id_url):
+    author_uuid = id_url.split('authors/')[1]
+    author_uuid = author_uuid.split('/')[0]
+    return author_uuid
+
+def is_our_frontend(origin):
+    # returns true if it's our front end
+    our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
+    return origin in our_frontends
+
+def display_name_exists(display_name):
+    obj = Author.objects.filter(displayName=display_name)
+    return obj.exists()
+
+def remote_author_exists(id_url):
+    obj = Author.objects.filter(id=id_url)
+    return obj.exists()

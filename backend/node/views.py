@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from .models import Node
 from .serializers import NodeSerializer
@@ -9,8 +8,10 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 import requests
 from rest_framework import authentication
 import base64
-from .nodeUtil import authenticated_GET
+from .utils import authenticated_GET, getRemoteAuthors, our_hosts
 import json
+from author.models import Author
+from author.serializers import AuthorSerializer
 
 credentialForConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 credentialForDelete = {"", "", "", ""}
@@ -120,15 +121,11 @@ def getNodeAuthors(request):
     Fetches to each node in DB to get their authors,
     then returns those authors
     '''
-    all_nodes = Node.objects.all()
-    all_nodes_authors = list()
-    for node in all_nodes:
-        node_authors_endpoint = f"{node.host}authors/"
-        res = authenticated_GET(node_authors_endpoint, node)
-        if (res.status_code == 200):
-            all_nodes_authors.extend(res.json()["items"])
+    #TODO: should be a local method only.
+    remote_authors = Author.objects.exclude(host__in=our_hosts)
+    serializer = AuthorSerializer(remote_authors, many=True)
 
-    result = {"type": "authors", "items": all_nodes_authors}
+    result = {"type": "authors", "items": serializer.data}
     return response.Response(result, status=status.HTTP_200_OK)
 
 """
