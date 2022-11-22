@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
 
-// const baseURL = "https://cs404-project.herokuapp.com/service";
+const baseURL = "https://cs404-t1.herokuapp.com/service";
 
 const useAxios = () => {
   // Use this function when you want to use a method that requires 

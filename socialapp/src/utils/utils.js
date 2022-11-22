@@ -23,5 +23,5 @@ export function authorHostIsOurs(host) {
     // Checks if the given host field of the author is our host
     return "http://localhost:8000/".includes(host) || 
     "http://127.0.0.1:8000/".includes(host) ||
-    "https://cs404-project.herokuapp.com/".includes(host)
+    "https://cs404-t1.herokuapp.com/".includes(host)
 }

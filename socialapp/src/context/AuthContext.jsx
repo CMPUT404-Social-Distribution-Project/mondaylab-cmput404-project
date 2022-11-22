@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   );
   const [loading, setLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(null);
-  const baseURL = "http://localhost:8000/service";
+  const baseURL = "https://cs404-t1.herokuapp.com/service";
 
   const navigate = useNavigate();
 
