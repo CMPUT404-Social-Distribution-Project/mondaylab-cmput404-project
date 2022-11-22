@@ -2,8 +2,14 @@ from uuid import UUID
 from rest_framework_simplejwt.authentication import JWTAuthentication
 JWT_authenticator = JWTAuthentication()
 from author.models import Author
-from author.serializers import LimitedAuthorSerializer
-
+from author.serializers import LimitedAuthorSerializer, AuthorSerializer
+from comments.serializers import CommentsSerializer
+from post.serializers import PostSerializer
+from like.serializers import LikeSerializer
+from post.models import Post
+from comments.models import Comment
+from like.models import Like
+from django.contrib.auth.hashers import make_password
 
 def isUUID(val):
     try:
@@ -141,10 +147,20 @@ def get_post_id(request):
     
     return post_url_id
 
-def get_uuid_from_id(id_url):
+def get_author_uuid_from_id(id_url):
     author_uuid = id_url.split('authors/')[1]
     author_uuid = author_uuid.split('/')[0]
     return author_uuid
+
+def get_post_uuid_from_id(id_url):
+    post_uuid = id_url.split('posts/')[1]
+    post_uuid = post_uuid.split('/')[0]
+    return post_uuid
+
+def get_comment_uuid_from_id(id_url):
+    post_uuid = id_url.split('comments/')[1]
+    post_uuid = post_uuid.split('/')[0]
+    return post_uuid
 
 def is_our_frontend(origin):
     # returns true if it's our front end
@@ -158,3 +174,139 @@ def display_name_exists(display_name):
 def remote_author_exists(id_url):
     obj = Author.objects.filter(id=id_url)
     return obj.exists()
+
+def remote_post_exists(post_id):
+    obj = Post.objects.filter(id=post_id)
+    return obj.exists()
+
+def remote_comment_exists(comment_id):
+    obj = Comment.objects.filter(id=comment_id)
+    return obj.exists()
+
+def remote_like_exists(author_id, object_id):
+    obj = Like.objects.filter(author__id=author_id, object=object_id)
+    return obj.exists()
+
+def validate_post(post_data):
+    post_fields = ['type','title','id','source','origin','description',
+        'contentType','content','categories','count','comments','published',
+        'visibility','unlisted','author','commentSrc', 'image']
+    
+    
+    for field in post_data.keys():
+        if field not in post_fields:
+            return (None, f"Field {field} is not a valid property")
+    
+    if post_data['type'].lower() != 'post':
+        return (None, f'Incorrect post type')
+
+def create_remote_author(remote_author):
+    if display_name_exists(remote_author["displayName"]):
+        remote_author["displayName"] = remote_author["displayName"]+':'+remote_author["host"]
+    
+    remote_author["followers"] = []
+    author_serializer = AuthorSerializer(data=remote_author)
+
+    if author_serializer.is_valid():
+        author_serializer.save(
+                uuid=get_author_uuid_from_id(remote_author["id"]),
+                id=remote_author.get("id"),
+                password=make_password(remote_author["displayName"]+"password")
+                )
+
+def create_remote_post(remote_post, remote_author):
+    '''
+    Given the remote post and remote author's Json data
+    ( which is a dict in Python ), creates a post object
+    locally, or updates the post object if it exists.
+    '''
+    remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
+    if (not remote_post_exists(remote_post["id"])):
+        # if remote post doesn't exist, create it.
+
+        # get the post's author and set the remote post's author to our local
+        remote_author_obj = get_author_with_id(remote_author["id"])
+        remote_post["author"] = remote_author_obj
+        if (not remote_post.get("image")):
+            # no image field so we make it empty
+            remote_post["image"] = ""
+
+        # delete commentSrc if it exists
+        if (remote_post.get("commentSrc")):
+            del remote_post["commentSrc"]
+
+        post_serializer = PostSerializer(data=remote_post)
+        if post_serializer.is_valid(raise_exception=True):
+            post_serializer.save(
+                uuid = remote_post_uuid,
+                id = remote_post.get("id"),
+                author = remote_author_obj
+            )
+    else:
+        # otherwise, try to update the existing post
+        remote_post_obj = Post.objects.filter(id=remote_post["id"])
+        if remote_post_obj.exists():
+            remote_post_obj.update(
+                title=remote_post.get("title"),
+                description=remote_post.get("description"),
+                contentType=remote_post.get("contentType"),
+                categories=remote_post.get("categories"),
+                count=remote_post.get("count"),
+                published=remote_post.get("published"),
+                visibility=remote_post.get("visibility"),
+                unlisted=remote_post.get("unlisted"),
+            )
+
+def create_remote_comment(remote_comment):
+    remote_comment_uuid = get_comment_uuid_from_id(remote_comment["id"])
+    if (not remote_comment_exists(remote_comment["id"])):
+        # create the remote comment locally
+        # but first create the comment's author if they don't exist 
+        if not remote_author_exists(remote_comment["author"]["id"]):
+            create_remote_author(remote_comment["author"])
+        
+        # get the comment's author and set it
+        remote_author_obj = get_author_with_id(remote_comment["author"]["id"])
+        del remote_comment["author"]
+        print(remote_author_obj.id)
+        print(type(remote_comment), remote_comment)
+
+        comment_serializer = CommentsSerializer(data=remote_comment)
+        if comment_serializer.is_valid(raise_exception=True):
+            comment_serializer.save(
+                uuid = remote_comment_uuid,
+                author = remote_author_obj,
+                id = remote_comment.get("id"),
+                published = remote_comment.get("published")
+            )
+
+def create_remote_like(remote_like):
+    # create comment's likes
+    # Extract UUIDS
+    if (not remote_like_exists(remote_like["author"]["id"], remote_like["object"])):
+        # create the remote like locally
+        # but first create the like's author if they don't exist 
+        if not remote_author_exists(remote_like["author"]["id"]):
+            create_remote_author(remote_like["author"])
+
+        remote_author_obj = get_author_with_id(remote_like["author"]["id"])
+        del remote_like["author"]
+
+        like_serializer = LikeSerializer(data=remote_like)
+        if like_serializer.is_valid(raise_exception=True):
+            like_serializer.save(
+                author = remote_author_obj
+            )
+    
+
+def get_author_with_id(id_url):
+    # returns None if author DNE
+    return Author.objects.filter(id=id_url).first()
+
+def get_post_with_id(id_url):
+    # returns None if author DNE
+    return Post.objects.filter(id=id_url).first()
+
+def get_comment_with_id(id_url):
+    # returns None if author DNE
+    return Comment.objects.filter(id=id_url).first()
