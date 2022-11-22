@@ -98,7 +98,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchData = async (ApiURL, authorId) => {
       await api      
-        .get(`${ApiURL}authors/${authorId}/posts/`,
+        .get(`${ApiURL}authors/${authorId}/posts`,
         {headers: authorNode.headers}
         )
         .then((response) => {
@@ -108,7 +108,7 @@ export default function Profile() {
           console.log("Failed to get posts of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/followers/`,
+        .get(`${ApiURL}authors/${authorId}/followers`,
         {headers: authorNode.headers}
         )
         .then((response) => {
@@ -119,7 +119,7 @@ export default function Profile() {
           console.log("Failed to get followers of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/friends/`,
+        .get(`${ApiURL}authors/${authorId}/friends`,
         {headers: authorNode.headers}
         )
         .then((response) => {
