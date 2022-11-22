@@ -72,15 +72,27 @@ export default function PostCard(props) {
       author: author,
       object: props.post.id,
     };
-    api
-      .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, postLike)
-      .then((response) => {
-        setLiked(true);
-        setLikeCount((likeCount) => likeCount + 1);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if(postAuthorBaseApiURL != null){
+      api
+        .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, {header: postAuthorNode.headers}, postLike)
+        .then((response) => {
+          setLiked(true);
+          setLikeCount((likeCount) => likeCount + 1);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      api
+        .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
+        .then((response) => {
+          setLiked(true);
+          setLikeCount((likeCount) => likeCount + 1);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
 
@@ -91,22 +103,22 @@ export default function PostCard(props) {
   useEffect(() => {
     const fetchPostAuthorData = async () => {
       await api
-      .get(
-        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
-        {headers: postAuthorNode.headers}
-      )
-      .then((response) => {
-        let likers = [];
-        setLikeCount((likeCount) => response.data.items.length);
-        for (let data of response.data.items) {
-          likers.push(extractAuthorUUID(data.author.id));
-          if (extractAuthorUUID(data.author.id) === user_id) {
-            setLiked(true);
+        .get(
+          `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+          {headers: postAuthorNode.headers}
+        )
+        .then((response) => {
+          let likers = [];
+          setLikeCount((likeCount) => response.data.items.length);
+          for (let data of response.data.items) {
+            likers.push(extractAuthorUUID(data.author.id));
+            if (extractAuthorUUID(data.author.id) === user_id) {
+              setLiked(true);
+            }
           }
-        }
-      })
-      .catch((error) => {
-        console.log(error);
+        })
+        .catch((error) => {
+          console.log(error);
       });
     await api
       .get(
@@ -188,40 +200,62 @@ export default function PostCard(props) {
   }, []);
 
   const sharePost = (post) => {
-    console.log(post.id);
+    host = baseURL + '/'
     if (post.visibility === "PUBLIC") {
       for (let index = 0; index < followers.length; index++) {
-        const sharedPost = {
-          type: "post",
-          summary: `${author.displayName} shared a post.`,
-          author: author,
-          object: post.id,
-        };
-        api
-          .post(`${baseURL}/authors/${extractAuthorUUID(followers[index].id)}/inbox/`, post)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
+        author = followers[index]
+        if (!authorHostIsOurs(author.host)) {
+          api
+            .get(`${baseURL}/node/?host=${author.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, author.host);
+              api
+                .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((error) => {
+                  console.log("Failed to get posts of author. " + error);
+                });
           });
+        } else {
+          api
+            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
       }
     } else if (post.visibility === "FRIENDS") {
       for (let index = 0; index < friends.length; index++) {
-        const sharedPost = {
-          type: "post",
-          summary: `${author.displayName} shared a post.`,
-          author: author,
-          object: post.id,
-        };
-        api
-          .post(`${baseURL}/authors/${extractAuthorUUID(friends[index].id)}/inbox/`, post)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
-          });
+        author = friends[index]
+        if (!authorHostIsOurs(author.host)) {
+          api
+            .get(`${baseURL}/node/?host=${author.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, author.host);
+              api
+                .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((error) => {
+                  console.log("Failed to get posts of author. " + error);
+                });
+            });
+        } else {
+          api
+            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
       }
     }
   };
