@@ -55,7 +55,7 @@ $font-family-sans-serif: system-ui, -apple-system, "Readex Pro" !default;
 $font-family-base: "Readex Pro" !important;
 
 
-@import "node_modules/bootstrap/scss/bootstrap.scss";
+@import "~bootstrap/scss/bootstrap.scss";
 
 .root-container {
   display: flex;
