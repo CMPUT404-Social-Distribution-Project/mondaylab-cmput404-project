@@ -35,6 +35,8 @@
     "yup": "^0.32.11"
   },
   "scripts": {
+    "frontend": "cd frontend && npm start",
+    "backend": "cd backend && nodemon app.js",
     "dev": "react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
