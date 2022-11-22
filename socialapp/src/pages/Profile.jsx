@@ -10,6 +10,8 @@ import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
+import { authorHostIsOurs, b64EncodeCredentials, createNodeObject } from '../utils/utils';
+import { CgRemote } from "react-icons/cg";
 
 function ProfilePosts(props) {
   return (
@@ -56,19 +58,49 @@ export default function Profile() {
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 
+  // node
+  const [authorNode, setAuthorNode] = useState(null);     // the node object of post's author
+  const [authorBaseApiURL, setAuthorBaseAPI] = useState(null);
+
+
+  useEffect(() => {
+    // first fetch the author
+    const fetchAuthor = async () => {
+      await axios
+      .get(`${baseURL}/authors/${author_id}/`)
+      .then((response) => {
+        setAuthor(response.data);
+        fetchNode(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+    fetchAuthor();
+  }, [useLocation().state, dir])
+
+
+  const fetchNode = async (author) => {
+    // fetches the node object
+    await api
+    .get(`${baseURL}/node/?host=${author.host}`)
+    .then((response) => {
+      let node = createNodeObject(response, author.host);
+      setAuthorNode(node);
+      setAuthorBaseAPI(node.host);
+    })
+    .catch((err) => {
+      console.log(err.response.data);
+    })
+  }
+
   // Called after rendering. Fetches data
   useEffect(() => {
-    const fetchData = async () => {
-      await axios
-        .get(`${baseURL}/authors/${author_id}/`)
-        .then((response) => {
-          setAuthor(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    const fetchData = async (ApiURL, authorId) => {
       await api      
-        .get(`${baseURL}/authors/${author_id}/posts/`)
+        .get(`${ApiURL}authors/${authorId}/posts/`,
+        {headers: authorNode.headers}
+        )
         .then((response) => {
           setPostsArray(response.data);
         })
@@ -76,15 +108,20 @@ export default function Profile() {
           console.log("Failed to get posts of author. " + error);
         });
       await api      
-        .get(`${baseURL}/authors/${author_id}/followers/`)
+        .get(`${ApiURL}authors/${authorId}/followers/`,
+        {headers: authorNode.headers}
+        )
         .then((response) => {
           setFollowersArray(response.data);
+
         })
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
         });
       await api      
-        .get(`${baseURL}/authors/${author_id}/friends/`)
+        .get(`${ApiURL}authors/${authorId}/friends/`,
+        {headers: authorNode.headers}
+        )
         .then((response) => {
           setFriendsArray(response.data);
         })
@@ -92,8 +129,16 @@ export default function Profile() {
           console.log("Failed to get friends of author. " + error);
         });
     };
-    fetchData();
-  }, [useLocation().state, dir]);
+      if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
+        fetchData(authorBaseApiURL, author_id);
+      } else {
+        // if the author is from our host, fetch from our API, or if something went wrong
+        // trying to fetch the foreign author, then fetch that author from ours as backup.
+        fetchData(baseURL+'/', author_id);
+      }
+      
+
+  }, [author, authorBaseApiURL]);
 
   return (
     <div className="profileContainer">
@@ -112,12 +157,15 @@ export default function Profile() {
               <span>Followers:</span>
               {/* Issue with data not becoming fully available due to async operations;
               So just do 0 until we get the full info */}
-              <div className="infoNum">{typeof author.followers === 'undefined' ? 0 : author.followers.length}</div>
+              <div className="infoNum">{typeof followersArray.items === 'undefined' ? 0 : followersArray.items.length}</div>
             </div>
             <div id="statContainer" className="friends">
               <span>Friends:</span>
               <div className="infoNum">{typeof friendsArray.items === 'undefined' ? 0 : friendsArray.items.length}</div>
             </div>
+            {!authorHostIsOurs(author.host) ? 
+            <div className="host-indicator">
+              <CgRemote style={{marginRight:"0.5em"}}/>{author.host}</div> : <div className="host-indicator" style={{background: "none"}}/>}
           </div>
           <EditProfileButton className="edit-button" author={author}/>
         </div>
