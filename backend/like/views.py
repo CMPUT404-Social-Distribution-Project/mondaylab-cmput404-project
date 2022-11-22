@@ -9,7 +9,7 @@ from author.models import Author
 from like.models import Like
 from comments.models import Comment
 from django.db.models import Q
-from like.serializers import LikeCommentSerializer, LikePostSerializer, LikeAuthorSerializer
+from like.serializers import LikeSerializer, LikeAuthorSerializer
 from backend.utils import isUUID, isAuthorized, get_author_url_id, get_post_id
 
 class LikesPostApiView(GenericAPIView):
@@ -24,7 +24,7 @@ class LikesPostApiView(GenericAPIView):
     GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID comment COMMENT_ID
     """
     permission_classes = [AllowAny]
-    serializer_class=LikePostSerializer
+    serializer_class=LikeSerializer
     def get(self, request, author_id, post_id):
 
         try:
@@ -70,7 +70,7 @@ class LikesCommentApiView(GenericAPIView):
     """
 
     permission_classes = [AllowAny]
-    serializer_class=LikeCommentSerializer
+    serializer_class=LikeSerializer
     def get(self, request, author_id, post_id, comment_id):
         
         #TODO: do this require authentiation
