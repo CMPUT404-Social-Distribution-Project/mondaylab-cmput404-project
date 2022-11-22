@@ -2,12 +2,12 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { fireEvent, render } from '@testing-library/react';
-import Register from '../Register.jsx';
-import { Axios } from "socialapp/src/utils/useAxios.js";
+import Register from './Register';
+import useAxios from "../../utils/useAxios.js";
 
-jest.mock(Axios)
+jest.mock(useAxios)
 
 it("renders correctly", () => {
-    const tree = renderer.create(<Register/>).toJSON();
+    const tree = renderer.create(<Register />).toJSON();
     expect(tree).toMatchSnapshot();
 });

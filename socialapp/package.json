@@ -26,6 +26,7 @@
     "react-paginate": "^8.1.4",
     "react-router-dom": "^6.4.2",
     "react-scripts": "^5.0.1",
+    "react-test-renderer": "^18.2.0",
     "reactjs-popup": "^2.0.5",
     "serve": "^14.1.2",
     "style-to-object": "^0.3.0",
