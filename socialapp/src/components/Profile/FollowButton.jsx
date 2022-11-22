@@ -108,78 +108,45 @@ export default function FollowButton(props) {
 
   const handleClick = () => {
     if (followState === "notFollowing") {
+      host = baseURL + "/"
       setFollowState("followSent");
+      if (postAuthorBaseApiURL != null) {
+        host = postAuthorBaseApiURL
+      }
       // Send a friend request object to the inbox of the author we're viewing
-      if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
-        api
-          .get(`${baseURL}/node/?host=${author.host}`)
-          .then((response) => {
-            let node = createNodeObject(response, author.host);
-            api
-              .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, {header:node.headers}, {
-              type: "follow",
-              summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
-              actor: currentAuthor,
-              object: props.authorViewing,
-            })
-              .then((response) => {
-                console.log("Success sending a friend request: " + response);
-              })
-              .catch((error) => {
-                setFollowState("notFollowing");
-              });
-          });
-      } else {
-        api
-          .post(`${baseURL}/authors/${author_id}/inbox/`, {
-            type: "follow",
-            summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
-            actor: currentAuthor,
-            object: props.authorViewing,
-          })
-          .then((response) => {
-            console.log("Success sending a friend request: " + response);
-          })
-          .catch((error) => {
-            setFollowState("notFollowing");
-          });
-      }
+      api
+        .post(`${host}authors/${author_id}/inbox/`, {
+          type: "follow",
+          summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
+          actor: currentAuthor,
+          object: props.authorViewing,
+        })
+        .then((response) => {
+          console.log("Success sending a friend request: " + response);
+        })
+        .catch((error) => {
+          setFollowState("notFollowing");
+      });
     } else if (followState === "following") {
-      // if we're already following, clicking will unfollow
-      if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
-        api
-          .get(`${baseURL}/node/?host=${author.host}`)
-          .then((response) => {
-            let node = createNodeObject(response, author.host);
-            api
-              .delete(`${host}authors/${extractAuthorUUID(author.id)}/followers/${currentAuthor.uuid}`, {header: node.headers}) 
-              .then((response) => {
-                console.log(
-                  "Success removing current author from viewing author's followers: " +
-                  response
-                );
-                setFollowState("notFollowing");
-              })
-              .catch((error) => {
-                console.log("Failed to unfollow: " + error);
-              });
-        });
-      } else {
-        api
-          .delete(
-            `${baseURL}/authors/${author_id}/followers/${currentAuthor.uuid}`
-          )
-          .then((response) => {
-            console.log(
-              "Success removing current author from viewing author's followers: " +
-                response
-            );
-            setFollowState("notFollowing");
-          })
-          .catch((error) => {
-            console.log("Failed to unfollow: " + error);
-          });
+      host = baseURL + "/"
+      if (postAuthorBaseApiURL != null) {
+        host = postAuthorBaseApiURL
       }
+      // if we're already following, clicking will unfollow
+      api
+        .delete(
+          `${host}authors/${author_id}/followers/${currentAuthor.uuid}`
+        )
+        .then((response) => {
+          console.log(
+            "Success removing current author from viewing author's followers: " +
+              response
+          );
+          setFollowState("notFollowing");
+        })
+        .catch((error) => {
+          console.log("Failed to unfollow: " + error);
+      });
     }
   };
 

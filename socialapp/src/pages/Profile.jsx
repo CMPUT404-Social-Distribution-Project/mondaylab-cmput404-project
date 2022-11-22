@@ -147,7 +147,7 @@ export default function Profile() {
           <div className="profilePicPage">
             <img id="profilePicPage" src={author.profileImage} alt="profilePic"/>
           </div>
-          <FollowButton authorViewing={author} />
+          <FollowButton authorViewing={author} authorNode={authorNode} authorBaseApiURL={authorBaseApiURL} />
         </div>
 
         <div className="profileInfo">

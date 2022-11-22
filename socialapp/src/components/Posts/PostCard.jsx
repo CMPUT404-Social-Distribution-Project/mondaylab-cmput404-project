@@ -66,6 +66,7 @@ export default function PostCard(props) {
   };
 
   const sendPostLike = () => {
+    host = baseURL + "/"
     const postLike = {
       type: "like",
       summary: `${author.displayName} Likes your post.`,
@@ -73,27 +74,19 @@ export default function PostCard(props) {
       object: props.post.id,
     };
     if(postAuthorBaseApiURL != null){
-      api
-        .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, {header: postAuthorNode.headers}, postLike)
-        .then((response) => {
-          setLiked(true);
-          setLikeCount((likeCount) => likeCount + 1);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } else {
-      api
-        .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
-        .then((response) => {
-          setLiked(true);
-          setLikeCount((likeCount) => likeCount + 1);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      host = postAuthorBaseApiURL
     }
+    api
+      .post(`${postAuthorBaseApiURL}authors/${post_user_id}/inbox/`, postLike)
+      .then((response) => {
+        setLiked(true);
+        setLikeCount((likeCount) => likeCount + 1);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
+
 
 
   // Needed to separate this from the others fetches, because
