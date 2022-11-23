@@ -171,8 +171,17 @@ def is_our_frontend(origin):
 
 def is_our_backend(origin):
     # return true if it's our back end
+    # NOTE, wait a minute, .... we dont neeed this because any request to us have frontend url : (
     our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
     return origin in our_backends
+
+def get_origin_from_author(author_id):
+    # given http://localhost:8000/author....
+    # return http://localhost:8000
+    
+    author_origin = author_id.split('authors/')[0]
+    
+    return author_origin[:-1]  # remove the / at the end
 
 def display_name_exists(display_name):
     obj = Author.objects.filter(displayName=display_name)
@@ -216,8 +225,8 @@ def create_remote_author(remote_author):
 
     if author_serializer.is_valid():
         author_serializer.save(
-                uuid=get_author_uuid_from_id(remote_author["id"]),
-                id=remote_author.get("id"),
+                uuid=get_author_uuid_from_id(remote_author["id"]),  # NOTE, why is uuid the 'id' field? 
+                id=remote_author.get("id"),                         # NOTe
                 password=make_password(remote_author["displayName"]+"password")
                 )
         
