@@ -131,10 +131,7 @@ export default function PostCard(props) {
         if (typeof(commentArray) !== 'undefined') {
           setCommentCount(commentArray.length);
           if (commentArray.length !== 0) {
-            for (let i = 0; i < commentArray.length; i++) {
-              const comment = commentArray[i];
-              setComments((comments) => [...comments, comment]);
-            }
+            setComments(commentArray);
           }
         }
       })
