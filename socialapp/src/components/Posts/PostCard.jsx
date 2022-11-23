@@ -15,7 +15,7 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { extractAuthorUUID, extractPostUUID, authorHostIsOurs } from "../../utils/utils";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject } from "../../utils/utils";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -66,7 +66,7 @@ export default function PostCard(props) {
   };
 
   const sendPostLike = () => {
-    host = baseURL + "/"
+    let host = baseURL + "/"
     const postLike = {
       type: "like",
       summary: `${author.displayName} Likes your post.`,
@@ -130,6 +130,7 @@ export default function PostCard(props) {
       })
       .catch((error) => {
         console.log(error);
+        // TODO: If failed to fetch from theirs, fall back on ours?
       });
     }
     if (postAuthorNode !== null) {
@@ -137,33 +138,38 @@ export default function PostCard(props) {
     }
   }, [postAuthorNode])
 
+  const fetchNode = async (author) => {
+    // fetches the node object
+    await api
+    .get(`${baseURL}/node/?host=${author.host}`)
+    .then((response) => {
+      let node = createNodeObject(response, author.host);
+      setPostAuthorNode(node);
+      setPostAuthorBaseAPI(node.host);
+    })
+    .catch((err) => {
+      console.log(err.response.data);
+    })
+  }
+
   useEffect(() => {
-    
+    const fetchAuthor = async () => {
+      await api
+      .get(`${baseURL}/authors/${user_id}/`)
+      .then((response) => {
+        setAuthor(response.data);
+        fetchNode(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+    fetchAuthor();
+  }, [])
+
+  useEffect(() => {
     const fetchData = async () => {
-      await api
-        .get(`${baseURL}/node/?host=${props.post.author.host}`)
-        .then((response) => {
-          const b64Credentials = btoa(`${response.data.username}:${response.data.password}`)
-          let node = {...response.data, headers:{}};
-          if (!authorHostIsOurs(props.post.author.host)) {
-            // Post author's host is a remote host (not ours), add in HTTP Basic auth
-            const authHeader = `Basic ${b64Credentials}`;
-            node = {...node, headers: {'Authorization': authHeader}};
-          }
-          setPostAuthorNode(node);
-          setPostAuthorBaseAPI(node.host);
-        })
-        .catch((err) => {
-          console.log(err.response.data);
-        })
-      await api
-        .get(`${baseURL}/authors/${user_id}/`)
-        .then((response) => {
-          setAuthor(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+
       await api
         .get(`${baseURL}/authors/${user_id}/followers`)
         .then((response) => {
@@ -190,13 +196,13 @@ export default function PostCard(props) {
         });
     };
     fetchData();
-  }, []);
+  }, [author, postAuthorBaseApiURL]);
 
   const sharePost = (post) => {
-    host = baseURL + '/'
+    let host = baseURL + '/';
     if (post.visibility === "PUBLIC") {
       for (let index = 0; index < followers.length; index++) {
-        follower = followers[index]
+        const follower = followers[index]
         if (!authorHostIsOurs(follower.host)) {
           api
             .get(`${baseURL}/node/?host=${follower.host}`)
@@ -224,7 +230,7 @@ export default function PostCard(props) {
       }
     } else if (post.visibility === "FRIENDS") {
       for (let index = 0; index < friends.length; index++) {
-        friend = friends[index]
+        const friend = friends[index]
         if (!authorHostIsOurs(friend.host)) {
           api
             .get(`${baseURL}/node/?host=${friend.host}`)

@@ -3,6 +3,7 @@ import Button from "react-bootstrap/Button";
 import AuthContext from "../../context/AuthContext";
 import useAxios from "../../utils/useAxios";
 import { useParams, useLocation } from "react-router-dom";
+import { authorHostIsOurs, extractAuthorUUID } from "../../utils/utils";
 
 // function authorInArray(id, array) {
 //   // checks if the given author id is in the array
@@ -36,9 +37,9 @@ export default function FollowButton(props) {
 
   useEffect(() => {
     const following = async () => {
-      if (!authorHostIsOurs(author.host) && props.authorBaseApiURL !== null) {
+      if (!authorHostIsOurs(props.authorViewing.host) && props.authorBaseApiURL !== null) {
         await api
-          .post(`${props.authorBaseApiURL}authors/${extractAuthorUUID(author.id)}/followers/${currentAuthor.uuid}`, { header: props.authorNode.headers })
+          .post(`${props.authorBaseApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`, { header: props.authorNode.headers })
           .then((response) => {
             if (response.data) {
               setIsFollowing(response.data);
