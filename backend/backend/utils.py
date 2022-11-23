@@ -169,6 +169,11 @@ def is_our_frontend(origin):
     our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
     return origin in our_frontends
 
+def is_our_backend(origin):
+    # return true if it's our back end
+    our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
+    return origin in our_backends
+
 def display_name_exists(display_name):
     obj = Author.objects.filter(displayName=display_name)
     return obj.exists()
