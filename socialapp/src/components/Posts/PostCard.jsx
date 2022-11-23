@@ -15,7 +15,7 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject } from "../../utils/utils";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl } from "../../utils/utils";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -443,9 +443,11 @@ export default function PostCard(props) {
         <Card.Title>
           <ReactMarkdown>{props.post.title}</ReactMarkdown>
         </Card.Title>
-        {props.post.image && (
+        {(props.post.image && (
           <img className="post-image" src={props.post.image} alt="postImage" />
-        )}
+        )) || (!authorHostIsOurs(props.post.author.host) && props.post.contentType.startsWith("image") 
+        && isValidHTTPUrl(props.post.content) && 
+        <img className="post-image" src={props.post.content} alt="postImage" />)}
         <Card.Text>
           {showContent && <ReactMarkdown>{props.post.content}</ReactMarkdown>}
         </Card.Text>
