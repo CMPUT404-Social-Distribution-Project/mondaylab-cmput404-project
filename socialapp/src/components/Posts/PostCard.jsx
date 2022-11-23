@@ -15,7 +15,7 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { extractAuthorUUID, extractPostUUID, authorHostIsOurs } from "../../utils/utils";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject } from "../../utils/utils";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -66,14 +66,18 @@ export default function PostCard(props) {
   };
 
   const sendPostLike = () => {
+    let host = baseURL + "/"
     const postLike = {
       type: "like",
       summary: `${author.displayName} Likes your post.`,
       author: author,
       object: props.post.id,
     };
+    if (!authorHostIsOurs(author.host) && postAuthorBaseApiURL != null){
+      host = postAuthorBaseApiURL
+    }
     api
-      .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, postLike)
+      .post(`${host}authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -84,6 +88,7 @@ export default function PostCard(props) {
   };
 
 
+
   // Needed to separate this from the others fetches, because
   // postAuthorNode is sometimes null. Doing it this way,
   // these fetch calls are only called once postAuthorNode changes
@@ -91,26 +96,26 @@ export default function PostCard(props) {
   useEffect(() => {
     const fetchPostAuthorData = async () => {
       await api
-      .get(
-        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
-        {headers: postAuthorNode.headers}
-      )
-      .then((response) => {
-        let likers = [];
-        setLikeCount((likeCount) => response.data.items.length);
-        for (let data of response.data.items) {
-          likers.push(extractAuthorUUID(data.author.id));
-          if (extractAuthorUUID(data.author.id) === user_id) {
-            setLiked(true);
+        .get(
+          `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+          {headers: postAuthorNode.headers}
+        )
+        .then((response) => {
+          let likers = [];
+          setLikeCount((likeCount) => response.data.items.length);
+          for (let data of response.data.items) {
+            likers.push(extractAuthorUUID(data.author.id));
+            if (extractAuthorUUID(data.author.id) === user_id) {
+              setLiked(true);
+            }
           }
-        }
-      })
-      .catch((error) => {
-        console.log(error);
+        })
+        .catch((error) => {
+          console.log(error);
       });
     await api
       .get(
-        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments/`,
+        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
         {headers: postAuthorNode.headers}
       )
       .then((response) => {
@@ -125,6 +130,7 @@ export default function PostCard(props) {
       })
       .catch((error) => {
         console.log(error);
+        // TODO: If failed to fetch from theirs, fall back on ours?
       });
     }
     if (postAuthorNode !== null) {
@@ -132,33 +138,38 @@ export default function PostCard(props) {
     }
   }, [postAuthorNode])
 
+  const fetchNode = async (author) => {
+    // fetches the node object
+    await api
+    .get(`${baseURL}/node/?host=${author.host}`)
+    .then((response) => {
+      let node = createNodeObject(response, author.host);
+      setPostAuthorNode(node);
+      setPostAuthorBaseAPI(node.host);
+    })
+    .catch((err) => {
+      console.log(err.response.data);
+    })
+  }
+
   useEffect(() => {
-    
+    const fetchAuthor = async () => {
+      await api
+      .get(`${baseURL}/authors/${user_id}/`)
+      .then((response) => {
+        setAuthor(response.data);
+        fetchNode(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+    fetchAuthor();
+  }, [])
+
+  useEffect(() => {
     const fetchData = async () => {
-      await api
-        .get(`${baseURL}/node/?host=${props.post.author.host}`)
-        .then((response) => {
-          const b64Credentials = btoa(`${response.data.username}:${response.data.password}`)
-          let node = {...response.data, headers:{}};
-          if (!authorHostIsOurs(props.post.author.host)) {
-            // Post author's host is a remote host (not ours), add in HTTP Basic auth
-            const authHeader = `Basic ${b64Credentials}`;
-            node = {...node, headers: {'Authorization': authHeader}};
-          }
-          setPostAuthorNode(node);
-          setPostAuthorBaseAPI(node.host);
-        })
-        .catch((err) => {
-          console.log(err.response.data);
-        })
-      await api
-        .get(`${baseURL}/authors/${user_id}/`)
-        .then((response) => {
-          setAuthor(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+
       await api
         .get(`${baseURL}/authors/${user_id}/followers`)
         .then((response) => {
@@ -185,43 +196,65 @@ export default function PostCard(props) {
         });
     };
     fetchData();
-  }, []);
+  }, [author, postAuthorBaseApiURL]);
 
   const sharePost = (post) => {
-    console.log(post.id);
+    let host = baseURL + '/';
     if (post.visibility === "PUBLIC") {
       for (let index = 0; index < followers.length; index++) {
-        const sharedPost = {
-          type: "post",
-          summary: `${author.displayName} shared a post.`,
-          author: author,
-          object: post.id,
-        };
-        api
-          .post(`${baseURL}/authors/${extractAuthorUUID(followers[index].id)}/inbox/`, post)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
+        const follower = followers[index]
+        if (!authorHostIsOurs(follower.host)) {
+          api
+            .get(`${baseURL}/node/?host=${follower.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, follower.host);
+              api
+                .post(`${node.host}authors/${extractAuthorUUID(follower.id)}/inbox/}`, { header: node.headers }, post)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((error) => {
+                  console.log("Failed to get posts of author. " + error);
+                });
           });
+        } else {
+          api
+            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
       }
     } else if (post.visibility === "FRIENDS") {
       for (let index = 0; index < friends.length; index++) {
-        const sharedPost = {
-          type: "post",
-          summary: `${author.displayName} shared a post.`,
-          author: author,
-          object: post.id,
-        };
-        api
-          .post(`${baseURL}/authors/${extractAuthorUUID(friends[index].id)}/inbox/`, post)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
-          });
+        const friend = friends[index]
+        if (!authorHostIsOurs(friend.host)) {
+          api
+            .get(`${baseURL}/node/?host=${friend.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, friend.host);
+              api
+                .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((error) => {
+                  console.log("Failed to get posts of author. " + error);
+                });
+            });
+        } else {
+          api
+            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
       }
     }
   };

@@ -1,0 +1,71 @@
+.explore-title-container {
+    padding-bottom: 1rem;
+}
+
+.search-bar-explore {
+    padding: 0.5em 3em;
+    width: 20em;
+    text-align: center;
+    background-color: var(--slightly-darker-blue);
+    color: var(--white-teal);
+    border: none;
+    border-bottom: solid 1px var(--orange);
+    position: relative;
+    margin-left: -2em;
+    z-index: 2;
+    border-radius: 11px;
+}
+
+.FaSearch {
+    color: var(--teal);
+    margin-left: -em;
+    height: 1em;
+    width: 1em;
+    z-index: 3;
+}
+
+.search-col {
+    display: flex;
+    align-items: center;
+}
+
+.authors-explore-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.search-bar-explore:focus {
+    outline: none !important;
+    background: var(--dark-blue);
+}
+
+.custom {
+    width: 20em;
+}
+
+.searchResult {
+    position: relative;
+}
+
+.public-post {
+    border-style: solid;
+    border-width: medium;
+}
+
+.all-posts-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.public-posts-and-remote-container {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1em;
+}
+
+.remote-authors-container .userCard {
+    width: 100%;
+    margin-top: 0.5em;
+}

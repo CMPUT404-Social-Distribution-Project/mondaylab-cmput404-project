@@ -1,27 +1,12 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { fireEvent, render } from '@testing-library/react'
-import Axios from "../../utils/useAxios";
 import Login from './Login.jsx'
+import { BrowserRouter } from "react-router-dom";
 
-jest.mock("../../utils/useAxios")
-
-describe('Testing Signup:', () => {
-    beforeEach(() => {
-        Axios.get = jest.fn().mockResolvedValue({
-            startLocation: "West Edmonton Mall",
-            endLocation: "UofA",
-            startTime: Date(20),
-            note: "Test",
-        })
-    });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
+describe('Testing Login:', () => {
     it("renders correctly", () => {
-        const tree = renderer.create(<Login />).toJSON();
+        const tree = render(<BrowserRouter><Login /></BrowserRouter>);
         expect(tree).toMatchSnapshot();
     });
 });

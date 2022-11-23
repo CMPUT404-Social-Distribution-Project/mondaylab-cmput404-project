@@ -12,9 +12,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
-from backend.utils import isUUID, isAuthorized, check_github_valid, is_our_frontend, get_uuid_from_id, display_name_exists, remote_author_exists
+from backend.utils import isAuthorized, check_github_valid, is_our_frontend
 from backend.pagination import CustomPagination
-from node.utils import getRemoteAuthors, our_hosts
+from node.utils import our_hosts
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
