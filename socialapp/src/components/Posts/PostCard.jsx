@@ -158,7 +158,9 @@ export default function PostCard(props) {
       .get(`${baseURL}/authors/${user_id}/`)
       .then((response) => {
         setAuthor(response.data);
-        fetchNode(response.data);
+        if (!authorHostIsOurs(response.data.host)) {
+          fetchNode(response.data);
+        }
       })
       .catch((error) => {
         console.log(error);
