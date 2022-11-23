@@ -101,11 +101,8 @@ class CommentsApiView(GenericAPIView):
             serialize = self.serializer_class(data=request.data)  # converts request.data to jsonlike object
             # chekc if the request.body contains valid key-value pair and satisty table constrain
             if serialize.is_valid(raise_exception=True):
-                # thnk of a field to add to comment body
-                # we will retrive this author who made this request, --> authorobject
-                # set this authorobj as the foreign key
+                post_obj = Post.objects.get(uuid=post_id)
                 commentUuid = uuid4()
-
                 authorObj = Author.objects.get(uuid=author_id)
                 commentId = request.build_absolute_uri() +  commentUuid.hex
                 # published date is in the following format 
@@ -113,6 +110,8 @@ class CommentsApiView(GenericAPIView):
                 publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
                 
                 serialize.save(id=commentId, author=authorObj, published=publishedDate, uuid=commentUuid)  # save to db with additional field injected
+                post_obj.count = post_obj.count + 1         # update count
+                post_obj.save(update_fields=["count"])
                 
                 return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:
