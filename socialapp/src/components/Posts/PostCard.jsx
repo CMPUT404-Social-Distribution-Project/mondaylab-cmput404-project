@@ -110,7 +110,7 @@ export default function PostCard(props) {
       });
     await api
       .get(
-        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments/`,
+        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
         {headers: postAuthorNode.headers}
       )
       .then((response) => {

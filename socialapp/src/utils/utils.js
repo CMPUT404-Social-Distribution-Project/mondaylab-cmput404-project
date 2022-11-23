@@ -6,7 +6,7 @@ export function extractAuthorUUID(id) {
     if (id.slice(-1) === '/') {
         UUID = UUID.slice(0, -1);   //remove end slash
     }
-    return UUID
+    return UUID.replace('-','');
 }
 
 export function extractPostUUID(id) {
@@ -16,7 +16,7 @@ export function extractPostUUID(id) {
     if (id.slice(-1) === '/') {
         UUID = UUID.slice(0, -1);   //remove end slash
     }
-    return UUID
+    return UUID.replace('-','');
 }
 
 export function authorHostIsOurs(host) {
@@ -29,7 +29,7 @@ export function authorHostIsOurs(host) {
 
 export function b64EncodeCredentials(username, password) {
     const b64Credentials = btoa(`${username}:${password}`)
-    return b64Credentials
+    return b64Credentials;
 }
 
 export function createNodeObject(response, authorsHost) {
@@ -44,4 +44,8 @@ export function createNodeObject(response, authorsHost) {
     }
     
     return node;
+}
+
+export function removeDashes(uuid) {
+    return uuid.replace(/-/g,'');
 }
