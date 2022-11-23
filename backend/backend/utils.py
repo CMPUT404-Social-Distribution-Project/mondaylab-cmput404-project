@@ -9,9 +9,11 @@ from like.serializers import LikeSerializer
 from post.models import Post
 from comments.models import Comment
 from like.models import Like
+from node.models import Node
 from django.contrib.auth.hashers import make_password
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from node.utils import authenticated_GET
 
 def isUUID(val):
     try:
@@ -19,6 +21,18 @@ def isUUID(val):
         return True
     except:
         return False
+    
+def add_end_slash(url):
+    # Adds the end slash to a url, if it doesn't exist
+    if url[-1] != '/':
+        return url+'/'
+    return url
+
+def remove_end_slash(url):
+    # Removes the end slash to a url, if it exists.
+    if url[-1] == '/':
+        return url[-1]
+    return url
 
 def isAuthorized(request, author_uuid):
     ''' Checks if the requester is authorized to do whatever method that's requested.
@@ -52,46 +66,76 @@ def check_github_valid(request):
         # in activity from their github (blank URL)
         return True
 
-def is_friends(request, author_id):
-    ''' Checks if the requester is friends with the author they are viewing
+def is_friends(request, author_uuid):
+    ''' Checks if the requester is friends with the author they are viewing <author_id>
         This is different from check_friend because check_friend requires
         you to get both IDs from the URL. But in this case it's not possible
         to get both IDs from the URL, only the author_id can be extracted.
         So we exploit JWT. 
     '''
-    res = JWT_authenticator.authenticate(request)
-    if res is not None:
-        user, token = res
-        requesterID = user.id           # the current user that is viewing the author on the screen
-        
-        try:
-            author = Author.objects.get(id=author_id)
-            requester_author = Author.objects.get(id=requesterID)
-            # see if the requester is in the followers list of author
-            in_followers = author.followers.get(id=requesterID)
-            # see if author is in the followers list of requester
-            author_in_req_followers = requester_author.followers.get(id=author_id)
-            if in_followers and author_in_req_followers:
-                return True
+    if request.META.get("HTTP_ORIGIN") is None:
+        return False
+
+    if is_our_frontend(request.META.get("HTTP_ORIGIN")):
+        # Requester is from our frontend, check JWT
+        res = JWT_authenticator.authenticate(request)
+        if res is not None:
+            user, token = res
+            requesterID = user.id           # the current user that is viewing the author on the screen
+            
+            try:
+                author = Author.objects.get(uuid=author_uuid)
+                requester_author = Author.objects.get(id=requesterID)
+                # see if the requester is in the followers list of author
+                in_followers = author.followers.get(id=requesterID)
+                # see if author is in the followers list of requester
+                author_in_req_followers = requester_author.followers.get(uuid=author_uuid)
+                if in_followers and author_in_req_followers:
+                    return True
+                else:
+                    return False
+            except Exception as e:
+                print(f"is_friends: {e}")
+                return False
+    else:
+        # Not our frontend, check the Request-Author header
+        if request.META.get("HTTP_REQUEST_AUTHOR") is not None:
+            requester_url = request.META.get("HTTP_REQUEST_AUTHOR")         # Request-Author header has the requester's authors' URL/id
+            if remote_author_exists(requester_url):
+                try:
+                    # requester's author exists in our db, check if they're friends
+                    return check_friend(author_uuid, get_author_uuid_from_id(requester_url))
+                except Exception as e:
+                    print(f"is_friends: {e}")
+                    return False
             else:
                 return False
-        except Exception as e:
+        else:
+            print("is_friends: No 'Request-Author' header found in request. ")
             return False
 
-def check_friend(author_id, foreign_id):
-    '''Checks if the two authors with the given id's are friends'''
+
+def check_friend(author_uuid, foreign_uuid):
+    '''Checks if the two authors with the given uuid's are friends'''
     try:
-        #TODO: when checking if our author is following foreign author,
-        # fetch to the foreign author's host API url's followers/ endpoint
-        # and check if our author is in their followers. 
-        current_author = Author.objects.get(id = author_id)
-        foreign_author = Author.objects.get(id = foreign_id)
-        followers = current_author.followers.get(id = foreign_id)
-        friends = foreign_author.followers.get(id = author_id)
-        if followers and friends:
-            return True
+        current_author = Author.objects.get(uuid = author_uuid)
+        foreign_author = Author.objects.get(uuid = author_uuid)
+        foreign_following_current = current_author.followers.filter(uuid = foreign_uuid).exists()
+        
+        if is_our_backend(foreign_author.host):
+            # The foreign author is our author, so just check followers field
+            current_following_foreign = foreign_author.followers.filter(uuid = author_uuid).exists()
         else:
-            return False
+            # The foreign author is not ours, fetch to its /followers/<current_author.uuid> endpoint
+            # to see if our author is following the foreign author
+            res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}")
+            if res.status_code == 200:
+                print("Checking friends result = ", res.json())
+                current_following_foreign = res.json()
+
+        if foreign_following_current and current_following_foreign:
+            return True
+
     except:
         return False
 
@@ -169,6 +213,11 @@ def is_our_frontend(origin):
     our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
     return origin in our_frontends
 
+def is_our_backend(host):
+    # return true if it's our back end
+    our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
+    return host in our_backends
+
 def display_name_exists(display_name):
     obj = Author.objects.filter(displayName=display_name)
     return obj.exists()
@@ -188,6 +237,19 @@ def remote_comment_exists(comment_id):
 def remote_like_exists(author_id, object_id):
     obj = Like.objects.filter(author__id=author_id, object=object_id)
     return obj.exists()
+
+def author_node_host_exists(author_host):
+    # Checks if the author's host is an existing node
+    return Node.objects.filter(host__contains= author_host).exists()
+
+def is_URL(string):
+    '''Checks if string is a url'''
+    validate = URLValidator()
+    try:
+        validate(string)
+        return True
+    except:
+        return False
 
 def validate_post(post_data):
     post_fields = ['type','title','id','source','origin','description',
@@ -217,10 +279,22 @@ def create_remote_author(remote_author):
                 )
         
 def validate_remote_post(post):
+    required_fields = ['type','id','contentType']
     remote_post = post.copy()
-    if (not remote_post.get("image")):
+
+    for field in required_fields:
+        if remote_post.get(field) == None:
+            raise ValueError(f'ValidatePost: Missing required field "{field}".')
+    if (remote_post.get("type").lower() != "post"):
+        raise ValueError(f'ValidatePost: Incorrect type, {remote_post.get("type")}')
+
+    if (remote_post.get("image") is None):
         # no image field so we make it empty
         remote_post["image"] = ""
+
+    if (remote_post["contentType"].startswith("image") and is_URL(remote_post["content"])):
+        # the post is from Team 2, who uses the post's "content" field to store an image link
+        remote_post["image"] = remote_post["content"]
 
     # delete commentSrc if it exists
     if (remote_post.get("commentSrc") != None):
@@ -254,25 +328,24 @@ def create_remote_post(remote_post, remote_author):
     Given the remote post and remote author's Json data
     ( which is a dict in Python ), creates a post object
     locally, or updates the post object if it exists.
+    IMPORTANT: Call validate_remote_post() before call this.
     '''
     remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
     if (not remote_post_exists(remote_post["id"])):
         # if remote post doesn't exist, create it.
         # get the post's author and set the remote post's author to our local
         remote_author_obj = get_author_with_id(remote_author["id"])
-        remote_post_validated = validate_remote_post(remote_post)
-        remote_post_validated["author"] = remote_author_obj
-        print(remote_post_validated)
+        remote_post["author"] = remote_author_obj
 
-        post_serializer = PostSerializer(data=remote_post_validated)
+        post_serializer = PostSerializer(data=remote_post)
         if post_serializer.is_valid(raise_exception=True):
             post_serializer.save(
                 uuid = remote_post_uuid,
-                id = remote_post_validated.get("id"),
+                id = remote_post.get("id"),
                 author = remote_author_obj,
-                comments = remote_post_validated.get("comments")
+                comments = remote_post.get("comments")
             )
-        return remote_post_validated
+        return remote_post
     else:
         # otherwise, try to update the existing post
         remote_post_obj = Post.objects.filter(id=remote_post["id"])
