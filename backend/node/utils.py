@@ -30,4 +30,12 @@ def getRemoteAuthors():
 
     return all_nodes_authors
 
+def getNodeRemoteAuthors(node):
+    # Gets a single node's authors
 
+    node_authors_endpoint = f"{node.host}authors/"
+    res = authenticated_GET(node_authors_endpoint, node)
+    if (res.status_code == 200):
+        return res.json()["items"]
+    else:
+        return []

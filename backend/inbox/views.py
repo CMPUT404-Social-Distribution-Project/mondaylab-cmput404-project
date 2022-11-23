@@ -1,4 +1,4 @@
-from like.serializers import LikePostSerializer, LikeAuthorSerializer
+from like.serializers import LikeSerializer, LikeAuthorSerializer
 from post.models import Post
 from author.models import Author
 from inbox.models import Inbox
@@ -258,7 +258,7 @@ class InboxAllApiView(GenericAPIView):
     """
     #permission_classes = [IsAuthenticated]
     fr_serializer_class = FriendRequestSerializer
-    lk_serializer_class=LikePostSerializer
+    lk_serializer_class=LikeSerializer
     ct_serializer_class=CommentsSerializer
     
     def get(self, request, author_id):
@@ -296,7 +296,7 @@ class InboxAllApiView(GenericAPIView):
                 # get likes in inbox 
                 if inbox.likes.exists():
                     likes_list = list(inbox.likes.all())
-                    likes_serializers = LikePostSerializer(likes_list, many=True)
+                    likes_serializers = LikeSerializer(likes_list, many=True)
                     likes_serializers_data = likes_serializers.data
                     
                 else:

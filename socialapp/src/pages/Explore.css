@@ -56,6 +56,7 @@
 .all-posts-container {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .public-posts-and-remote-container {

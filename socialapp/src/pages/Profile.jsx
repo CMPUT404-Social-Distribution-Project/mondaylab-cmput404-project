@@ -10,7 +10,7 @@ import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
-import { authorHostIsOurs, b64EncodeCredentials, createNodeObject } from '../utils/utils';
+import { authorHostIsOurs, removeDashes, createNodeObject } from '../utils/utils';
 import { CgRemote } from "react-icons/cg";
 
 function ProfilePosts(props) {
@@ -98,7 +98,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchData = async (ApiURL, authorId) => {
       await api      
-        .get(`${ApiURL}authors/${authorId}/posts/`,
+        .get(`${ApiURL}authors/${authorId}/posts`,
         {headers: authorNode.headers}
         )
         .then((response) => {
@@ -108,7 +108,7 @@ export default function Profile() {
           console.log("Failed to get posts of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/followers/`,
+        .get(`${ApiURL}authors/${authorId}/followers`,
         {headers: authorNode.headers}
         )
         .then((response) => {
@@ -119,7 +119,7 @@ export default function Profile() {
           console.log("Failed to get followers of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/friends/`,
+        .get(`${ApiURL}authors/${authorId}/friends`,
         {headers: authorNode.headers}
         )
         .then((response) => {
@@ -130,7 +130,7 @@ export default function Profile() {
         });
     };
       if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
-        fetchData(authorBaseApiURL, author_id);
+        fetchData(authorBaseApiURL, removeDashes(author_id));
       } else {
         // if the author is from our host, fetch from our API, or if something went wrong
         // trying to fetch the foreign author, then fetch that author from ours as backup.
