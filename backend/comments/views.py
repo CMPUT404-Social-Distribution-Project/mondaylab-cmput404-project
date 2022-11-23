@@ -104,10 +104,10 @@ class CommentsApiView(GenericAPIView):
                 # thnk of a field to add to comment body
                 # we will retrive this author who made this request, --> authorobject
                 # set this authorobj as the foreign key
-                commentUuid = str(uuid4())
+                commentUuid = uuid4()
 
                 authorObj = Author.objects.get(uuid=author_id)
-                commentId = request.build_absolute_uri() +  commentUuid
+                commentId = request.build_absolute_uri() +  commentUuid.hex
                 # published date is in the following format 
                 # 2015-03-09T13:07:04+00:00
                 publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")

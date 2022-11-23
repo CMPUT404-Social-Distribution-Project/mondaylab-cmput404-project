@@ -212,14 +212,14 @@ class PostsApiView(GenericAPIView):
                     # get author obj to be saved in author field of post
                     authorObj = Author.objects.get(uuid=author_id)
                     # create post ID and origin and source
-                    postUUID = str(uuid4())
-                    postId = request.build_absolute_uri() + postUUID
+                    postUUID = uuid4()
+                    postId = request.build_absolute_uri() + postUUID.hex
                     origin = postId
 
                     if serialize.validated_data.get("contentType").startswith("image"):
                         # content type is an image, then the content SHOULD be a base64 string.
                         # make image field the url link to the image
-                        image = request.build_absolute_uri() + postUUID + "/image"
+                        image = request.build_absolute_uri() + postUUID.hex + "/image"
                         serialize.validated_data["image"] = image
 
                     serialize.save(

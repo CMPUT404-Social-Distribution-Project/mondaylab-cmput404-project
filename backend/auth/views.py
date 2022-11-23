@@ -57,8 +57,8 @@ class RegistrationViewSet(ModelViewSet, TokenObtainPairView):
 
         # add in host, id, url, uuid from here since we can't access request object from the model
         host = request.build_absolute_uri('/')[:-1]
-        uuid = str(uuid4())
-        url =str(host) +'/service/authors/'+ uuid
+        uuid = uuid4()
+        url =str(host) +'/service/authors/'+ uuid.hex
         serializer.validated_data['host'] = host+'/'
         serializer.validated_data['url'] = url
         serializer.validated_data['id'] = url

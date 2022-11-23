@@ -8,6 +8,7 @@ from author.serializers import LimitedAuthorSerializer
 class PostSerializer(serializers.ModelSerializer):
     # author = LimitedAuthorSerializer(many=False, allow_null=True, required=False)  # needed this to get post's author field to become nested json object
     # commentSrc = CommentSrcSerializer(many=True, required=False)
+    uuid = serializers.UUIDField(format='hex', required=False)
     class Meta:
         model = Post
         fields = '__all__'
