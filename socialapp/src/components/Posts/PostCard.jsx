@@ -73,11 +73,11 @@ export default function PostCard(props) {
       author: author,
       object: props.post.id,
     };
-    if(postAuthorBaseApiURL != null){
+    if (!authorHostIsOurs(author.host) && postAuthorBaseApiURL != null){
       host = postAuthorBaseApiURL
     }
     api
-      .post(`${postAuthorBaseApiURL}authors/${post_user_id}/inbox/`, postLike)
+      .post(`${host}authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -196,14 +196,14 @@ export default function PostCard(props) {
     host = baseURL + '/'
     if (post.visibility === "PUBLIC") {
       for (let index = 0; index < followers.length; index++) {
-        author = followers[index]
-        if (!authorHostIsOurs(author.host)) {
+        follower = followers[index]
+        if (!authorHostIsOurs(follower.host)) {
           api
-            .get(`${baseURL}/node/?host=${author.host}`)
+            .get(`${baseURL}/node/?host=${follower.host}`)
             .then((response) => {
-              let node = createNodeObject(response, author.host);
+              let node = createNodeObject(response, follower.host);
               api
-                .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .post(`${node.host}authors/${extractAuthorUUID(follower.id)}/inbox/}`, { header: node.headers }, post)
                 .then((response) => {
                   console.log(response);
                 })
@@ -224,14 +224,14 @@ export default function PostCard(props) {
       }
     } else if (post.visibility === "FRIENDS") {
       for (let index = 0; index < friends.length; index++) {
-        author = friends[index]
-        if (!authorHostIsOurs(author.host)) {
+        friend = friends[index]
+        if (!authorHostIsOurs(friend.host)) {
           api
-            .get(`${baseURL}/node/?host=${author.host}`)
+            .get(`${baseURL}/node/?host=${friend.host}`)
             .then((response) => {
-              let node = createNodeObject(response, author.host);
+              let node = createNodeObject(response, friend.host);
               api
-                .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
                 .then((response) => {
                   console.log(response);
                 })
