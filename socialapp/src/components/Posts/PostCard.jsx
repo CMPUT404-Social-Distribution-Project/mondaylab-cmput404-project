@@ -29,6 +29,8 @@ export default function PostCard(props) {
 
   const [postComment, setPostComment] = useState({
     comment: "",
+    type: "comment",
+    contentType: "text/markdown"
   });
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
@@ -94,11 +96,11 @@ export default function PostCard(props) {
   // these fetch calls are only called once postAuthorNode changes
   // to not null. 
   useEffect(() => {
-    const fetchPostAuthorData = async () => {
+    const fetchPostAuthorData = async (ApiURL, node) => {
       await api
         .get(
-          `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
-          {headers: postAuthorNode.headers}
+          `${ApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+          {headers: node.headers}
         )
         .then((response) => {
           let likers = [];
@@ -121,8 +123,8 @@ export default function PostCard(props) {
       });
     await api
       .get(
-        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
-        {headers: postAuthorNode.headers}
+        `${ApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
+        {headers: node.headers}
       )
       .then((response) => {
         let commentArray = response.data.comments;
@@ -141,8 +143,13 @@ export default function PostCard(props) {
         // TODO: If failed to fetch from theirs, fall back on ours?
       });
     }
-    if (postAuthorNode !== null) {
-      fetchPostAuthorData();
+    if (!authorHostIsOurs(props.post.author.host) && postAuthorNode !== null) {
+      fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
+    } else {
+      // empty node
+      let node = {}
+      node.headers = {}
+      fetchPostAuthorData(baseURL+'/', node);
     }
   }, [postAuthorNode])
 
@@ -167,6 +174,7 @@ export default function PostCard(props) {
       .get(`${baseURL}/authors/${user_id}/`)
       .then((response) => {
         setAuthor(response.data);
+        setPostComment({ ...postComment, author: response.data })
         if (!authorHostIsOurs(props.post.author.host)) {
           fetchNode(props.post.author);
         }
@@ -308,7 +316,7 @@ export default function PostCard(props) {
         postComment
       )
       .then((response) => {
-        window.location.reload(true);
+        
 
         commentObject["type"] = response.data.type;
         commentObject["comment"] = response.data.comment;
@@ -319,13 +327,15 @@ export default function PostCard(props) {
         commentObject["uuid"] = response.data.uuid;
 
         api
-          .post(`${baseURL}/authors/${post_user_id}/inbox/`, commentObject)
+          .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, commentObject)
           .then((response) => {
             console.log("success send comments to inbox");
           })
           .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
+            console.log("Failed to send comment to inbox" + error);
           });
+
+        refreshState();
       })
       .catch((error) => {
         alert(`Something went wrong posting! \n Error: ${error}`);
