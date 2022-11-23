@@ -41,7 +41,7 @@ def create_node_posts(modeladmin, request, queryset):
 
             # Once author exists, we try to fetch to the remote node author's posts endpoint
             # to create it's posts locally
-            node_posts_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/"
+            node_posts_endpoint = f"{node.host}authors/{remote_author_uuid}/posts"
             res = authenticated_GET(node_posts_endpoint, node)
             if (res.status_code == 200):
                 try:
@@ -74,13 +74,15 @@ def create_node_posts(modeladmin, request, queryset):
                             if res.status_code == 200 and remote_post_likes:
                                 for remote_post_like in remote_post_likes:
                                     create_remote_like(remote_post_like)
-
+            
                 except Exception as e:
                     print("Could not create remote post locally.", e)
+            else:
+                print("Failed to retrieve node posts.")
 
 def create_node_objects(modeladmin, request, queryset):
-    create_node_posts(queryset)
-    create_node_authors(queryset)
+    create_node_posts(modeladmin, request, queryset)
+    create_node_authors(modeladmin, request, queryset)
 
 
 class NodeAdmin(admin.ModelAdmin):

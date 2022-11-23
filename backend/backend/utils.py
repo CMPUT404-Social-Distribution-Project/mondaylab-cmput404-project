@@ -10,6 +10,8 @@ from post.models import Post
 from comments.models import Comment
 from like.models import Like
 from django.contrib.auth.hashers import make_password
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 def isUUID(val):
     try:
@@ -223,17 +225,41 @@ def create_remote_post(remote_post, remote_author):
     remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
     if (not remote_post_exists(remote_post["id"])):
         # if remote post doesn't exist, create it.
-
+        print(type(remote_post), remote_post)
+        print(1.1)
         # get the post's author and set the remote post's author to our local
         remote_author_obj = get_author_with_id(remote_author["id"])
         remote_post["author"] = remote_author_obj
         if (not remote_post.get("image")):
             # no image field so we make it empty
             remote_post["image"] = ""
-
+        print(1.2)
         # delete commentSrc if it exists
-        if (remote_post.get("commentSrc")):
+        if (remote_post.get("commentSrc") != None):
             del remote_post["commentSrc"]
+        # delete categories if it exists (TODO: maybe we want to do categories?)
+        if (remote_post.get("categories") != None):
+            remote_post["categories"] = ""
+        print(1.3)
+        # validate that source/origin are urls, if exists
+        validate = URLValidator()
+        if remote_post.get("source") != None or remote_post.get("origin") != None:
+            try:
+                validate(remote_post.get("source"))
+                validate(remote_post.get("origin"))
+            except ValidationError as e:
+                # if not valid url, set source and origin to the id
+                remote_post["source"] = remote_post["id"]
+                remote_post["origin"] = remote_post["id"]
+
+        print(1.4)
+        if (remote_post.get("comments") != None):
+            try:
+                validate(remote_post.get("comments"))
+            except ValidationError as e:
+                # if not valid url, create comment url
+                remote_post["comments"] = remote_post["id"] + '/comments'
+        print(1.5)
 
         post_serializer = PostSerializer(data=remote_post)
         if post_serializer.is_valid(raise_exception=True):
@@ -250,7 +276,7 @@ def create_remote_post(remote_post, remote_author):
                 title=remote_post.get("title"),
                 description=remote_post.get("description"),
                 contentType=remote_post.get("contentType"),
-                categories=remote_post.get("categories"),
+                # categories=remote_post.get("categories"),
                 count=remote_post.get("count"),
                 published=remote_post.get("published"),
                 visibility=remote_post.get("visibility"),

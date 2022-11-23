@@ -130,7 +130,7 @@ class AuthorLikedApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
-        author_url_id = get_author_url_id(request)
+        # author_url_id = get_author_url_id(request)
         
         try:
             author = Author.objects.get(uuid = author_id)
