@@ -49,10 +49,14 @@ def create_node_posts(modeladmin, request, queryset):
                     if remote_author_posts:
                         for remote_post in remote_author_posts:
                             remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
-                            create_remote_post(remote_post, remote_author)
+                            remote_post = create_remote_post(remote_post, remote_author)
 
+                            #TODO: If one of these points fail the rest won't get created
+                            # e.g. if creating comments fails, then creating the likes won't happen.
+                            # Maybe need separate try-catch clauses for each??
                             # create it's comments as well
-                            res = authenticated_GET(remote_post["comments"], node)
+                            node_post_comment_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/comments"
+                            res = authenticated_GET(node_post_comment_endpoint, node)
                             remote_post_comments = res.json().get("comments")
                             if res.status_code == 200 and remote_post_comments:
                                 for remote_comment in remote_post_comments:
@@ -66,7 +70,7 @@ def create_node_posts(modeladmin, request, queryset):
                                     if res.status_code == 200 and remote_comment_likes:
                                         for remote_comment_like in remote_comment_likes:
                                             create_remote_like(remote_comment_like)
-                                    
+
                             # create post's likes
                             node_likes_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/likes"
                             res = authenticated_GET(node_likes_endpoint, node) 
@@ -74,7 +78,7 @@ def create_node_posts(modeladmin, request, queryset):
                             if res.status_code == 200 and remote_post_likes:
                                 for remote_post_like in remote_post_likes:
                                     create_remote_like(remote_post_like)
-            
+
                 except Exception as e:
                     print("Could not create remote post locally.", e)
             else:

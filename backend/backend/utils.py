@@ -215,6 +215,39 @@ def create_remote_author(remote_author):
                 id=remote_author.get("id"),
                 password=make_password(remote_author["displayName"]+"password")
                 )
+        
+def validate_remote_post(post):
+    remote_post = post.copy()
+    if (not remote_post.get("image")):
+        # no image field so we make it empty
+        remote_post["image"] = ""
+
+    # delete commentSrc if it exists
+    if (remote_post.get("commentSrc") != None):
+        del remote_post["commentSrc"]
+    # delete categories if it exists (TODO: maybe we want to do categories?)
+    if (remote_post.get("categories") != None):
+        remote_post["categories"] = ""
+
+    # validate that source/origin are urls, if exists
+    validate = URLValidator()
+    if remote_post.get("source") != None or remote_post.get("origin") != None:
+        try:
+            validate(remote_post.get("source"))
+            validate(remote_post.get("origin"))
+        except ValidationError as e:
+            # if not valid url, set source and origin to the id
+            remote_post["source"] = remote_post["id"]
+            remote_post["origin"] = remote_post["id"]
+
+    if (remote_post.get("comments") != None):
+        try:
+            validate(remote_post.get("comments"))
+        except ValidationError as e:
+            # if not valid url, create comment url
+            remote_post["comments"] = remote_post["id"] + '/comments'
+
+    return remote_post
 
 def create_remote_post(remote_post, remote_author):
     '''
@@ -225,49 +258,21 @@ def create_remote_post(remote_post, remote_author):
     remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
     if (not remote_post_exists(remote_post["id"])):
         # if remote post doesn't exist, create it.
-        print(type(remote_post), remote_post)
-        print(1.1)
         # get the post's author and set the remote post's author to our local
         remote_author_obj = get_author_with_id(remote_author["id"])
-        remote_post["author"] = remote_author_obj
-        if (not remote_post.get("image")):
-            # no image field so we make it empty
-            remote_post["image"] = ""
-        print(1.2)
-        # delete commentSrc if it exists
-        if (remote_post.get("commentSrc") != None):
-            del remote_post["commentSrc"]
-        # delete categories if it exists (TODO: maybe we want to do categories?)
-        if (remote_post.get("categories") != None):
-            remote_post["categories"] = ""
-        print(1.3)
-        # validate that source/origin are urls, if exists
-        validate = URLValidator()
-        if remote_post.get("source") != None or remote_post.get("origin") != None:
-            try:
-                validate(remote_post.get("source"))
-                validate(remote_post.get("origin"))
-            except ValidationError as e:
-                # if not valid url, set source and origin to the id
-                remote_post["source"] = remote_post["id"]
-                remote_post["origin"] = remote_post["id"]
+        remote_post_validated = validate_remote_post(remote_post)
+        remote_post_validated["author"] = remote_author_obj
+        print(remote_post_validated)
 
-        print(1.4)
-        if (remote_post.get("comments") != None):
-            try:
-                validate(remote_post.get("comments"))
-            except ValidationError as e:
-                # if not valid url, create comment url
-                remote_post["comments"] = remote_post["id"] + '/comments'
-        print(1.5)
-
-        post_serializer = PostSerializer(data=remote_post)
+        post_serializer = PostSerializer(data=remote_post_validated)
         if post_serializer.is_valid(raise_exception=True):
             post_serializer.save(
                 uuid = remote_post_uuid,
-                id = remote_post.get("id"),
-                author = remote_author_obj
+                id = remote_post_validated.get("id"),
+                author = remote_author_obj,
+                comments = remote_post_validated.get("comments")
             )
+        return remote_post_validated
     else:
         # otherwise, try to update the existing post
         remote_post_obj = Post.objects.filter(id=remote_post["id"])
@@ -282,6 +287,7 @@ def create_remote_post(remote_post, remote_author):
                 visibility=remote_post.get("visibility"),
                 unlisted=remote_post.get("unlisted"),
             )
+        return remote_post
 
 def create_remote_comment(remote_comment):
     remote_comment_uuid = get_comment_uuid_from_id(remote_comment["id"])
