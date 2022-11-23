@@ -73,7 +73,7 @@ export default function PostCard(props) {
       author: author,
       object: props.post.id,
     };
-    if (!authorHostIsOurs(author.host) && postAuthorBaseApiURL != null){
+    if (!authorHostIsOurs(props.post.author.host) && postAuthorBaseApiURL != null){
       host = postAuthorBaseApiURL
     }
     api
@@ -102,11 +102,17 @@ export default function PostCard(props) {
         )
         .then((response) => {
           let likers = [];
-          setLikeCount((likeCount) => response.data.items.length);
-          for (let data of response.data.items) {
-            likers.push(extractAuthorUUID(data.author.id));
-            if (extractAuthorUUID(data.author.id) === user_id) {
-              setLiked(true);
+          let resLikeItems = response.data.items;
+          if (typeof(response.data.items) === 'undefined') {
+            resLikeItems = response.data;
+          }
+          if (typeof(resLikeItems) !== 'undefined') {
+            setLikeCount((likeCount) => resLikeItems.length);
+            for (let data of resLikeItems) {
+              likers.push(extractAuthorUUID(data.author.id));
+              if (extractAuthorUUID(data.author.id) === user_id) {
+                setLiked(true);
+              }
             }
           }
         })
@@ -119,12 +125,14 @@ export default function PostCard(props) {
         {headers: postAuthorNode.headers}
       )
       .then((response) => {
-        const commentArray = response.data.comments;
-        setCommentCount(commentArray.length);
-        if (commentArray.length !== 0) {
-          for (let i = 0; i < commentArray.length; i++) {
-            const comment = commentArray[i];
-            setComments((comments) => [...comments, comment]);
+        let commentArray = response.data.comments;
+        if (typeof(commentArray) !== 'undefined') {
+          setCommentCount(commentArray.length);
+          if (commentArray.length !== 0) {
+            for (let i = 0; i < commentArray.length; i++) {
+              const comment = commentArray[i];
+              setComments((comments) => [...comments, comment]);
+            }
           }
         }
       })
@@ -152,14 +160,15 @@ export default function PostCard(props) {
     })
   }
 
+
   useEffect(() => {
     const fetchAuthor = async () => {
       await api
       .get(`${baseURL}/authors/${user_id}/`)
       .then((response) => {
         setAuthor(response.data);
-        if (!authorHostIsOurs(response.data.host)) {
-          fetchNode(response.data);
+        if (!authorHostIsOurs(props.post.author.host)) {
+          fetchNode(props.post.author);
         }
       })
       .catch((error) => {
