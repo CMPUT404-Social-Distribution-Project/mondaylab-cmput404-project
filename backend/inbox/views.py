@@ -10,7 +10,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from backend.utils import isUUID, isAuthorized, display_name_exists, is_our_backend, get_origin_from_author, remote_author_exists, create_remote_author
+from backend.utils import isUUID, isAuthorized, display_name_exists, is_our_backend, remote_author_exists, create_remote_author
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
