@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Inbox
 
-# Register your models here.
-admin.site.register(Inbox)
+class InboxAdmin(admin.ModelAdmin):
+    filter_horizontal = ('posts', 'comments', 'likes', 'follow_requests',)
+
+admin.site.register(Inbox, InboxAdmin)
