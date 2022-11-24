@@ -275,12 +275,12 @@ def create_remote_author(remote_author):
     if not isUUID(remote_author_uuid):
         remote_author_uuid = uuid4()
 
-    console.log
     if author_serializer.is_valid():
         author_serializer.save(
                 uuid= remote_author_uuid,
                 id=remote_author.get("id"),
-                password=make_password(remote_author["displayName"]+"password")
+                password=make_password(remote_author["displayName"]+"password"),
+                host= add_end_slash(remote_author.get("host"))
                 )
         
 def validate_remote_post(post):
@@ -407,7 +407,12 @@ def create_remote_like(remote_like):
             like_serializer.save(
                 author = remote_author_obj
             )
-    
+
+def remove_objects(node):
+    # removes the node's objects
+    node_host_split = node.host.split('/')
+    actual_host = node_host_split[0] + '://' + node_host_split[2] + '/'
+    Author.objects.filter(host=node.host).delete()
 
 def get_author_with_id(id_url):
     # returns None if author DNE

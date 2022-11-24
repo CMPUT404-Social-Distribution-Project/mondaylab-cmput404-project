@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from backend.utils import (remote_author_exists, create_remote_like, 
 get_author_uuid_from_id, get_post_uuid_from_id, create_remote_post, 
     create_remote_comment, create_remote_author, get_comment_uuid_from_id,
-    validate_remote_post)
+    validate_remote_post, remove_objects)
 from author.serializers import AuthorSerializer
 from post.serializers import PostSerializer
 from comments.serializers import CommentsSerializer
@@ -96,8 +96,11 @@ def create_node_objects(modeladmin, request, queryset):
     create_node_posts(modeladmin, request, queryset)
     create_node_authors(modeladmin, request, queryset)
 
-
+def del_remote_node_objects(modeladmin, request, queryset):
+    # removes the node's objects
+    for node in queryset:
+        remove_objects(node)
 class NodeAdmin(admin.ModelAdmin):
-    actions = [create_node_authors, create_node_posts, create_node_objects]
+    actions = [create_node_authors, create_node_posts, create_node_objects, del_remote_node_objects]
 
 admin.site.register(Node, NodeAdmin)
