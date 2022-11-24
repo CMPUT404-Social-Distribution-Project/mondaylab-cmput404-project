@@ -15,7 +15,7 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject } from "../../utils/utils";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl } from "../../utils/utils";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -29,6 +29,8 @@ export default function PostCard(props) {
 
   const [postComment, setPostComment] = useState({
     comment: "",
+    type: "comment",
+    contentType: "text/markdown"
   });
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
@@ -73,7 +75,7 @@ export default function PostCard(props) {
       author: author,
       object: props.post.id,
     };
-    if (!authorHostIsOurs(author.host) && postAuthorBaseApiURL != null){
+    if (!authorHostIsOurs(props.post.author.host) && postAuthorBaseApiURL != null){
       host = postAuthorBaseApiURL
     }
     api
@@ -94,19 +96,25 @@ export default function PostCard(props) {
   // these fetch calls are only called once postAuthorNode changes
   // to not null. 
   useEffect(() => {
-    const fetchPostAuthorData = async () => {
+    const fetchPostAuthorData = async (ApiURL, node) => {
       await api
         .get(
-          `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
-          {headers: postAuthorNode.headers}
+          `${ApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+          {headers: node.headers}
         )
         .then((response) => {
           let likers = [];
-          setLikeCount((likeCount) => response.data.items.length);
-          for (let data of response.data.items) {
-            likers.push(extractAuthorUUID(data.author.id));
-            if (extractAuthorUUID(data.author.id) === user_id) {
-              setLiked(true);
+          let resLikeItems = response.data.items;
+          if (typeof(response.data.items) === 'undefined') {
+            resLikeItems = response.data;
+          }
+          if (typeof(resLikeItems) !== 'undefined') {
+            setLikeCount((likeCount) => resLikeItems.length);
+            for (let data of resLikeItems) {
+              likers.push(extractAuthorUUID(data.author.id));
+              if (extractAuthorUUID(data.author.id) === user_id) {
+                setLiked(true);
+              }
             }
           }
         })
@@ -115,16 +123,15 @@ export default function PostCard(props) {
       });
     await api
       .get(
-        `${postAuthorBaseApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
-        {headers: postAuthorNode.headers}
+        `${ApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
+        {headers: node.headers}
       )
       .then((response) => {
-        const commentArray = response.data.comments;
-        setCommentCount(commentArray.length);
-        if (commentArray.length !== 0) {
-          for (let i = 0; i < commentArray.length; i++) {
-            const comment = commentArray[i];
-            setComments((comments) => [...comments, comment]);
+        let commentArray = response.data.comments;
+        if (typeof(commentArray) !== 'undefined') {
+          setCommentCount(commentArray.length);
+          if (commentArray.length !== 0) {
+            setComments(commentArray);
           }
         }
       })
@@ -133,10 +140,15 @@ export default function PostCard(props) {
         // TODO: If failed to fetch from theirs, fall back on ours?
       });
     }
-    if (postAuthorNode !== null) {
-      fetchPostAuthorData();
+    if (!authorHostIsOurs(props.post.author.host) && postAuthorNode !== null) {
+      fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
+    } else {
+      // empty node
+      let node = {}
+      node.headers = {}
+      fetchPostAuthorData(baseURL+'/', node);
     }
-  }, [postAuthorNode])
+  }, [postAuthorNode, useLocation().state])
 
   const fetchNode = async (author) => {
     // fetches the node object
@@ -152,13 +164,17 @@ export default function PostCard(props) {
     })
   }
 
+
   useEffect(() => {
     const fetchAuthor = async () => {
       await api
       .get(`${baseURL}/authors/${user_id}/`)
       .then((response) => {
         setAuthor(response.data);
-        fetchNode(response.data);
+        setPostComment({ ...postComment, author: response.data })
+        if (!authorHostIsOurs(props.post.author.host)) {
+          fetchNode(props.post.author);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -297,7 +313,7 @@ export default function PostCard(props) {
         postComment
       )
       .then((response) => {
-        window.location.reload(true);
+        
 
         commentObject["type"] = response.data.type;
         commentObject["comment"] = response.data.comment;
@@ -308,13 +324,15 @@ export default function PostCard(props) {
         commentObject["uuid"] = response.data.uuid;
 
         api
-          .post(`${baseURL}/authors/${post_user_id}/inbox/`, commentObject)
+          .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, commentObject)
           .then((response) => {
             console.log("success send comments to inbox");
           })
           .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
+            console.log("Failed to send comment to inbox" + error);
           });
+
+        refreshState();
       })
       .catch((error) => {
         alert(`Something went wrong posting! \n Error: ${error}`);
@@ -443,9 +461,11 @@ export default function PostCard(props) {
         <Card.Title>
           <ReactMarkdown>{props.post.title}</ReactMarkdown>
         </Card.Title>
-        {props.post.image && (
+        {(props.post.image && (
           <img className="post-image" src={props.post.image} alt="postImage" />
-        )}
+        )) || (!authorHostIsOurs(props.post.author.host) && props.post.contentType.startsWith("image") 
+        && isValidHTTPUrl(props.post.content) && 
+        <img className="post-image" src={props.post.content} alt="postImage" />)}
         <Card.Text>
           {showContent && <ReactMarkdown>{props.post.content}</ReactMarkdown>}
         </Card.Text>

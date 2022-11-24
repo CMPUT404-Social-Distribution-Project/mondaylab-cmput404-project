@@ -36,7 +36,7 @@ class AuthorManager(BaseUserManager):
         """
         host = 'https://cs404-project.herokuapp.com/'         # temporary solution...need to figure out a way to get host later on
         uuid = uuid4()
-        url = host + 'service/authors/' + str(uuid)
+        url = host + 'service/authors/' + uuid.hex
         user = self.create_user_uuid(displayName, password, uuid)
         user.is_staff = True
         user.is_superuser = True
