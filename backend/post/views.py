@@ -152,8 +152,8 @@ class PostsApiView(GenericAPIView):
                 postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC', unlisted=False).order_by("published").reverse()
             postsPaginated = self.paginate_queryset(postsQuerySet)
             links = self.get_paginated_response(postsPaginated).data.get("links")
-            pg = self.get_paginated_response(postsPaginated).data.get("page")
-            sz = self.get_paginated_response(postsPaginated).data.get("size")
+            page = self.get_paginated_response(postsPaginated).data.get("page")
+            size = self.get_paginated_response(postsPaginated).data.get("size")
 
             
             # Need to set the commentSrc of each post object in the paginated posts
@@ -205,7 +205,7 @@ class PostsApiView(GenericAPIView):
 
             postsSerializer = self.serializer_class(postsPaginated, many=True)
 
-            result = {"next": links['next'], "previous": links["previous"], "pg": pg, "sz": sz, "type": "posts", "items": postsSerializer.data}
+            result = {"next": links['next'], "previous": links["previous"], "page": page, "size": size, "type": "posts", "items": postsSerializer.data}
             
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:

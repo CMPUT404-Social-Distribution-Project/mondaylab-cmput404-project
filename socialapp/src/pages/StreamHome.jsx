@@ -148,12 +148,12 @@ export default function StreamHome() {
         <ul className="pagination justify-content-center">
           {previousUrl &&
             <li className="page-item">
-            <button className="page-link" onClick={()=>paginationHandler(previousUrl)}>{'<'}</button>
+            <button className="page-link" onClick={()=>paginationHandler(previousUrl)}>{'< previous'}</button>
             </li>
           }
           {nextUrl &&
             <li className="page-item">
-              <button className="page-link" onClick={()=>paginationHandler(nextUrl)}>{'>'}</button>
+              <button className="page-link" onClick={()=>paginationHandler(nextUrl)}>{'next >'}</button>
             </li> 
           }   
         </ul> 
