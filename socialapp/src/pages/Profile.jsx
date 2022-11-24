@@ -70,7 +70,10 @@ export default function Profile() {
       .get(`${baseURL}/authors/${author_id}/`)
       .then((response) => {
         setAuthor(response.data);
-        fetchNode(response.data);
+        if (!authorHostIsOurs(response.data.host)) {
+          // only fetch to the node if the author is ours
+          fetchNode(response.data);
+        }
       })
       .catch((error) => {
         console.log(error);

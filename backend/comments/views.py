@@ -16,10 +16,12 @@ from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
 from backend.utils import isAuthorized
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CommentsApiView(GenericAPIView):
     serializer_class = CommentsSerializer
     pagination_class = CustomPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     """
     get all the comment from this post    
@@ -27,8 +29,6 @@ class CommentsApiView(GenericAPIView):
     http://host/service/authors/{author_id}/posts/{post_id}/comments/
 
     serialize.save(id =author_id+'/'+'posts/'+str(uuid4())  )
-    
-    TODO: problem pos
     """
     def get(self, request, author_id, post_id):
         size = 5
@@ -74,13 +74,7 @@ class CommentsApiView(GenericAPIView):
                     "id": post_id_full_path + "/comments",
                     'comments': comments
                 }
-
-                # comments = Comment.objects.filter(id__contains = post_id).order_by("published")
-                # result = {"type":"comments", 
-                #            "page":1, "size":5,
-                #            "post": post_id_full_path,
-                #            "id": post_id_full_path + "/comments",
-                #            "comments": self.serializer_class(comments, many=True).data}
+                
                 return response.Response(result, status=status.HTTP_200_OK)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -92,27 +86,24 @@ class CommentsApiView(GenericAPIView):
         URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments
         POST [local] if you post an object of “type”:”comment”,
          it will add your comment to the post whose id is POST_ID
-
-        TODO: think of a field to type in the comment
         
         """
-     
         try:
+            authorObj = Author.objects.get(id=request.data["author"]["id"])
+            del request.data["author"]
             serialize = self.serializer_class(data=request.data)  # converts request.data to jsonlike object
-            # chekc if the request.body contains valid key-value pair and satisty table constrain
-            if serialize.is_valid(raise_exception=True):
-                # thnk of a field to add to comment body
-                # we will retrive this author who made this request, --> authorobject
-                # set this authorobj as the foreign key
-                commentUuid = str(uuid4())
 
-                authorObj = Author.objects.get(uuid=author_id)
-                commentId = request.build_absolute_uri() +  commentUuid
+            if serialize.is_valid(raise_exception=True):
+                post_obj = Post.objects.get(uuid=post_id)
+                commentUuid = uuid4()
+                commentId = request.build_absolute_uri() +  commentUuid.hex
                 # published date is in the following format 
                 # 2015-03-09T13:07:04+00:00
                 publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
                 
                 serialize.save(id=commentId, author=authorObj, published=publishedDate, uuid=commentUuid)  # save to db with additional field injected
+                post_obj.count = post_obj.count + 1         # update count
+                post_obj.save(update_fields=["count"])
                 
                 return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:

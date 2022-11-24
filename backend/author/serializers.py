@@ -2,6 +2,8 @@ from .models import Author
 from rest_framework import serializers
 
 class AuthorSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(format='hex', required=False)
+
     class Meta:
         model = Author
         fields = ['id','uuid','host','displayName','url',
@@ -17,6 +19,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 # Need a different author serializer that doesn't include the 
 # extra fields we have in the other serializer
 class LimitedAuthorSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(format='hex', required=False)
     class Meta:
         model = Author
         fields = ['id','uuid','host','displayName','url',
@@ -28,6 +31,7 @@ class LimitedAuthorSerializer(serializers.ModelSerializer):
         }
 
 class FollowerSerializer(serializers.ModelSerializer):
+    uuid = serializers.UUIDField(format='hex', required=False)
     class Meta:
             model = Author
             fields = ['type', 'id', 'uuid', 'url', 'host','displayName', 'github', 'profileImage']
