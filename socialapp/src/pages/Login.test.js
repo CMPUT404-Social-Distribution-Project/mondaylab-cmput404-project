@@ -1,7 +1,7 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import { fireEvent, render } from '@testing-library/react'
-import Login from './Login.jsx'
+import Login from './authentication/Login.jsx'
 import { BrowserRouter } from "react-router-dom";
 
 describe('Testing Login:', () => {
