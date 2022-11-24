@@ -164,65 +164,45 @@ export default function PostCard(props) {
     }
   }, []);
 
+  const sendPostToAuthorInbox = (author, post) => {
+    if (!authorHostIsOurs(author.host)) {
+      api
+        .get(`${baseURL}/node/?host=${author.host}`)
+        .then((response) => {
+          let node = createNodeObject(response, author.host);
+          api
+            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox}`, { header: node.headers }, post)
+            .then((response) => {
+              console.log("Success sending to author's inbox", response);
+            })
+            .catch((error) => {
+              console.log("Failed to send post to inbox of author", error.response);
+            });
+      });
+    } else {
+      api
+        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox}`, post)
+        .then((response) => {
+          console.log("Success sending to author's inbox", response);
+        })
+        .catch((error) => {
+          console.log("Failed to send post to inbox of author", error.response);
+        });
+    }
+  }
+
   const sharePost = (post) => {
-    let host = baseURL + '/';
     if (post.visibility === "PUBLIC") {
       for (let index = 0; index < followers.length; index++) {
-        const follower = followers[index]
-        if (!authorHostIsOurs(follower.host)) {
-          api
-            .get(`${baseURL}/node/?host=${follower.host}`)
-            .then((response) => {
-              let node = createNodeObject(response, follower.host);
-              api
-                .post(`${node.host}authors/${extractAuthorUUID(follower.id)}/inbox/}`, { header: node.headers }, post)
-                .then((response) => {
-                  console.log(response);
-                })
-                .catch((error) => {
-                  console.log("Failed to get posts of author. " + error);
-                });
-          });
-        } else {
-          api
-            .post(`${host}authors/${extractAuthorUUID(loggedInUser.id)}/inbox/}`, post)
-            .then((response) => {
-              console.log(response);
-            })
-            .catch((error) => {
-              console.log("Failed to get posts of author. " + error);
-            });
-        }
-      }
+        const follower = followers[index];
+        sendPostToAuthorInbox(follower, post);
+      };
     } else if (post.visibility === "FRIENDS") {
       for (let index = 0; index < friends.length; index++) {
-        const friend = friends[index]
-        if (!authorHostIsOurs(friend.host)) {
-          api
-            .get(`${baseURL}/node/?host=${friend.host}`)
-            .then((response) => {
-              let node = createNodeObject(response, friend.host);
-              api
-                .post(`${node.host}authors/${extractAuthorUUID(friend.id)}/inbox/}`, { header: node.headers }, post)
-                .then((response) => {
-                  console.log(response);
-                })
-                .catch((error) => {
-                  console.log("Failed to get posts of author. " + error);
-                });
-            });
-        } else {
-          api
-            .post(`${host}authors/${extractAuthorUUID(loggedInUser.id)}/inbox/}`, post)
-            .then((response) => {
-              console.log(response);
-            })
-            .catch((error) => {
-              console.log("Failed to get posts of author. " + error);
-            });
-        }
-      }
-    }
+        const friend = friends[index];
+        sendPostToAuthorInbox(friend, post);
+      };
+    };
   };
 
   const deletePost = (uuid) => {
