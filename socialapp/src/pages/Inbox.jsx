@@ -30,6 +30,8 @@ export default function Inbox() {
   const [comments, setComments] = useState([]);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
+  const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
   const api = useAxios();
   const [show, setShow] = useState(false);
 
@@ -79,6 +81,22 @@ export default function Inbox() {
         })
         .catch((error) => {
           console.log("Failed to get inbox of author. " + error);
+        });
+      await api
+        .get(`${baseURL}/authors/${user_id}/followers`)
+        .then((response) => {
+          setFollowers(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/`)
+        .then((response) => {
+          setFriends(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
         });
     };
     fetchData();
@@ -183,7 +201,7 @@ export default function Inbox() {
                 <Tab.Pane eventKey="post">
                   {typeof posts !== "undefined" ? (
                     posts.length !== 0 ? (
-                      posts.map((item, i) => <PostCard post={item} key={i}/>)
+                      posts.map((item, i) => <PostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={item} key={i}/>)
                     ) : (
                       <h4>No posts yet! </h4>
                     )

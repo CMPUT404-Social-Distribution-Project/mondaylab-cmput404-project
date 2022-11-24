@@ -15,11 +15,11 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl } from "../../utils/utils";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl, emptyNode } from "../../utils/utils";
 
 export default function PostCard(props) {
-  const user_id = localStorage.getItem("user_id");
-  const post_user_id = extractAuthorUUID(props.post.author.id);
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  const post_user_uuid = extractAuthorUUID(props.post.author.id);
   const post_id = extractPostUUID(props.post.id)
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
 
@@ -30,20 +30,18 @@ export default function PostCard(props) {
   const [postComment, setPostComment] = useState({
     comment: "",
     type: "comment",
-    contentType: "text/markdown"
+    contentType: "text/markdown",
+    author: loggedInUser
   });
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();
-  const [likeCount, setLikeCount] = useState(0);
+  const [likeCount, setLikeCount] = useState(null);
   const [CommentCount, setCommentCount] = useState(0);
   const [liked, setLiked] = useState(false);
-  const [beOwner, setBeOwner] = useState(user_id === post_user_id);
-  const [beFriend, setBeFriend] = useState(false);
-  const [author, setAuthor] = useState("");
   const [open, openComments] = useState(false);
-  const [followers, setFollowers] = useState([]);
-  const [friends, setFriends] = useState([]);
+  const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
+  const [friends, setFriends] = useState(props.loggedInAuthorsFriends);
 
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
@@ -58,7 +56,7 @@ export default function PostCard(props) {
   // for navigating to post's author
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${post_user_id}/`, { state: { refresh: true } });
+    navigate(`/authors/${post_user_uuid}/`, { state: { refresh: true } });
   };
 
   // for refreshing the page of where the post card is
@@ -69,17 +67,18 @@ export default function PostCard(props) {
 
   const sendPostLike = () => {
     let host = baseURL + "/"
+    console.log("LIKE SENT WITH AUTHOR", loggedInUser);
     const postLike = {
       type: "like",
-      summary: `${author.displayName} Likes your post.`,
-      author: author,
+      summary: `${loggedInUser.displayName} Likes your post.`,
+      author: loggedInUser,
       object: props.post.id,
     };
     if (!authorHostIsOurs(props.post.author.host) && postAuthorBaseApiURL != null){
       host = postAuthorBaseApiURL
     }
     api
-      .post(`${host}authors/${post_user_id}/inbox/`, postLike)
+      .post(`${host}authors/${post_user_uuid}/inbox`, postLike)
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -89,8 +88,6 @@ export default function PostCard(props) {
       });
   };
 
-
-
   // Needed to separate this from the others fetches, because
   // postAuthorNode is sometimes null. Doing it this way,
   // these fetch calls are only called once postAuthorNode changes
@@ -99,7 +96,7 @@ export default function PostCard(props) {
     const fetchPostAuthorData = async (ApiURL, node) => {
       await api
         .get(
-          `${ApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+          `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/likes`, 
           {headers: node.headers}
         )
         .then((response) => {
@@ -112,7 +109,7 @@ export default function PostCard(props) {
             setLikeCount((likeCount) => resLikeItems.length);
             for (let data of resLikeItems) {
               likers.push(extractAuthorUUID(data.author.id));
-              if (extractAuthorUUID(data.author.id) === user_id) {
+              if (extractAuthorUUID(data.author.id) === loggedInUser.uuid) {
                 setLiked(true);
               }
             }
@@ -123,7 +120,7 @@ export default function PostCard(props) {
       });
     await api
       .get(
-        `${ApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
+        `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/comments?size=10`,
         {headers: node.headers}
       )
       .then((response) => {
@@ -143,10 +140,7 @@ export default function PostCard(props) {
     if (!authorHostIsOurs(props.post.author.host) && postAuthorNode !== null) {
       fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
     } else {
-      // empty node
-      let node = {}
-      node.headers = {}
-      fetchPostAuthorData(baseURL+'/', node);
+      fetchPostAuthorData(baseURL+'/', emptyNode);
     }
   }, [postAuthorNode, useLocation().state])
 
@@ -163,56 +157,12 @@ export default function PostCard(props) {
       console.log(err.response.data);
     })
   }
-
-
+  
   useEffect(() => {
-    const fetchAuthor = async () => {
-      await api
-      .get(`${baseURL}/authors/${user_id}/`)
-      .then((response) => {
-        setAuthor(response.data);
-        setPostComment({ ...postComment, author: response.data })
-        if (!authorHostIsOurs(props.post.author.host)) {
-          fetchNode(props.post.author);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (!authorHostIsOurs(props.post.author.host)) {
+      fetchNode(props.post.author);
     }
-    fetchAuthor();
-  }, [])
-
-  useEffect(() => {
-    const fetchData = async () => {
-
-      await api
-        .get(`${baseURL}/authors/${user_id}/followers`)
-        .then((response) => {
-          setFollowers(response.data.items);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await api
-        .get(`${baseURL}/authors/${user_id}/friends/`)
-        .then((response) => {
-          setFriends(response.data.items);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await api
-        .get(`${baseURL}/authors/${user_id}/friends/${post_user_id}`)
-        .then((response) => {
-          setBeFriend(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    };
-    fetchData();
-  }, [author, postAuthorBaseApiURL]);
+  }, []);
 
   const sharePost = (post) => {
     let host = baseURL + '/';
@@ -235,7 +185,7 @@ export default function PostCard(props) {
           });
         } else {
           api
-            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .post(`${host}authors/${extractAuthorUUID(loggedInUser.id)}/inbox/}`, post)
             .then((response) => {
               console.log(response);
             })
@@ -253,7 +203,7 @@ export default function PostCard(props) {
             .then((response) => {
               let node = createNodeObject(response, friend.host);
               api
-                .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .post(`${node.host}authors/${extractAuthorUUID(friend.id)}/inbox/}`, { header: node.headers }, post)
                 .then((response) => {
                   console.log(response);
                 })
@@ -263,7 +213,7 @@ export default function PostCard(props) {
             });
         } else {
           api
-            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .post(`${host}authors/${extractAuthorUUID(loggedInUser.id)}/inbox/}`, post)
             .then((response) => {
               console.log(response);
             })
@@ -277,7 +227,7 @@ export default function PostCard(props) {
 
   const deletePost = (uuid) => {
     api
-      .delete(`${baseURL}/authors/${user_id}/posts/${uuid}`)
+      .delete(`${baseURL}/authors/${loggedInUser.uuid}/posts/${uuid}`)
       .then((response) => {
         window.location.reload(true);
       })
@@ -305,11 +255,24 @@ export default function PostCard(props) {
     });
   };
 
+  const sendCommentToInbox = (ApiURL, post_user_uuid, commentObject, node) => {
+    api
+      .post(`${ApiURL}authors/${post_user_uuid}/inbox`, commentObject, {
+        headers: node.headers
+      })
+      .then((response) => {
+        console.log("success send comments to inbox");
+      })
+      .catch((error) => {
+        console.log("Failed to send comment to inbox" + error);
+      });
+  }
+
   const sendComment = (uuid) => {
     var commentObject = {};
     api
       .post(
-        `${baseURL}/authors/${user_id}/posts/${uuid}/comments/`,
+        `${baseURL}/authors/${extractAuthorUUID(props.post.author.id)}/posts/${uuid}/comments/`,
         postComment
       )
       .then((response) => {
@@ -323,14 +286,11 @@ export default function PostCard(props) {
         commentObject["published"] = response.data.published;
         commentObject["uuid"] = response.data.uuid;
 
-        api
-          .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, commentObject)
-          .then((response) => {
-            console.log("success send comments to inbox");
-          })
-          .catch((error) => {
-            console.log("Failed to send comment to inbox" + error);
-          });
+        if (!authorHostIsOurs(props.post.author.host)) {
+          sendCommentToInbox(postAuthorBaseApiURL, post_user_uuid, commentObject, postAuthorNode);
+        } else {
+          sendCommentToInbox(baseURL+'/', post_user_uuid, commentObject, emptyNode);
+        }
 
         refreshState();
       })
@@ -353,7 +313,7 @@ export default function PostCard(props) {
               <MdShare /> Share Post
             </Dropdown.Item>
             {(() => {
-              if (user_id === post_user_id) {
+              if (loggedInUser.uuid === post_user_uuid) {
                 return (
                   <div>
                     <Dropdown.Item onClick={() => setShowEditPost(true)}>
@@ -480,7 +440,7 @@ export default function PostCard(props) {
             onClick={() => sendPostLike(post_id)}
           />
 
-          {beFriend || beOwner ? likeCount : null}
+          {likeCount !== null ? likeCount : null}
           <BsFillChatFill
             className="comment-icon"
             style={{

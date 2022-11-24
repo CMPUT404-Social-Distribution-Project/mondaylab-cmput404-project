@@ -14,6 +14,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 export default function StreamHome() {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const [postsArray, setPostsArray] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
   const user_id = localStorage.getItem("user_id");
   const api = useAxios();
   const navigate = useNavigate();
@@ -43,6 +45,28 @@ export default function StreamHome() {
     };
     fetchData();
   }, [useLocation().state]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await api
+        .get(`${baseURL}/authors/${user_id}/followers`)
+        .then((response) => {
+          setFollowers(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/`)
+        .then((response) => {
+          setFriends(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+    fetchData();
+  }, []);
 
   return (
     /**
@@ -83,7 +107,7 @@ export default function StreamHome() {
       <Container style={{ zIndex: 10 }}>
         <div className="posts">
           {postsArray.map((post) => (
-            <PostCard post={post} key={post.id} />
+            <PostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
           ))}
         </div>
       </Container>
