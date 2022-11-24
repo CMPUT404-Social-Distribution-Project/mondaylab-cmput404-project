@@ -61,7 +61,7 @@ export default function Profile() {
   // node
   const [authorNode, setAuthorNode] = useState(null);     // the node object of post's author
   const [authorBaseApiURL, setAuthorBaseAPI] = useState(null);
-
+  const emptyNode = {}; emptyNode.headers = {}
 
   useEffect(() => {
     // first fetch the author
@@ -150,7 +150,7 @@ export default function Profile() {
           <div className="profilePicPage">
             <img id="profilePicPage" src={author.profileImage} alt="profilePic"/>
           </div>
-          <FollowButton authorViewing={author} authorNode={authorNode} authorBaseApiURL={authorBaseApiURL} />
+          <FollowButton authorViewing={author} authorNode={authorHostIsOurs(author.host) ? authorNode : emptyNode} authorBaseApiURL={!authorHostIsOurs(author.host) ? authorBaseApiURL : baseURL+'/'} />
         </div>
 
         <div className="profileInfo">
