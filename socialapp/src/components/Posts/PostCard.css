@@ -149,12 +149,15 @@
 .post-card .input-comment {
     width: 100%;
     margin-top: 1rem;
+    display: grid;
+    grid-template-columns: 11fr 1fr;
 }
 
 .post-card .input-comment .form-control {
     background-color: var(--slightly-darker-blue);
     box-shadow: none;
-    border-radius: 2rem;
+    border-top-left-radius: 2rem;
+    border-bottom-left-radius: 2rem;
 }
 
 .post-card .input-comment .form-control:focus {

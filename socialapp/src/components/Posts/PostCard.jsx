@@ -282,11 +282,12 @@ export default function PostCard(props) {
       });
   }
 
-  const sendComment = (uuid) => {
+  const sendComment = (e) => {
+    e.preventDefault();
     var commentObject = {};
     api
       .post(
-        `${baseURL}/authors/${extractAuthorUUID(props.post.author.id)}/posts/${uuid}/comments/`,
+        `${baseURL}/authors/${extractAuthorUUID(props.post.author.id)}/posts/${post_id}/comments/`,
         postComment
       )
       .then((response) => {
@@ -305,7 +306,8 @@ export default function PostCard(props) {
         } else {
           sendCommentToInbox(baseURL+'/', post_user_uuid, commentObject, emptyNode);
         }
-
+        setPostComment({ ...postComment, comment: "" });
+        e.target.reset();
         refreshState();
       })
       .catch((error) => {
@@ -499,27 +501,26 @@ export default function PostCard(props) {
           ) : null}
         </div>
         <div className="comments-container">
-          <div className="input-comment">
-            <InputGroup className="mb-3">
-              <Form.Control
-                placeholder="Comment"
-                aria-label="Comment"
-                onChange={(e) =>
-                  setPostComment({ ...postComment, comment: e.target.value })
-                }
-              />
-              <Button
-                style={{
-                  borderRadius: "1.5rem",
-                  color: "black",
-                  backgroundColor: "#BFEFE9",
-                }}
-                onClick={() => sendComment(post_id)}
+          <Form className="input-comment mb-3" onSubmit={sendComment}>
+            <Form.Control
+              placeholder="Comment"
+              aria-label="Comment"
+              onChange={(e) =>
+                setPostComment({ ...postComment, comment: e.target.value })
+              }
+            >
+            </Form.Control>
+            <Button
+              style={{
+                borderRadius: "1.5rem",
+                color: "black",
+                backgroundColor: "#BFEFE9",
+              }}
+              type="submit"
               >
                 Send
               </Button>
-            </InputGroup>
-          </div>
+          </Form>
         </div>
       </Card.Body>
     </Card>
