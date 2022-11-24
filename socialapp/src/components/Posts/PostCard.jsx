@@ -82,15 +82,19 @@ export default function PostCard(props) {
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
+
+        // Need this for checking if author liked remote post or not.
+        // Since when sending a like object to remote host's inbox,
+        // the like object is created in their DB but not ours. So 
+        // create a like object in ours as well.
+        api
+          .post(`${baseURL}/authors/${loggedInUser.uuid}/liked`, postLike)
+          .catch((error) => {
+            console.log("Failed to create backup like object", error.response.data);
+          });
       })
       .catch((error) => {
         console.log("Failed to send like to inbox", error.response);
-        // also create like object in our local if things go wrong in remote
-        api
-        .post(`${baseURL}/authors/${loggedInUser.uuid}/liked`, postLike)
-        .catch((error) => {
-          console.log(error.response.data);
-        });
       });
   };
 
@@ -115,7 +119,7 @@ export default function PostCard(props) {
           }
         })
         .catch((error) => {
-          console.log(error);
+          if (error.response) { console.log(error.response.data); };
       });
     await api
       .get(
@@ -132,7 +136,7 @@ export default function PostCard(props) {
         }
       })
       .catch((error) => {
-        console.log(error);
+        if (error.response) { console.log(error.response.data); };
       });
     }
 
@@ -146,12 +150,12 @@ export default function PostCard(props) {
 
   useEffect(() => {
     if (!authorHostIsOurs(props.post.author.host)) {
-      const fetchNode = async (author) => {
+      const fetchNode = async () => {
         // fetches the node object
         await api
-        .get(`${baseURL}/node/?host=${author.host}`)
+        .get(`${baseURL}/node/?host=${props.post.author.host}`)
         .then((response) => {
-          let node = createNodeObject(response, author);
+          let node = createNodeObject(response, props.post.author);
           setPostAuthorNode(node);
           setPostAuthorBaseAPI(node.host);
         })
