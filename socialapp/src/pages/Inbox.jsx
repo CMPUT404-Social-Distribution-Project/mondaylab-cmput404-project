@@ -121,7 +121,7 @@ export default function Inbox() {
   
   const deleteInbox = () => {
     api
-      .delete(`${baseURL}/authors/${user_id}/inbox/`)
+      .delete(`${baseURL}/authors/${user_id}/inbox`)
       .then(
         (response) => setShow(true),
         setPosts([]),
