@@ -12,6 +12,9 @@ import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
 
 function ProfilePosts(props) {
+  // console.log("PreviousUrl in ProfilePosts is", props.previousUrl);
+  // console.log("NextUrl in ProfilePosts is", props.nextUrl);
+  console.log("ProfilePosts posts", props.postsArray)
   return (
     <div className="posts-container-profile">
     {
@@ -19,6 +22,20 @@ function ProfilePosts(props) {
         props.postsArray.items.map((post) => <PostCard post={post} key={post.id}/>)
         : null
     }
+      <nav>
+        <ul className="pagination justify-content-center">
+            { props.prevUrl &&
+            <li className="page-item">
+            <button className="page-link" onClick={() => props.paginationPrev()}>{'<'}</button>
+            </li>
+            }
+            { props.nextUrl && 
+            <li className="page-item">
+              <button className="page-link" onClick={() => props.paginationNext()}>{'>'}</button>
+            </li> 
+            }
+        </ul> 
+      </nav>
     </div>
   )
 }
@@ -56,8 +73,8 @@ export default function Profile() {
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 
-  const [nextUrl, setNextUrl] = useState();
-  const [previousUrl, setPreviousURL] = useState();
+  const [nextUrl, setNextUrl] = useState(null);
+  const [previousUrl, setPreviousURL] = useState(null);
 
   // Called after rendering. Fetches data
   useEffect(() => {
@@ -76,10 +93,11 @@ export default function Profile() {
           setPostsArray(response.data);
           console.log('--');
           console.log(response.data);
-          // setPreviousURL(response.data.previous);
-          // setNextUrl(response.data.next);
-          // console.log(response.data.previous);
-          // console.log(response.data.next);
+          setPreviousURL(response.data.previous);
+          setNextUrl(response.data.next);
+          console.log("previousURL IS", response.data.previous);
+          console.log("nextURL IS",response.data.next);
+          console.log("THE ACTUAL PREVURL IS", previousUrl)
           console.log('...');
         })
         .catch((error) => {
@@ -105,19 +123,28 @@ export default function Profile() {
     fetchData();
   }, [useLocation().state, dir]);
 
-  // var paginationHandler = (url) => {
-  //   try{
-  //     axios.get(url)
-  //     .then((response) => {
-  //       setNextUrl(response.data.next);
-  //       setPreviousURL(response.data.previous);
-  //       setPostsArray(response.data.items);
-  //     });
-  //   }
-  //   catch (error) {
-  //     console.log(error);
-  //   }
-  // }
+  useEffect(() => {
+    console.log("URLs changed", nextUrl, previousUrl);
+  }, [nextUrl, previousUrl])
+
+  var paginationHandler = (url) => {
+    console.log("url is", url);
+    try{
+      api.get(url)
+      .then((response) => {
+        setNextUrl(response.data.next);
+        setPreviousURL(response.data.previous);
+        setPostsArray(response.data);
+      })
+      .catch((error) => {
+        console.log(error.response.data);
+        
+      });
+    }
+    catch (error) {
+      console.log(error.response.data);
+    }
+  }
 
 
   return (
@@ -148,20 +175,12 @@ export default function Profile() {
         </div>
       </div>
       <ProfileTabs dir={dir} author_id={author_id}/>
-      {dir === 'posts' || dir === undefined ? <ProfilePosts postsArray={postsArray}/> : <></>}
+      {dir === 'posts' || dir === undefined ? <ProfilePosts prevUrl = {previousUrl} nextUrl={nextUrl}
+      paginationPrev={() => paginationHandler(previousUrl)} paginationNext={() => paginationHandler(nextUrl)} postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
       
-      <nav>
-        <ul className="pagination justify-content-center">
-            <li className="page-item">
-            <button className="page-link">{'<'}</button>
-            </li>
-            <li className="page-item">x
-              <button className="page-link">{'>'}</button>
-            </li> 
-        </ul> 
-      </nav>
+
       
     </div>
   );
