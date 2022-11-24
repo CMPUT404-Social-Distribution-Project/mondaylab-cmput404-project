@@ -148,7 +148,7 @@ export default function PostCard(props) {
       node.headers = {}
       fetchPostAuthorData(baseURL+'/', node);
     }
-  }, [postAuthorNode])
+  }, [postAuthorNode, useLocation().state])
 
   const fetchNode = async (author) => {
     // fetches the node object
