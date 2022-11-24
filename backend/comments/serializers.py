@@ -5,6 +5,8 @@ from author.serializers import LimitedAuthorSerializer
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = LimitedAuthorSerializer(required=False, many=False, allow_null=True)
+    uuid = serializers.UUIDField(format='hex', required=False)
+
     class Meta:
         model = Comment
         fields = '__all__'

@@ -19,7 +19,7 @@ const AuthLayout = () => {
     // if token is expired, try to refresh it
     if (isExpired === true) {
         const req = async () => {
-            const response = await axios.post(`${baseURL}/refresh/`, {
+            const response = await axios.post(`${baseURL}/auth/refresh/`, {
                 refresh: authTokens.refresh
               })
               .then((response) => {

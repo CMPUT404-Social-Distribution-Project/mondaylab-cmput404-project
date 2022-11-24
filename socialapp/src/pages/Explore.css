@@ -52,3 +52,20 @@
     border-style: solid;
     border-width: medium;
 }
+
+.all-posts-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.public-posts-and-remote-container {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 1em;
+}
+
+.remote-authors-container .userCard {
+    width: 100%;
+    margin-top: 0.5em;
+}

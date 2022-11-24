@@ -15,13 +15,22 @@ import EditPost from "./EditPost";
 import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
+import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl } from "../../utils/utils";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
-  const post_user_id = props.post.author.uuid;
+  const post_user_id = extractAuthorUUID(props.post.author.id);
+  const post_id = extractPostUUID(props.post.id)
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
+
+  // node
+  const [postAuthorNode, setPostAuthorNode] = useState(null);     // the node object of post's author
+  const [postAuthorBaseApiURL, setPostAuthorBaseAPI] = useState("");
+
   const [postComment, setPostComment] = useState({
     comment: "",
+    type: "comment",
+    contentType: "text/markdown"
   });
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
@@ -58,15 +67,19 @@ export default function PostCard(props) {
     navigate(`${location.pathname}`, { state: { refresh: true } });
   };
 
-  const sendPostLike = (uuid) => {
+  const sendPostLike = () => {
+    let host = baseURL + "/"
     const postLike = {
       type: "like",
       summary: `${author.displayName} Likes your post.`,
       author: author,
       object: props.post.id,
     };
+    if (!authorHostIsOurs(props.post.author.host) && postAuthorBaseApiURL != null){
+      host = postAuthorBaseApiURL
+    }
     api
-      .post(`${baseURL}/authors/${post_user_id}/inbox/`, postLike)
+      .post(`${host}authors/${post_user_id}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -76,64 +89,103 @@ export default function PostCard(props) {
       });
   };
 
+
+
+  // Needed to separate this from the others fetches, because
+  // postAuthorNode is sometimes null. Doing it this way,
+  // these fetch calls are only called once postAuthorNode changes
+  // to not null. 
   useEffect(() => {
-    const fetchData = async () => {
-      await api
-        .get(`${baseURL}/authors/${user_id}/`)
-        .then((response) => {
-          setAuthor(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    const fetchPostAuthorData = async (ApiURL, node) => {
       await api
         .get(
-          `${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/likes`
+          `${ApiURL}authors/${post_user_id}/posts/${post_id}/likes`, 
+          {headers: node.headers}
         )
         .then((response) => {
           let likers = [];
-          setLikeCount((likeCount) => response.data.items.length);
-          for (let data of response.data.items) {
-            likers.push(data.author.uuid);
-            if (data.author.uuid === user_id) {
-              setLiked(true);
+          let resLikeItems = response.data.items;
+          if (typeof(response.data.items) === 'undefined') {
+            resLikeItems = response.data;
+          }
+          if (typeof(resLikeItems) !== 'undefined') {
+            setLikeCount((likeCount) => resLikeItems.length);
+            for (let data of resLikeItems) {
+              likers.push(extractAuthorUUID(data.author.id));
+              if (extractAuthorUUID(data.author.id) === user_id) {
+                setLiked(true);
+              }
             }
           }
-
-          api
-            .get(`${baseURL}/authors/${user_id}/friends/`)
-            .then((response) => {
-              setFriends(response.data.items);
-              for (let data of response.data.items) {
-                if (likers.includes(data.uuid)) {
-                  setBeFriend(true);
-                }
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-            });
         })
         .catch((error) => {
           console.log(error);
-        });
-      await api
-        .get(
-          `${baseURL}/authors/${post_user_id}/posts/${props.post.uuid}/comments/`
-        )
-        .then((response) => {
-          const commentArray = response.data.comments;
+      });
+    await api
+      .get(
+        `${ApiURL}authors/${post_user_id}/posts/${post_id}/comments`,
+        {headers: node.headers}
+      )
+      .then((response) => {
+        let commentArray = response.data.comments;
+        if (typeof(commentArray) !== 'undefined') {
           setCommentCount(commentArray.length);
           if (commentArray.length !== 0) {
-            for (let i = 0; i < commentArray.length; i++) {
-              const comment = commentArray[i];
-              setComments((comments) => [...comments, comment]);
-            }
+            setComments(commentArray);
           }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        // TODO: If failed to fetch from theirs, fall back on ours?
+      });
+    }
+    if (!authorHostIsOurs(props.post.author.host) && postAuthorNode !== null) {
+      fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
+    } else {
+      // empty node
+      let node = {}
+      node.headers = {}
+      fetchPostAuthorData(baseURL+'/', node);
+    }
+  }, [postAuthorNode])
+
+  const fetchNode = async (author) => {
+    // fetches the node object
+    await api
+    .get(`${baseURL}/node/?host=${author.host}`)
+    .then((response) => {
+      let node = createNodeObject(response, author.host);
+      setPostAuthorNode(node);
+      setPostAuthorBaseAPI(node.host);
+    })
+    .catch((err) => {
+      console.log(err.response.data);
+    })
+  }
+
+
+  useEffect(() => {
+    const fetchAuthor = async () => {
+      await api
+      .get(`${baseURL}/authors/${user_id}/`)
+      .then((response) => {
+        setAuthor(response.data);
+        setPostComment({ ...postComment, author: response.data })
+        if (!authorHostIsOurs(props.post.author.host)) {
+          fetchNode(props.post.author);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
+    fetchAuthor();
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+
       await api
         .get(`${baseURL}/authors/${user_id}/followers`)
         .then((response) => {
@@ -150,45 +202,75 @@ export default function PostCard(props) {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/${post_user_id}`)
+        .then((response) => {
+          setBeFriend(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
-  }, []);
+  }, [author, postAuthorBaseApiURL]);
 
   const sharePost = (post) => {
-    console.log(post.id);
+    let host = baseURL + '/';
     if (post.visibility === "PUBLIC") {
       for (let index = 0; index < followers.length; index++) {
-        const sharedPost = {
-          type: "post",
-          summary: `${author.displayName} shared a post.`,
-          author: author,
-          object: post.id,
-        };
-        api
-          .post(`${baseURL}/authors/${followers[index].uuid}/inbox/`, post)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
+        const follower = followers[index]
+        if (!authorHostIsOurs(follower.host)) {
+          api
+            .get(`${baseURL}/node/?host=${follower.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, follower.host);
+              api
+                .post(`${node.host}authors/${extractAuthorUUID(follower.id)}/inbox/}`, { header: node.headers }, post)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((error) => {
+                  console.log("Failed to get posts of author. " + error);
+                });
           });
+        } else {
+          api
+            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
       }
     } else if (post.visibility === "FRIENDS") {
       for (let index = 0; index < friends.length; index++) {
-        const sharedPost = {
-          type: "post",
-          summary: `${author.displayName} shared a post.`,
-          author: author,
-          object: post.id,
-        };
-        api
-          .post(`${baseURL}/authors/${friends[index].uuid}/inbox/`, post)
-          .then((response) => {
-            console.log(response);
-          })
-          .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
-          });
+        const friend = friends[index]
+        if (!authorHostIsOurs(friend.host)) {
+          api
+            .get(`${baseURL}/node/?host=${friend.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, friend.host);
+              api
+                .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/}`, { header: node.headers }, post)
+                .then((response) => {
+                  console.log(response);
+                })
+                .catch((error) => {
+                  console.log("Failed to get posts of author. " + error);
+                });
+            });
+        } else {
+          api
+            .post(`${host}authors/${extractAuthorUUID(author.id)}/inbox/}`, post)
+            .then((response) => {
+              console.log(response);
+            })
+            .catch((error) => {
+              console.log("Failed to get posts of author. " + error);
+            });
+        }
       }
     }
   };
@@ -231,7 +313,7 @@ export default function PostCard(props) {
         postComment
       )
       .then((response) => {
-        window.location.reload(true);
+        
 
         commentObject["type"] = response.data.type;
         commentObject["comment"] = response.data.comment;
@@ -239,16 +321,18 @@ export default function PostCard(props) {
         commentObject["id"] = response.data.id;
         commentObject["contentType"] = response.data.contentType;
         commentObject["published"] = response.data.published;
-        commentObject["uuid"] = response.data.uui;
+        commentObject["uuid"] = response.data.uuid;
 
         api
-          .post(`${baseURL}/authors/${post_user_id}/inbox/`, commentObject)
+          .post(`${postAuthorBaseApiURL}/authors/${post_user_id}/inbox/`, commentObject)
           .then((response) => {
             console.log("success send comments to inbox");
           })
           .catch((error) => {
-            console.log("Failed to get posts of author. " + error);
+            console.log("Failed to send comment to inbox" + error);
           });
+
+        refreshState();
       })
       .catch((error) => {
         alert(`Something went wrong posting! \n Error: ${error}`);
@@ -269,7 +353,7 @@ export default function PostCard(props) {
               <MdShare /> Share Post
             </Dropdown.Item>
             {(() => {
-              if (user_id === props.post.author.uuid) {
+              if (user_id === post_user_id) {
                 return (
                   <div>
                     <Dropdown.Item onClick={() => setShowEditPost(true)}>
@@ -278,7 +362,7 @@ export default function PostCard(props) {
 
                     <Dropdown.Item
                       className="delete-post"
-                      onClick={() => confirmDelete(props.post.uuid)}
+                      onClick={() => confirmDelete(post_id)}
                     >
                       <MdDelete /> Delete Post
                     </Dropdown.Item>
@@ -377,9 +461,11 @@ export default function PostCard(props) {
         <Card.Title>
           <ReactMarkdown>{props.post.title}</ReactMarkdown>
         </Card.Title>
-        {props.post.image && (
+        {(props.post.image && (
           <img className="post-image" src={props.post.image} alt="postImage" />
-        )}
+        )) || (!authorHostIsOurs(props.post.author.host) && props.post.contentType.startsWith("image") 
+        && isValidHTTPUrl(props.post.content) && 
+        <img className="post-image" src={props.post.content} alt="postImage" />)}
         <Card.Text>
           {showContent && <ReactMarkdown>{props.post.content}</ReactMarkdown>}
         </Card.Text>
@@ -391,7 +477,7 @@ export default function PostCard(props) {
               color:
                 likeCount !== 0 && liked ? "var(--orange)" : "var(--white)",
             }}
-            onClick={() => sendPostLike(props.post.uuid)}
+            onClick={() => sendPostLike(post_id)}
           />
 
           {beFriend || beOwner ? likeCount : null}
@@ -454,7 +540,7 @@ export default function PostCard(props) {
                   color: "black",
                   backgroundColor: "#BFEFE9",
                 }}
-                onClick={() => sendComment(props.post.uuid)}
+                onClick={() => sendComment(post_id)}
               >
                 Send
               </Button>

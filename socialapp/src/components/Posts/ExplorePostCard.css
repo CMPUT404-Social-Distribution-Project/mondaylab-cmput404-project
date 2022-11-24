@@ -6,6 +6,7 @@
     margin-left: 10px;
     border-color: none;
     --bs-card-bg: none;
+    flex-basis: 16.4rem;
 }
 
 .post-card-explore .card-header {

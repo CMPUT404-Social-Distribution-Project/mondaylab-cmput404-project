@@ -36,6 +36,20 @@ function RenderAuthors(props) {
   return <></>;
 }
 
+function RenderRemoteAuthors(props) {
+  // given the list of authors from the query, creates the user cards
+  if (props.authors !== "undefined" && props.authors.length > 0) {
+    return (
+        <Card className="remote-authors-container" style={{ backgroundColor: "var(--darker-blue)" }}>
+          <Card.Body>
+            <h5>Remote Authors</h5>
+          {props.authors.map((author) => <UserCard author={author} key={author.id}/>)}
+          </Card.Body>
+        </Card>
+    );
+  }
+}
+
 export default function Explore() {
   // const validate = Yup.object().shape({
   //   search: Yup.string(),
@@ -48,6 +62,7 @@ export default function Explore() {
   const [displaySearch, setDisplaySearch] = useState(false);
   const api = useAxios();
   const { baseURL } = useContext(AuthContext);
+  const [remoteAuthors, setRemoteAuthors] = useState([]);
 
   useEffect(() => {
     api
@@ -59,6 +74,17 @@ export default function Explore() {
         console.log(error);
       });
   }, [useLocation().state]);
+
+  useEffect(() => {
+    api
+      .get(`${baseURL}/node/authors/`)
+      .then((response) => {
+        setRemoteAuthors(response.data.items);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const search = async (val) => {
     setLoading(true);
@@ -98,7 +124,7 @@ export default function Explore() {
   };
 
   return (
-    <Container>
+    <div className="explore-page-container">
       {/* Stack the columns on mobile by making one full-width and the other half-width */}
       <Row className="explore-title-container">
         <Col>
@@ -120,38 +146,41 @@ export default function Explore() {
       </div>
 
       {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
-
-      <Card style={{ backgroundColor: "var(--darker-blue)" }}>
-        <Card.Body>
-          {value !== "" ? (
-            displaySearch === true ? (
-              <>
-                <p>Search posts:</p>
-                <Row>
-                  {searchPostsArray.map((post) => (
-                    <Col key={post.id} >
-                      <ExplorePostCard post={post} />
-                    </Col>
-                  ))}
-                </Row>
-              </>
+      <div className="public-posts-and-remote-container">
+        <Card style={{ backgroundColor: "var(--darker-blue)" }}>
+          <Card.Body>
+            {value !== "" ? (
+              displaySearch === true ? (
+                <>
+                  <p>Search posts:</p>
+                  <Row>
+                    {searchPostsArray.map((post) => (
+                      <Col key={post.id} >
+                        <ExplorePostCard post={post} />
+                      </Col>
+                    ))}
+                  </Row>
+                </>
+              ) : (
+                <h5> No match result for posts!</h5>
+              )
             ) : (
-              <h5> No match result for posts!</h5>
-            )
-          ) : (
-            <>
-              <p>Current public posts</p>
-              <Row>
-                {postsArray.map((post) => (
-                  <Col key={post.id}>
-                    <ExplorePostCard post={post} />
-                  </Col>
-                ))}
-              </Row>
-            </>
-          )}
-        </Card.Body>
-      </Card>
-    </Container>
+              <>
+                <h5>Current public posts</h5>
+                <div className="all-posts-container">
+                  {postsArray.map((post) => (
+                      <ExplorePostCard post={post} />
+                  ))}
+                </div>
+              </>
+            )}
+          </Card.Body>
+        </Card>
+        <RenderRemoteAuthors authors={remoteAuthors}/>
+
+      </div>
+      
+
+    </div>
   );
 }

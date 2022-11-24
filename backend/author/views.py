@@ -12,8 +12,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
 from django.shortcuts import get_list_or_404
-from backend.utils import isUUID, isAuthorized, check_github_valid
+from backend.utils import isAuthorized, check_github_valid, is_our_frontend
 from backend.pagination import CustomPagination
+from node.utils import our_hosts
 
 class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch', 'post']
@@ -44,7 +45,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 /service/authors/
         '''
         try:
-
+            if not is_our_frontend(request.META.get("HTTP_ORIGIN")):
+                # if not our frontend (is remote node) then only include our
+                # authors and not remote authors in the list
+                self.queryset = Author.objects.filter(host__in=our_hosts)
+            
             authorsQuerySet = self.filter_queryset(self.queryset)
             authorsPaginateQuerySet = self.paginate_queryset(authorsQuerySet)
             authorsSerializer = AuthorSerializer(authorsPaginateQuerySet, many=True, context={"request": request})
@@ -57,10 +62,6 @@ class UserViewSet(viewsets.ModelViewSet):
             }
             
             return Response(result, status=status.HTTP_200_OK)
-
-            # serializer = self.serializer_class(self.filter_queryset(self.queryset), many=True, context={"request": request})
-            # serializer = {"type": "authors", "items":serializer.data}
-            # return Response(serializer, status=status.HTTP_200_OK)
             
         except Exception as e:
             return Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)

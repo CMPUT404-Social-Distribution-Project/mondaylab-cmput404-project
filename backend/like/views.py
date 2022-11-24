@@ -9,8 +9,8 @@ from author.models import Author
 from like.models import Like
 from comments.models import Comment
 from django.db.models import Q
-from like.serializers import LikeCommentSerializer, LikePostSerializer, LikeAuthorSerializer
-from backend.utils import isUUID, isAuthorized, get_author_url_id, get_post_id
+from like.serializers import LikeSerializer, LikeAuthorSerializer
+from backend.utils import isAuthorized, is_friends
 
 class LikesPostApiView(GenericAPIView):
     """
@@ -24,15 +24,25 @@ class LikesPostApiView(GenericAPIView):
     GET [local, remote] a list of likes from other authors on AUTHOR_ID’s post POST_ID comment COMMENT_ID
     """
     permission_classes = [AllowAny]
-    serializer_class=LikePostSerializer
+    serializer_class=LikeSerializer
     def get(self, request, author_id, post_id):
 
         try:
+            
             post = Post.objects.get(uuid=post_id) 
-            post_like = Like.objects.filter(object = post.id)
-            post_likes = self.serializer_class(post_like, many=True)
-            result = {"type": "likes", "items": post_likes.data}
-            return response.Response(result, status=status.HTTP_200_OK)
+            if isAuthorized(request, author_id) or (
+                post.visibility == "FRIENDS" and is_friends(request, author_id)
+            ):
+                # if the owner of the post, just show all the likes OR
+                # if the author viewing is a friend, and the post is friends-only
+                # show the likes
+                post_like = Like.objects.filter(object = post.id)
+                post_likes = self.serializer_class(post_like, many=True)
+                result = {"type": "likes", "items": post_likes.data}
+                return response.Response(result, status=status.HTTP_200_OK)
+            else:
+                result = {"type": "likes", "items": []}
+                return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
@@ -70,13 +80,8 @@ class LikesCommentApiView(GenericAPIView):
     """
 
     permission_classes = [AllowAny]
-    serializer_class=LikeCommentSerializer
+    serializer_class=LikeSerializer
     def get(self, request, author_id, post_id, comment_id):
-        
-        #TODO: do this require authentiation
-        # TODO: to test, how to I test for likes
-        # what is the summary field? suggestion is to say [list of author liked your post]
-
         # return list of likes from this author's post's comment
         # Like db contains rows of like object, each like obj has this field('object') = "...author/{author_id}/posts/{postid}/comments/{commentid}"
         # to get all likes with this comment, check if post_id, comment_id is in the field('object')
@@ -84,10 +89,9 @@ class LikesCommentApiView(GenericAPIView):
             author = Author.objects.get(uuid = author_id)
             post = Post.objects.get(uuid=post_id)
             comment = Comment.objects.get(uuid=comment_id)
-            fullcommentID =  get_comment_url(request, author_id, post_id, comment_id)
 
             # all likes in this comment; we query using like['object']
-            commentLikes = Like.objects.filter(object=fullcommentID)
+            commentLikes = Like.objects.filter(object=comment.id)
             commentLikesSerialize = self.serializer_class(commentLikes, many=True)
             result = {"type": "likes", "items": commentLikesSerialize.data}
             return response.Response(result, status=status.HTTP_200_OK)
@@ -130,8 +134,6 @@ class AuthorLikedApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikeAuthorSerializer
     def get(self, request, author_id):
-        author_url_id = get_author_url_id(request)
-        
         try:
             author = Author.objects.get(uuid = author_id)
             post_like = Like.objects.filter(author = author)
@@ -140,17 +142,3 @@ class AuthorLikedApiView(GenericAPIView):
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
-
-
-
-
-def get_comment_url(request, author_id, post_id, comment_id):
-    """
-    Delete <service> in url, return post url without post uuid
-    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/{postid}/comments/{comment_id}/likes
-    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/{postid}/comments/{comment_id}
-
-    """
-    xx=request.build_absolute_uri().split('service/')  # remove service/ string
-    commentID= xx[0]+ 'authors/'+author_id+"/posts/" + post_id + "/" + "comments/" + comment_id
-    return str(commentID)
