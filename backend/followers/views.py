@@ -7,7 +7,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
-from backend.utils import isUUID, isAuthorized, check_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
+from backend.utils import isAuthorized, check_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
 
 class FollowersApiView(GenericAPIView):
     """
@@ -17,7 +17,6 @@ class FollowersApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
-
         try:
             current_author = Author.objects.get(uuid=author_id)
             followers = current_author.followers.all()
@@ -50,14 +49,11 @@ class FollowersForeignApiView(GenericAPIView):
     serializer_class = FollowerSerializer
     def get(self, request, author_id, foreign_author_id):
         try:
-            author_id = get_author_url_id(request)
-            foreign_id = get_foreign_id(request)
-
-            current_author = Author.objects.get(id = author_id)
+            current_author = Author.objects.get(uuid = author_id)
             followers = current_author.followers.all()
             if followers.exists():
                 # check if the foreign author is following author
-                isFollowing = current_author.followers.filter(id = foreign_id).first()
+                isFollowing = current_author.followers.filter(uuid = foreign_author_id).first()
                 if isFollowing != None:
                     return response.Response(True, status=status.HTTP_200_OK)
                 else:
@@ -74,11 +70,6 @@ class FollowersForeignApiView(GenericAPIView):
         else:
             try:
                 current_author = Author.objects.get(uuid = author_id)
-                # TODO: Need to create function that tries to get foreign_author_uuid in DB
-                # if unsuccessful, then check request's host -> if req host is a node in our DB
-                # then get it's API url, try and fetch this foreign author from their DB.
-                # If foreign author is retrieved from their DB, create that author
-                # in our DB. 
                 foreign_author = Author.objects.get(uuid = foreign_author_id)
 
                 current_author.followers.add(foreign_author)
@@ -129,9 +120,7 @@ class TrueFriendApiView(GenericAPIView):
     def get(self, request, author_id, foreign_author_id):
         
         try:
-            author_id = get_author_url_id(request)
-            friend_id = get_friend_id(request)
-            result = check_friend(author_id, friend_id)
+            result = check_friend(author_id, foreign_author_id)
             if result ==True:
                 return response.Response(True, status=status.HTTP_200_OK)
             else:
@@ -150,15 +139,11 @@ class TrueFriendsApiView(GenericAPIView):
     def get(self, request, author_id):
         
         try:
-            author_id = get_author_url_id(request)
-            current_author = Author.objects.get(id = author_id)
-
+            current_author = Author.objects.get(uuid = author_id)
             friends_list = get_friends_list(current_author)
 
             result = {"type": "friends", "items": friends_list}
             return response.Response(result, status=status.HTTP_200_OK)
-
-        
 
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)

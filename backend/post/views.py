@@ -12,10 +12,10 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import get_friends_list, isUUID, isAuthorized, is_friends, get_friends_list, get_author_url_id
+from backend.utils import get_friends_list, is_URL, isAuthorized, is_friends, get_friends_list, get_author_url_id
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
-import base64
+import base64, requests
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -129,15 +129,13 @@ class PostsApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = Author.objects.get(uuid=author_id)
-            author_url_id = get_author_url_id(request)
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
                 postsQuerySet = Post.objects.filter(author=authorObj).order_by("published").reverse()
-            elif is_friends(request, author_url_id):             # if the current author is friends with the viewed author, show the friend posts
+            elif is_friends(request, author_id):             # if the current author is friends with the viewed author, show the friend posts
                 postsQuerySet = Post.objects.filter(author=authorObj, visibility__in=['PUBLIC','FRIENDS'], unlisted=False).order_by("published").reverse()
             else:
                 postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC', unlisted=False).order_by("published").reverse()
             postsPaginated = self.paginate_queryset(postsQuerySet)
-
             
             # Need to set the commentSrc of each post object in the paginated posts
             # so we loop through the paginated query set to do so
@@ -212,14 +210,14 @@ class PostsApiView(GenericAPIView):
                     # get author obj to be saved in author field of post
                     authorObj = Author.objects.get(uuid=author_id)
                     # create post ID and origin and source
-                    postUUID = str(uuid4())
-                    postId = request.build_absolute_uri() + postUUID
+                    postUUID = uuid4()
+                    postId = request.build_absolute_uri() + postUUID.hex
                     origin = postId
 
                     if serialize.validated_data.get("contentType").startswith("image"):
                         # content type is an image, then the content SHOULD be a base64 string.
                         # make image field the url link to the image
-                        image = request.build_absolute_uri() + postUUID + "/image"
+                        image = request.build_absolute_uri() + postUUID.hex + "/image"
                         serialize.validated_data["image"] = image
 
                     serialize.save(
@@ -281,7 +279,7 @@ class AllPostsApiView(GenericAPIView):
 
     def get(self, request):
         '''
-        Gets all public posts
+        Gets all public posts.
         '''
         try:
             posts_list = list(Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published'))
@@ -297,7 +295,10 @@ class AllPostsApiView(GenericAPIView):
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 class PostImageApiView(GenericAPIView):
-
+    """
+    URL ://posts/<post_id>/image
+    GET [local] returns the post's image
+    """
     def get(self, request, post_id, author_id):
         try:
             if isAuthorized(request, author_id): 
@@ -309,6 +310,14 @@ class PostImageApiView(GenericAPIView):
 
             
             if "base64" not in image_post.content:
+                if is_URL(image_post.content):
+                    # Team 2 has a link to the image in the post's content
+                    res = requests.get(image_post.content)
+                    if res.status_code == 200:
+                        content_type = res.headers.get("content-type")
+                        ext = content_type.split('/')[-1]
+                        data = ContentFile(res.content, name='temp.' + ext)
+                        return HttpResponse(data, content_type=content_type)
                 return response.Response(f"Content of this post is not a base64 encoded string.", status=status.HTTP_400_BAD_REQUEST)
                 
             # decode the base64 image into binary 
@@ -333,21 +342,4 @@ def get_followers_list(current_author):
         print(e)
 
     return followers_list
-
-def check_author_id(request):
-    author_url_id= get_author_url_id(request)
-    author = Author.objects.filter(id = author_url_id)
-    return author.exists()
-
-def get_post_url(request, author_id):
-    """
-    Delete <service> in url, return post url without post uuid
-    Input : http://127.0.0.1:8000/service/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
-    Output: http://127.0.0.1:8000/authors/7295a07e-1ee0-4b70-8515-08502b6d5b03/posts/
-    """
-
-    xx=request.build_absolute_uri().split('service/')
-    author_url_id= xx[0]+ 'authors/'+author_id+"/posts/"
-    return str(author_url_id)
-
 
