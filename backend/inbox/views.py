@@ -14,6 +14,7 @@ from backend.utils import isUUID, isAuthorized
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
+from backend.pagination import CustomPagination
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
@@ -36,11 +37,16 @@ class InboxApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/inbox
     DELETE [local]: clear the inbox
     """
+
     permission_classes = [AuthenticateGET]
     serializer_class = PostSerializer
     http_method_names=['get', 'post', 'delete']
 
+    pagination_class = CustomPagination
+    
     def get(self, request, author_id):
+    
+        print("in GET")
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
         """
@@ -57,7 +63,15 @@ class InboxApiView(GenericAPIView):
             try:
                 
                 posts_list = list(inbox.posts.all().order_by("published"))
+
+                print()
+                print()
+                print("--- posts_list")
+                print(posts_list)
+                print()
+
                 posts_serializers = self.serializer_class(posts_list, many=True)
+
 
                 result = {
                     'type': 'inbox',
@@ -72,6 +86,8 @@ class InboxApiView(GenericAPIView):
 
 
     def post(self, request, author_id):
+
+        print("in post")
         """
         POST [local, remote]: send a post to the author
         if the type is “post” then add that post to AUTHOR_ID’s inbox
@@ -312,6 +328,7 @@ class InboxAllApiView(GenericAPIView):
                 else:
                     comments_serializers_data=[]
                     
+                print("HEREEEE")
                 result = {
                     'type': 'inbox',
                     'author': author.url,
@@ -321,14 +338,15 @@ class InboxAllApiView(GenericAPIView):
                     comments_serializers_data
                     
                 }
+                print(result)
                 return response.Response(result, status=status.HTTP_200_OK) 
 
             except Exception as e:
                 result = {'detail':"Posts Not Found" , "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
-
 class InboxDeleteFRApiView(GenericAPIView):
+    print("here!-!")
     '''
     URL: ://service/authors/{AUTHOR_ID}/inbox/{FOREIGN_AUTHOR_ID}
     DELETE [local]: deletes the follow request(s) from the 
@@ -359,6 +377,8 @@ class InboxDeleteFRApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 def get_author(author_id):
+
+    print("in get_author")
     """
     Given author id, check if the author exists in database
     """
@@ -370,6 +390,8 @@ def get_author(author_id):
         return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
 def get_like_type(object_field):
+
+    print("in get_link_type")
     if "posts" in object_field and "comments" in object_field:
         return "comment"
     elif "post" in object_field:
