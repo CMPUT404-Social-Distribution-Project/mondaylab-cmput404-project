@@ -24,7 +24,7 @@ export function authorHostIsOurs(host) {
     // TODO: uncomment out last line once we connect with other nodes
     return "http://localhost:8000/".includes(host) || 
     "http://127.0.0.1:8000/".includes(host) 
-    // || "https://cs404-project.herokuapp.com/".includes(host)
+    || "https://cs404-project.herokuapp.com/".includes(host)
 }
 
 export function b64EncodeCredentials(username, password) {
