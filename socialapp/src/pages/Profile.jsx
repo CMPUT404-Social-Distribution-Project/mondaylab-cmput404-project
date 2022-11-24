@@ -112,7 +112,7 @@ export default function Profile() {
     await api
     .get(`${baseURL}/node/?host=${author.host}`)
     .then((response) => {
-      let node = createNodeObject(response, author.host);
+      let node = createNodeObject(response, author);
       setAuthorNode(node);
       setAuthorBaseAPI(node.host);
     })

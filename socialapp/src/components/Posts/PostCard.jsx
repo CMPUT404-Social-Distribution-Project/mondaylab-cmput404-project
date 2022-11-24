@@ -133,9 +133,9 @@ export default function PostCard(props) {
       })
       .catch((error) => {
         console.log(error);
-        // TODO: If failed to fetch from theirs, fall back on ours?
       });
     }
+
     if (!authorHostIsOurs(props.post.author.host) && postAuthorNode !== null) {
       fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
     } else {
@@ -151,7 +151,7 @@ export default function PostCard(props) {
         await api
         .get(`${baseURL}/node/?host=${author.host}`)
         .then((response) => {
-          let node = createNodeObject(response, author.host);
+          let node = createNodeObject(response, author);
           setPostAuthorNode(node);
           setPostAuthorBaseAPI(node.host);
         })
@@ -199,7 +199,7 @@ export default function PostCard(props) {
       api
         .get(`${baseURL}/node/?host=${author.host}`)
         .then((response) => {
-          let node = createNodeObject(response, author.host);
+          let node = createNodeObject(response, author);
           api
             .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox}`, { header: node.headers }, post)
             .then((response) => {

@@ -92,7 +92,7 @@ export default function PostCard(props) {
         await api
         .get(`${baseURL}/node/?host=${author.host}`)
         .then((response) => {
-          let node = createNodeObject(response, author.host);
+          let node = createNodeObject(response, author);
           setPostAuthorNode(node);
           setPostAuthorBaseAPI(node.host);
         })
@@ -140,7 +140,7 @@ export default function PostCard(props) {
       api
         .get(`${baseURL}/node/?host=${author.host}`)
         .then((response) => {
-          let node = createNodeObject(response, author.host);
+          let node = createNodeObject(response, author);
           api
             .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox}`, { header: node.headers }, post)
             .then((response) => {
