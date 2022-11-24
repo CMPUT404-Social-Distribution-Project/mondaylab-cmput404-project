@@ -13,9 +13,12 @@ from .models import Node
 def create_node_authors(modeladmin, request, queryset):
     all_remote_authors = list()
     for node in queryset:
-        res = getNodeRemoteAuthors(node)
-        all_remote_authors.extend(res)
-
+        try:
+            res = getNodeRemoteAuthors(node)
+            all_remote_authors.extend(res)
+        except Exception as e:
+            print("Failed to get nodes remote authors. ", e)
+    print(all_remote_authors)
     for remote_author in all_remote_authors:
         if not remote_author_exists(remote_author["id"]):
             try:
