@@ -42,7 +42,7 @@ class LikesPostApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_200_OK)
             else:
                 result = {"type": "likes", "items": []}
-                return response.Response(result, status=status.HTTP_200_OK)
+                return response.Response("You are neither a friend of the post's author nor the author, likes not shown.", status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
