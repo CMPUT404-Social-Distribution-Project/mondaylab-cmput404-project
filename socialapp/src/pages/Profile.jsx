@@ -99,10 +99,10 @@ export default function Profile() {
 
   // Called after rendering. Fetches data
   useEffect(() => {
-    const fetchData = async (ApiURL, authorId) => {
+    const fetchData = async (ApiURL, authorId, node) => {
       await api      
         .get(`${ApiURL}authors/${authorId}/posts`,
-        {headers: authorNode.headers}
+        {headers: node.headers}
         )
         .then((response) => {
           setPostsArray(response.data);
@@ -112,7 +112,7 @@ export default function Profile() {
         });
       await api      
         .get(`${ApiURL}authors/${authorId}/followers`,
-        {headers: authorNode.headers}
+        {headers: node.headers}
         )
         .then((response) => {
           setFollowersArray(response.data);
@@ -123,7 +123,7 @@ export default function Profile() {
         });
       await api      
         .get(`${ApiURL}authors/${authorId}/friends`,
-        {headers: authorNode.headers}
+        {headers: node.headers}
         )
         .then((response) => {
           setFriendsArray(response.data);
@@ -133,11 +133,13 @@ export default function Profile() {
         });
     };
       if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
-        fetchData(authorBaseApiURL, removeDashes(author_id));
+        fetchData(authorBaseApiURL, removeDashes(author_id), authorNode);
       } else {
         // if the author is from our host, fetch from our API, or if something went wrong
         // trying to fetch the foreign author, then fetch that author from ours as backup.
-        fetchData(baseURL+'/', author_id);
+        let node = {};
+        node.headers = {};
+        fetchData(baseURL+'/', author_id, node);
       }
       
 
