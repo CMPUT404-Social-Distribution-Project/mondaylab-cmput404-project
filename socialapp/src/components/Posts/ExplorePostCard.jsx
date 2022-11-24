@@ -10,7 +10,7 @@ import useAxios from "../../utils/useAxios";
 import { useEffect } from "react";
 import EditPost from "./EditPost";
 import { BsFillHeartFill, BsCursorFill } from "react-icons/bs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
 import Row from "react-bootstrap/Row";
@@ -40,6 +40,11 @@ export default function PostCard(props) {
     navigate(`/authors/${post_user_uuid}/`, { state: { refresh: true } });
   };
 
+  const location = useLocation();
+  const refreshState = () => {
+    navigate(`${location.pathname}`, { state: { refresh: true } });
+  };
+
   const [showContent, setShowContent] = useState(() => {
     if (props.post.contentType.startsWith("image")) {
       return false;
@@ -53,8 +58,7 @@ export default function PostCard(props) {
   };
 
   const sendPostLike = () => {
-    let host = baseURL + "/"
-    console.log("LIKE SENT WITH AUTHOR", loggedInUser);
+    let host = baseURL + "/";
     const postLike = {
       type: "like",
       summary: `${loggedInUser.displayName} Likes your post.`,
@@ -71,33 +75,55 @@ export default function PostCard(props) {
         setLikeCount((likeCount) => likeCount + 1);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Failed to send like to inbox", error.response);
+        // also create like object in our local if things go wrong in remote
+        api
+        .post(`${baseURL}/authors/${loggedInUser.uuid}/liked`, postLike)
+        .catch((error) => {
+          console.log(error.response.data);
+        });
       });
   };
 
-  // Needed to separate this from the others fetches, because
-  // postAuthorNode is sometimes null. Doing it this way,
-  // these fetch calls are only called once postAuthorNode changes
-  // to not null. 
   useEffect(() => {
-    const fetchPostAuthorData = async (ApiURL, node) => {
+    if (!authorHostIsOurs(props.post.author.host)) {
+      const fetchNode = async (author) => {
+        // fetches the node object
+        await api
+        .get(`${baseURL}/node/?host=${author.host}`)
+        .then((response) => {
+          let node = createNodeObject(response, author.host);
+          setPostAuthorNode(node);
+          setPostAuthorBaseAPI(node.host);
+        })
+        .catch((err) => {
+          console.log(err.response.data);
+        })
+      }
+      fetchNode();
+    }
+  }, []);
+
+  // Checks the logged in user's liked objects,
+  // if it matches this post's ID, then set liked to be true.
+  useEffect(() => {
+    const fetchLoggedUsersLiked = async () => {
       await api
         .get(
-          `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/likes`, 
-          {headers: node.headers}
+          `${baseURL}/authors/${loggedInUser.uuid}/liked`
         )
         .then((response) => {
-          let likers = [];
-          let resLikeItems = response.data.items;
+          let resLikedItems = response.data.items;
           if (typeof(response.data.items) === 'undefined') {
-            resLikeItems = response.data;
+            resLikedItems = response.data;
           }
-          if (typeof(resLikeItems) !== 'undefined') {
-            setLikeCount((likeCount) => resLikeItems.length);
-            for (let data of resLikeItems) {
-              likers.push(extractAuthorUUID(data.author.id));
-              if (extractAuthorUUID(data.author.id) === loggedInUser.uuid) {
+          if (typeof(resLikedItems) !== 'undefined') {
+            // console.log(props.post.id);
+
+            for (let data of resLikedItems) {
+              if (data.object === props.post.id) {
                 setLiked(true);
+                break;
               }
             }
           }
@@ -106,12 +132,8 @@ export default function PostCard(props) {
           console.log(error);
       });
     }
-    if (!authorHostIsOurs(props.post.author.host) && postAuthorNode !== null) {
-      fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
-    } else {
-      fetchPostAuthorData(baseURL+'/', emptyNode);
-    }
-  }, [postAuthorNode])
+    fetchLoggedUsersLiked();
+  }, [])
 
   const sendPostToAuthorInbox = (author, post) => {
     if (!authorHostIsOurs(author.host)) {
@@ -176,7 +198,7 @@ export default function PostCard(props) {
     api
       .delete(`${baseURL}/authors/${extractAuthorUUID(loggedInUser.id)}/posts/${uuid}`)
       .then((response) => {
-        window.location.reload(true);
+        refreshState();
       })
       .catch((error) => {
         alert(`Something went wrong posting! \n Error: ${error}`);
@@ -265,7 +287,7 @@ export default function PostCard(props) {
             <div>
               <BsFillHeartFill
                 className="like-icon"
-                style={{color: likeCount !== 0 && liked? "var(--orange)": "var(--white)",}}
+                style={{color: liked ? "var(--orange)": "var(--white)",}}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>

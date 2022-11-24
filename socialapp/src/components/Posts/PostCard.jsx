@@ -84,7 +84,13 @@ export default function PostCard(props) {
         setLikeCount((likeCount) => likeCount + 1);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Failed to send like to inbox", error.response);
+        // also create like object in our local if things go wrong in remote
+        api
+        .post(`${baseURL}/authors/${loggedInUser.uuid}/liked`, postLike)
+        .catch((error) => {
+          console.log(error.response.data);
+        });
       });
   };
 
@@ -100,19 +106,12 @@ export default function PostCard(props) {
           {headers: node.headers}
         )
         .then((response) => {
-          let likers = [];
           let resLikeItems = response.data.items;
           if (typeof(response.data.items) === 'undefined') {
             resLikeItems = response.data;
           }
           if (typeof(resLikeItems) !== 'undefined') {
             setLikeCount((likeCount) => resLikeItems.length);
-            for (let data of resLikeItems) {
-              likers.push(extractAuthorUUID(data.author.id));
-              if (extractAuthorUUID(data.author.id) === loggedInUser.uuid) {
-                setLiked(true);
-              }
-            }
           }
         })
         .catch((error) => {
@@ -144,25 +143,56 @@ export default function PostCard(props) {
     }
   }, [postAuthorNode, useLocation().state])
 
-  const fetchNode = async (author) => {
-    // fetches the node object
-    await api
-    .get(`${baseURL}/node/?host=${author.host}`)
-    .then((response) => {
-      let node = createNodeObject(response, author.host);
-      setPostAuthorNode(node);
-      setPostAuthorBaseAPI(node.host);
-    })
-    .catch((err) => {
-      console.log(err.response.data);
-    })
-  }
-  
+
   useEffect(() => {
     if (!authorHostIsOurs(props.post.author.host)) {
-      fetchNode(props.post.author);
+      const fetchNode = async (author) => {
+        // fetches the node object
+        await api
+        .get(`${baseURL}/node/?host=${author.host}`)
+        .then((response) => {
+          let node = createNodeObject(response, author.host);
+          setPostAuthorNode(node);
+          setPostAuthorBaseAPI(node.host);
+        })
+        .catch((err) => {
+          console.log(err.response.data);
+        })
+      }
+      fetchNode();
     }
   }, []);
+
+  // Checks the logged in user's liked objects,
+  // if it matches this post's ID, then set liked to be true.
+  useEffect(() => {
+    const fetchLoggedUsersLiked = async () => {
+      await api
+        .get(
+          `${baseURL}/authors/${loggedInUser.uuid}/liked`
+        )
+        .then((response) => {
+          let resLikedItems = response.data.items;
+          if (typeof(response.data.items) === 'undefined') {
+            resLikedItems = response.data;
+          }
+          if (typeof(resLikedItems) !== 'undefined') {
+            // console.log(props.post.id);
+
+            for (let data of resLikedItems) {
+              if (data.object === props.post.id) {
+                setLiked(true);
+                break;
+              }
+            }
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+      });
+    }
+    fetchLoggedUsersLiked();
+  }, [])
 
   const sendPostToAuthorInbox = (author, post) => {
     if (!authorHostIsOurs(author.host)) {
@@ -209,7 +239,7 @@ export default function PostCard(props) {
     api
       .delete(`${baseURL}/authors/${loggedInUser.uuid}/posts/${uuid}`)
       .then((response) => {
-        window.location.reload(true);
+        refreshState();
       })
       .catch((error) => {
         alert(`Something went wrong posting! \n Error: ${error}`);
@@ -220,7 +250,7 @@ export default function PostCard(props) {
   const confirmDelete = (uuid) => {
     confirmAlert({
       title: "Confirm to submit",
-      message: "Are you sure youn want to delete this post?",
+      message: "Are you sure you want to delete this post?",
       buttons: [
         {
           label: "Yes",

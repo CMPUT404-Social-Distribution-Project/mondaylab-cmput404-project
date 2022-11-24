@@ -38,6 +38,10 @@
     color: var(--teal);
 }
 
+.post-card-explore .profile-pic-post:hover {
+    cursor: pointer;
+}
+
 .post-card-explore .post-author-name {
     display: inline-flex;
     align-items: center;
