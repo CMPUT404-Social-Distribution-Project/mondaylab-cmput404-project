@@ -10,7 +10,7 @@ import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
-import { authorHostIsOurs, removeDashes, createNodeObject, emptyNode } from '../utils/utils';
+import { authorHostIsOurs, extractAuthorUUID, createNodeObject, emptyNode } from '../utils/utils';
 import { CgRemote } from "react-icons/cg";
 
 function ProfilePosts(props) {
@@ -157,7 +157,7 @@ export default function Profile() {
         });
     };
       if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
-        fetchData(authorBaseApiURL, removeDashes(author_id), authorNode);
+        fetchData(authorBaseApiURL, extractAuthorUUID(author.id), authorNode);
       } else {
         // if the author is from our host, fetch from our API, or if something went wrong
         // trying to fetch the foreign author, then fetch that author from ours as backup.
