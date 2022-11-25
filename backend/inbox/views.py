@@ -10,7 +10,8 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from backend.utils import isUUID, isAuthorized, validate_follow_rq, validate_comment, validate_like, get_author_uuid_from_id, get_or_create_author
+from backend.utils import (isUUID, isAuthorized, validate_follow_rq, validate_comment, 
+validate_like, validate_remote_post, get_author_uuid_from_id, get_or_create_author, create_remote_post, create_remote_like, create_remote_comment)
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
@@ -103,7 +104,7 @@ class InboxApiView(GenericAPIView):
                 validate_follow_rq(request.data)
                 actor_obj = get_or_create_author(request.data["actor"])
                 if actor_obj == None:
-                    return response.Response("Something went wrong getting or creating author.")
+                    return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                 # get the object author object
                 object_url_id = request.data['object']['id']
@@ -130,16 +131,24 @@ class InboxApiView(GenericAPIView):
             
         elif request.data['type'].lower() == "post":
             try:
-                post_uuid= request.data['id'].split('/')[-1]
-            except:
-                return response.Response("Incorrect format of post", status=status.HTTP_400_BAD_REQUEST)
-            try:    
-                post=Post.objects.get(uuid = post_uuid)
-
+                request_post_data = validate_remote_post(request.data)
+                print(request_post_data)
+                request_post_author = get_or_create_author(request_post_data["author"])
+                
+                if request_post_author == None:
+                    return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                # If post already exists, then use that to add to inbox
+                if Post.objects.filter(id=request_post_data["id"]).exists():
+                    post_obj = Post.objects.get(id=request_post_data["id"])
+                else:
+                    # If doesn't exist, create the post
+                    create_remote_post(request_post_data, request_post_data["author"])
+                    post_obj = Post.objects.get(id=request_post_data["id"])
             except Exception as e:
-                post=Post.objects.create(uuid = post_uuid)
+                return response.Response(f"Incorrect format of post. {e}", status=status.HTTP_400_BAD_REQUEST)
 
-            inbox.posts.add(post)
+
+            inbox.posts.add(post_obj)
             result={
                 "detail": " send post successful"
             }
@@ -231,10 +240,8 @@ class InboxApiView(GenericAPIView):
                     request.data["id"] = request.build_absolute_uri() +  comment_uuid.hex
                     request.data["published"] = datetime.now(tz=timezone.utc).isoformat("T","seconds")
 
-                    comments_serializer = CommentsInboxSerializer(data=request.data)
-                    if comments_serializer.is_valid(raise_exception=True):
-                        comment = comments_serializer.save(
-                    )
+                    create_remote_comment(request.data)
+                    comment = Comment.objects.get(id=request.data["id"])
                         
 
                 inbox.comments.add(comment)

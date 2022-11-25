@@ -259,15 +259,15 @@ def is_URL(string):
 def validate_post(post_data):
     post_fields = ['type','title','id','source','origin','description',
         'contentType','content','categories','count','comments','published',
-        'visibility','unlisted','author','commentSrc', 'image']
+        'visibility','unlisted','author','commentSrc', 'image', 'uuid']
     
     
     for field in post_data.keys():
         if field not in post_fields:
-            return (None, f"Field {field} is not a valid property")
+            raise ValidationError(f"Field {field} is not a valid property")
     
     if post_data['type'].lower() != 'post':
-        return (None, f'Incorrect post type')
+        raise ValidationError(f'Incorrect post type')
 
 def create_remote_author(remote_author):
     if display_name_exists(remote_author["displayName"]):
@@ -288,7 +288,7 @@ def create_remote_author(remote_author):
                 )
         
 def validate_remote_post(post):
-    required_fields = ['type','id','contentType']
+    required_fields = ['type','id','contentType', 'author']
     remote_post = post.copy()
 
     for field in required_fields:
@@ -329,6 +329,11 @@ def validate_remote_post(post):
         except ValidationError as e:
             # if not valid url, create comment url
             remote_post["comments"] = remote_post["id"] + '/comments'
+
+    # Check if all fields in author are there
+    for required_field in author_required_fields:
+        if remote_post["author"].get(required_field) == None:
+            raise ValidationError(f"Post's author is missing required field {required_field}")
 
     return remote_post
 
@@ -382,8 +387,6 @@ def create_remote_comment(remote_comment):
         # get the comment's author and set it
         remote_author_obj = get_author_with_id(remote_comment["author"]["id"])
         del remote_comment["author"]
-        print(remote_author_obj.id)
-        print(type(remote_comment), remote_comment)
 
         comment_serializer = CommentsSerializer(data=remote_comment)
         if comment_serializer.is_valid(raise_exception=True):
