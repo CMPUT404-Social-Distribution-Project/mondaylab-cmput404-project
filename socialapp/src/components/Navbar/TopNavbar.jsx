@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 function TopNavbar() {
     const [res, setRes] = useState("");
-    const { baseURL } = useContext(AuthContext);
+    const { baseURL } = useContext(AuthContext) || {};
     const user_id = localStorage.getItem("user_id");
     const navigate = useNavigate();
     const routeChange = () => {

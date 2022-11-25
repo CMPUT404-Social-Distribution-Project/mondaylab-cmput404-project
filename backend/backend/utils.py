@@ -383,7 +383,7 @@ def create_remote_comment(remote_comment):
         # but first create the comment's author if they don't exist 
         if not remote_author_exists(remote_comment["author"]["id"]):
             create_remote_author(remote_comment["author"])
-        
+
         # get the comment's author and set it
         remote_author_obj = get_author_with_id(remote_comment["author"]["id"])
         del remote_comment["author"]

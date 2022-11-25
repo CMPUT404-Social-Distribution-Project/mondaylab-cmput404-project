@@ -6,7 +6,7 @@ export function extractAuthorUUID(id) {
     if (id.slice(-1) === '/') {
         UUID = UUID.slice(0, -1);   //remove end slash
     }
-    return UUID.replace('-','');
+    return UUID;
 }
 
 export function extractPostUUID(id) {
@@ -16,7 +16,7 @@ export function extractPostUUID(id) {
     if (id.slice(-1) === '/') {
         UUID = UUID.slice(0, -1);   //remove end slash
     }
-    return UUID.replace('-','');
+    return UUID;
 }
 
 export function authorHostIsOurs(host) {

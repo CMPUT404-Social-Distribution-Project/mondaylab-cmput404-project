@@ -12,7 +12,7 @@ import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import ReactPaginate from "react-paginate";
 export default function GithubPage() {
-  const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
+  const { baseURL } = useContext(AuthContext) || {}; // our api url http://127.0.0.1/service
   const user_id = localStorage.getItem("user_id");
   const api = useAxios();
   const [myGithubActivities, setMyGithubActicities] = useState([]);

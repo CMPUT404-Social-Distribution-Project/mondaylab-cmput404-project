@@ -13,6 +13,8 @@ export default function Post() {
   const user_id = localStorage.getItem("user_id");  // the currently logged in author
   const { author_id, post_id } = useParams();                       // gets the author id in the url
   const api = useAxios();
+  const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
 
   // route to 404 if post not found
   const navigate = useNavigate();
@@ -35,13 +37,29 @@ export default function Post() {
             routeChange();
           }
         });
+      await api
+        .get(`${baseURL}/authors/${user_id}/followers`)
+        .then((response) => {
+          setFollowers(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/`)
+        .then((response) => {
+          setFriends(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     };
     fetchData();
   }, [useLocation().state]);
 
   return (
     <div className="post-container">
-        {post && <PostCard post={post} />}
+        {post && <PostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />}
 
     </div>
   );
