@@ -60,6 +60,15 @@
     ]
   },
   "devDependencies": {
+    "react-test-renderer": "^18.2.0",
     "sass": "^1.55.0"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "axios": "axios/dist/node/axios.cjs"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
+    ]
   }
 }
