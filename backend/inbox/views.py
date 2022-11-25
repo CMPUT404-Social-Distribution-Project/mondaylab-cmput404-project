@@ -171,27 +171,23 @@ class InboxApiView(GenericAPIView):
                         actor_obj: is the person who sent the like
                         object field in like model: is the url field of author getting this like
                     """
-                    actor_obj = None
-                    if (not is_our_backend(request.data['author']['host'])):  # this request is sent by remote
-                        # create the remote author to this db if not exist
-                        if (not remote_author_exists(request.data['author']['id'])):  # checked by 'id' because all remote author have uuid=id
-                            create_remote_author(request.data['author'])
-                            actor_obj = Author.objects.get(id=request.data['author']['id'])  # NOTE, get by id because some group dont have UUID so uuid=id, same thing
-                        else:  # case: this remote author already exist locally
-                            actor_obj = Author.objects.get(id=request.data['author']['id'])
-                    else:  # case: this like object is sent by author in our server
-                        actor_obj = Author.objects.get(uuid=request.data['author']['uuid'])
-
-
-                    actor_name = actor_obj.displayName
+                    actor_object = None
+                    
+                    validate_like(request.data)
+                    actor_object = get_or_create_author(request.data['author'])
+                    if actor_object == None:
+                        return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                     assert(likes_serializer.validated_data["object"] == object_field)  # NOTE, checking to see if they refer to same thing
                     # summary changes depending on the type it's liked on
+                    actor_name = actor_object.displayName
                     summary = f"{actor_name} likes your {like_type}"
-            
-                    like = Like.objects.filter(author = actor_obj,object = likes_serializer.validated_data["object"]).first()
+                    
+
+                    like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
+
                     if like == None:
-                        like = Like.objects.create(author = actor_obj,object = likes_serializer.validated_data["object"], summary =summary)
+                        like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
                     else:
                         return response.Response("Like already exist", status=status.HTTP_403_FORBIDDEN)
                     # add like object to inbox of author
