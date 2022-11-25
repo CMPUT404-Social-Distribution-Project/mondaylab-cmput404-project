@@ -257,18 +257,18 @@ def is_URL(string):
     except:
         return False
 
-def validate_post(post_data):
-    post_fields = ['type','title','id','source','origin','description',
-        'contentType','content','categories','count','comments','published',
-        'visibility','unlisted','author','commentSrc', 'image', 'uuid']
+# def validate_post(post_data):
+#     post_fields = ['type','title','id','source','origin','description',
+#         'contentType','content','categories','count','comments','published',
+#         'visibility','unlisted','author','commentSrc', 'image', 'uuid']
     
     
-    for field in post_data.keys():
-        if field not in post_fields:
-            raise ValidationError(f"Field {field} is not a valid property")
+#     for field in post_data.keys():
+#         if field not in post_fields:
+#             raise ValidationError(f"Field {field} is not a valid property")
     
-    if post_data['type'].lower() != 'post':
-        raise ValidationError(f'Incorrect post type')
+#     if post_data['type'].lower() != 'post':
+#         raise ValidationError(f'Incorrect post type')
 
 def create_remote_author(remote_author):
     if display_name_exists(remote_author["displayName"]):
@@ -384,7 +384,7 @@ def create_remote_comment(remote_comment):
         # but first create the comment's author if they don't exist 
         if not remote_author_exists(remote_comment["author"]["id"]):
             create_remote_author(remote_comment["author"])
-        
+
         # get the comment's author and set it
         remote_author_obj = get_author_with_id(remote_comment["author"]["id"])
         del remote_comment["author"]

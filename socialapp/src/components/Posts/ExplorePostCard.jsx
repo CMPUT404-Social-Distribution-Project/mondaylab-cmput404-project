@@ -146,7 +146,7 @@ export default function PostCard(props) {
         .then((response) => {
           let node = createNodeObject(response, author);
           api
-            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox`, { header: node.headers }, post)
+            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/`, post, { headers: node.headers })
             .then((response) => {
               console.log("Success sending to author's inbox", response);
             })
@@ -156,7 +156,7 @@ export default function PostCard(props) {
       });
     } else {
       api
-        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox`, post)
+        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
         .then((response) => {
           console.log("Success sending to author's inbox", response);
         })

@@ -8,7 +8,7 @@ import CreatePost from "../Posts/CreatePost";
 
 
 export default function Sidebar() {
-    const { logoutUser } = useContext(AuthContext);
+    const { logoutUser } = useContext(AuthContext) || {};
     const [newPost, setNewPost] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();

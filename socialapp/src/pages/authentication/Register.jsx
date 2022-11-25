@@ -19,7 +19,7 @@ export default function Register() {
         });
         
 
-    const { registerUser } = useContext(AuthContext);
+    const { registerUser } = useContext(AuthContext) || {};
     
     const navigate = useNavigate();
 
