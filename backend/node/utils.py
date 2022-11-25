@@ -2,8 +2,8 @@ import requests
 from .models import Node
 
 # TODO: Add "https://cs404-project.herokuapp.com/service/" later
-our_hosts_api = ["http://localhost:8000/service/", ]
-our_hosts = ["http://localhost:8000/", ]
+our_hosts_api = ["http://localhost:8000/service/", "https://cs404-project.herokuapp.com/service"]
+our_hosts = ["http://localhost:8000/", "https://cs404-project.herokuapp.com/"]
 
 
 def authenticated_GET(url, node):
