@@ -14,6 +14,7 @@ from django.contrib.auth.hashers import make_password
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from node.utils import authenticated_GET
+from uuid import uuid4
 
 def isUUID(val):
     try:
@@ -270,12 +271,16 @@ def create_remote_author(remote_author):
     
     remote_author["followers"] = []
     author_serializer = AuthorSerializer(data=remote_author)
+    remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
+    if not isUUID(remote_author_uuid):
+        remote_author_uuid = uuid4()
 
     if author_serializer.is_valid():
         author_serializer.save(
-                uuid=get_author_uuid_from_id(remote_author["id"]),
+                uuid= remote_author_uuid,
                 id=remote_author.get("id"),
-                password=make_password(remote_author["displayName"]+"password")
+                password=make_password(remote_author["displayName"]+"password"),
+                host= add_end_slash(remote_author.get("host"))
                 )
         
 def validate_remote_post(post):
@@ -402,7 +407,12 @@ def create_remote_like(remote_like):
             like_serializer.save(
                 author = remote_author_obj
             )
-    
+
+def remove_objects(node):
+    # removes the node's objects
+    node_host_split = node.host.split('/')
+    actual_host = node_host_split[0] + '://' + node_host_split[2] + '/'
+    Author.objects.filter(host=node.host).delete()
 
 def get_author_with_id(id_url):
     # returns None if author DNE

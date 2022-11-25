@@ -26,12 +26,25 @@ class CommentsTestCase(APITestCase):
         self.authorization = f'Bearer {res_data.get("token")}'
         self.mock_author = Author.objects.get(displayName=self.displayName)
 
+        self.mock_comment == {
+            "type": "comment",
+            "author": {
+                "type": "author",
+                "id": self.mock_author.id,
+                "url": self.mock_author.url,
+                "host": self.mock_author.host,
+                "displayName": self.mock_author.displayName,
+                "github": ""
+            },
+            "comment": "Comment1"
+        }
+        self.urlPost = f'/service/authors/{self.mock_author.uuid}/posts/'
+
     def testCreateComments(self):
 
         # 1st we create a post object --------------------------
-        urlPost = f'/service/authors/{self.mock_author.uuid}/posts/'
         
-        responseCreatePost = self.client.post(urlPost, {'contentType': 'text/plain'}, HTTP_AUTHORIZATION=self.authorization)
+        responseCreatePost = self.client.post(self.urlPost, {'contentType': 'text/plain'}, HTTP_AUTHORIZATION=self.authorization)
         
         self.assertEqual(responseCreatePost.status_code, 201)
     
@@ -41,7 +54,7 @@ class CommentsTestCase(APITestCase):
 
         postUUID = responseCreatePost.data.get('uuid')
         # now we create comment
-        urlComment = f'/service/authors/{self.mock_author.uuid}/posts/{postUUID}/comments/'
+        urlComment = f'{self.urlPost}{postUUID}/comments/'
         responseCreateComment = self.client.post(urlComment, {},HTTP_AUTHORIZATION=self.authorization)
         self.assertEqual(responseCreateComment.status_code, 201)
 
@@ -51,6 +64,48 @@ class CommentsTestCase(APITestCase):
         self.assertEqual(str(self.mock_author.uuid) , comment_authorUUID)
         #Comment.objects.create("")
 
+    def testUnauthorizedCreateComment(self):
+        responseCreatePost = self.client.post(self.urlPost, {'contentType': 'text/plain'}, HTTP_AUTHORIZATION=self.authorization)
+        self.assertEqual(responseCreatePost.status_code, 201)
+        postUUID = responseCreatePost.data.get('uuid')
+
+        # attempt to create comment
+        urlComment = f'{self.urlPost}{postUUID}/comments/'
+        responseCreateComment = self.client.post(urlComment, self.mock_comment)
+        self.assertEqual(responseCreateComment.status_code, 401)
+        
     def testGetComment(self):
-        # not yet implemented
-        self.assertEqual(1, 1)
+        responseCreatePost = self.client.post(self.urlPost, {'contentType': 'text/plain'}, HTTP_AUTHORIZATION=self.authorization)
+        postUUID = responseCreatePost.data.get("uuid")
+
+        # create comment
+        urlComment = f'{self.urlPost}{postUUID}/comments/'
+        res = self.client.post(urlComment, self.mock_comment, HTTP_AUTHORIZATION=self.authorization)
+        self.assertEqual(res.status_code, 201)
+        
+        commentUUID = res.data.get("uuid")
+        # get the comment
+        res = self.client.get(f"{urlComment}{commentUUID}", HTTP_AUTHORIZATION=self.authorization)
+        self.assertEqual(res.status_code, 200)
+
+        # verify contents
+        self.assertEqual(res.data.get("author").get("id"), self.mock_author.id)
+        self.assertEqual(res.data.get("comment"), self.mock_comment.get("comment"))
+
+    def testCommentsPagination(self):
+        responseCreatePost = self.client.post(self.urlPost, {'contentType': 'text/plain'}, HTTP_AUTHORIZATION=self.authorization)
+        postUUID = responseCreatePost.data.get("uuid")
+
+        # create two comments
+        urlComment = f'{self.urlPost}{postUUID}/comments/'
+        res = self.client.post(urlComment, self.mock_comment, HTTP_AUTHORIZATION=self.authorization)
+        self.assertEqual(res.status_code, 201)
+        res = self.client.post(urlComment, self.mock_comment, HTTP_AUTHORIZATION=self.authorization)
+        self.assertEqual(res.status_code, 201)
+
+        res = self.client.get(f"{urlComment}?page=1&size=1")
+        self.assertEqual(res.status_code, 200)
+    
+        self.assertEqual(len(res.data.get("comments")), 1)
+
+

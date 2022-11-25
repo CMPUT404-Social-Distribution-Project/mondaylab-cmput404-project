@@ -42,7 +42,7 @@ class LikesPostApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_200_OK)
             else:
                 result = {"type": "likes", "items": []}
-                return response.Response(result, status=status.HTTP_200_OK)
+                return response.Response("You are neither a friend of the post's author nor the author, likes not shown.", status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
@@ -128,6 +128,7 @@ class AuthorLikedApiView(GenericAPIView):
     """
     URL: ://service/authors/{AUTHOR_ID}/liked
     GET [local, remote] list what public things AUTHOR_ID liked.
+    POST [local] creates a like object
     It’s a list of of likes originating from this author
     Note: be careful here private information could be disclosed.
     """
@@ -136,9 +137,29 @@ class AuthorLikedApiView(GenericAPIView):
     def get(self, request, author_id):
         try:
             author = Author.objects.get(uuid = author_id)
-            post_like = Like.objects.filter(author = author)
-            post_likes = self.serializer_class(post_like, many=True)
-            result = {"type": "liked", "items": post_likes.data}
+            liked = Like.objects.filter(author = author)
+            liked_serializer = self.serializer_class(liked, many=True)
+            result = {"type": "liked", "items": liked_serializer.data}
             return response.Response(result, status=status.HTTP_200_OK)
+        except Exception as e:
+            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+    
+    def post(self, request, author_id):
+        '''FOR LOCAL USE ONLY.'''
+        try:
+            if isAuthorized(request, author_id):
+                
+                author = Author.objects.get(uuid = author_id)
+                like_exists = Like.objects.filter(author = author,object = request.data["object"]).exists()
+                if like_exists:
+                    return response.Response("Like already exists", status=status.HTTP_400_BAD_REQUEST)
+                request.data["author"] = author
+                liked_serializer = self.serializer_class(data=request.data)
+                if liked_serializer.is_valid(raise_exception=True):
+                    liked_serializer.save(author=author)
+                return response.Response("Like created", status=status.HTTP_201_CREATED)
+            else:
+                return response.Response("You are not the author.", status=status.HTTP_401_UNAUTHORIZED)
+            
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
