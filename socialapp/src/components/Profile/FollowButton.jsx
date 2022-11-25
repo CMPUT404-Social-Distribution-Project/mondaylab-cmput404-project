@@ -67,7 +67,7 @@ export default function FollowButton(props) {
       setFollowState("followSent");
       // Send a friend request object to the inbox of the author we're viewing
       api
-        .post(`${props.authorBaseApiURL}authors/${author_id}/inbox/`, {
+        .post(`${props.authorBaseApiURL}authors/${author_id}/inbox`, {
           type: "follow",
           summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
           actor: currentAuthor,

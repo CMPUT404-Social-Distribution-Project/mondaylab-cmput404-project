@@ -136,6 +136,16 @@ class PostTestCase(APITestCase):
         self.assertEqual(self.mock_post_1['unlisted'], post_data['unlisted'])
         self.assertEqual(self.mock_post_1['categories'], post_data['categories'])
 
+    def test_get_posts_pagination(self):
+        request = self.mock_post_1
+        response = self.client.post(f'/service/authors/{self.author_id}/posts/', request, format="json")
+        self.assertEqual(response.status_code, 201)
+        response = self.client.post(f'/service/authors/{self.author_id}/posts/', request, format="json")
+        self.assertEqual(response.status_code, 201)
+        post_id =response.data['uuid']
+        response = self.client.get(f'/service/authors/{self.author_id}/posts/?page=1&size=1')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data.get("items")), 1)
 
     def test_put_posts(self):
         """
