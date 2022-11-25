@@ -68,7 +68,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       await api
-        .get(`${baseURL}/authors/${loggedInUser.uuid}/followers`)
+        .get(`${baseURL}/authors/${loggedInUser.uuid}/followers/`)
         .then((response) => {
           setLoggedInAuthorsFollowers(response.data.items);
         })
@@ -125,7 +125,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchData = async (ApiURL, authorId, node) => {
       await api      
-        .get(`${ApiURL}authors/${authorId}/posts`,
+        .get(`${ApiURL}authors/${authorId}/posts/`,
         {headers: node.headers}
         )
         .then((response) => {
@@ -135,7 +135,7 @@ export default function Profile() {
           console.log("Failed to get posts of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/followers`,
+        .get(`${ApiURL}authors/${authorId}/followers/`,
         {headers: node.headers}
         )
         .then((response) => {
@@ -146,7 +146,7 @@ export default function Profile() {
           console.log("Failed to get followers of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/friends`,
+        .get(`${ApiURL}authors/${authorId}/friends/`,
         {headers: node.headers}
         )
         .then((response) => {
@@ -157,6 +157,7 @@ export default function Profile() {
         });
     };
       if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
+        console.log("THE AUTHOR IS", author);
         fetchData(authorBaseApiURL, extractAuthorUUID(author.id), authorNode);
       } else {
         // if the author is from our host, fetch from our API, or if something went wrong
