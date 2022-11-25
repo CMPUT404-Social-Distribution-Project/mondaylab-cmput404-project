@@ -49,3 +49,15 @@ export function createNodeObject(response, authorsHost) {
 export function removeDashes(uuid) {
     return uuid.replace(/-/g,'');
 }
+
+export function isValidHTTPUrl(string) {
+    let url;
+    try {
+        url = new URL(string);
+      } catch (_) {
+        return false;
+      }
+    return url.protocol === "http:" || url.protocol === "https:";
+}
+
+export const emptyNode = {headers: {}};
