@@ -2,9 +2,9 @@ import jwt_decode from "jwt-decode";
 import dayjs from "dayjs";
 import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
+import axios from "axios"
 
 // const baseURL = "https://cs404-project.herokuapp.com/service";
-const {axios} = require("axios");
 
 const useAxios = () => {
   // Use this function when you want to use a method that requires 
