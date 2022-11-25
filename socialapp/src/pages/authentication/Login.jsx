@@ -16,7 +16,7 @@ export default function Login() {
         password: Yup.string().required(),
     });
 
-    const { loginUser } = useContext(AuthContext);
+    const { loginUser } = useContext(AuthContext) || {};
 
     const navigate = useNavigate();
 
