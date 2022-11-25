@@ -10,10 +10,14 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from backend.utils import isUUID, isAuthorized, display_name_exists, is_our_backend, remote_author_exists, create_remote_author, get_author_uuid_from_id
+from backend.utils import (isUUID, isAuthorized, validate_follow_rq, validate_comment, 
+validate_like, validate_remote_post, get_author_uuid_from_id, get_or_create_author, create_remote_post, create_remote_like, create_remote_comment)
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
+from uuid import uuid4
+from datetime import datetime, timezone
+
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
@@ -97,24 +101,10 @@ class InboxApiView(GenericAPIView):
                 objectauthor: author that is on the receiving end of this follow request.
                 """
                 # get the actor author object
-                actor_url_id = request.data['actor']['id']
-                actor_uuid = get_author_uuid_from_id(actor_url_id)   # eg ['http://localhost:8000', 'author_uuid']
-                actor_obj = None
-                # 1.check if the actor exist in the local db.() 
-                # 2.if dont exist then this actor is likely a remote author that sent this follow request to us
-                                       # + the admin likely did not fetch this actor_author yet
-                                       # we must create this remote author to our local db
-                #NOTE remote author in our local db have uuid = id 
-                if (not is_our_backend(request.data['actor']['host'])):  # this request is sent by remote
-                    # create the remote author to this db
-                    if (not remote_author_exists(actor_url_id)):
-                        create_remote_author(request.data['actor'])
-                        actor_obj = Author.objects.get(id=actor_url_id)
-                    else:  # this remote author already exist in our local db
-                        actor_obj = Author.objects.get(id=actor_url_id)  # NOTE, getting by ID for now since remote_author_exist check used that too
-                else:  # case: this is request from our server
-                    actor_obj = Author.objects.get(uuid=actor_uuid)
-
+                validate_follow_rq(request.data)
+                actor_obj = get_or_create_author(request.data["actor"])
+                if actor_obj == None:
+                    return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                 # get the object author object
                 object_url_id = request.data['object']['id']
@@ -141,16 +131,24 @@ class InboxApiView(GenericAPIView):
             
         elif request.data['type'].lower() == "post":
             try:
-                post_uuid= request.data['id'].split('/')[-1]
-            except:
-                return response.Response("Incorrect format of post", status=status.HTTP_400_BAD_REQUEST)
-            try:    
-                post=Post.objects.get(uuid = post_uuid)
-
+                request_post_data = validate_remote_post(request.data)
+                print(request_post_data)
+                request_post_author = get_or_create_author(request_post_data["author"])
+                
+                if request_post_author == None:
+                    return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                # If post already exists, then use that to add to inbox
+                if Post.objects.filter(id=request_post_data["id"]).exists():
+                    post_obj = Post.objects.get(id=request_post_data["id"])
+                else:
+                    # If doesn't exist, create the post
+                    create_remote_post(request_post_data, request_post_data["author"])
+                    post_obj = Post.objects.get(id=request_post_data["id"])
             except Exception as e:
-                post=Post.objects.create(uuid = post_uuid)
+                return response.Response(f"Incorrect format of post. {e}", status=status.HTTP_400_BAD_REQUEST)
 
-            inbox.posts.add(post)
+
+            inbox.posts.add(post_obj)
             result={
                 "detail": " send post successful"
             }
@@ -219,17 +217,38 @@ class InboxApiView(GenericAPIView):
             return response.Response(result, status=status.HTTP_200_OK)
 
         elif request.data['type'].lower() == "comment":
-            if (request.data.get("author").get("id")) == None:
-                return response.Response("Author field is required or missing a field", status=status.HTTP_400_BAD_REQUEST)
             try:
-                comments_serializer = CommentsInboxSerializer(data=request.data)
-                if comments_serializer.is_valid(raise_exception=True):
-                    comment, create = Comment.objects.get_or_create(id = request.data.get("id"))
-                    inbox.comments.add(comment)
+                validate_comment(request.data)
+                comment_author_obj = get_or_create_author(request.data["author"])
+                if comment_author_obj == None:
+                    return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+                if request.data.get("id") != None:
+                    # There's an id field in comment, then assume that the comment has already been created.
+                    # Attempt to get comment object
+                    comment = Comment.objects.get(id=request.data["id"])
+                else:
+                    # Otherwise, no id field, then assume comment needs to be created
+                    # check to make sure object (post) exists
+                    if not Post.objects.filter(id=request.data["object"]).exists():
+                        return response.Response("Post object does not exist", status=status.HTTP_400_BAD_REQUEST)
+                    
+                    # clean up request data to be serialized
+                    request.data["author"] = comment_author_obj
 
-                    result={
-                        "detail": str(author) +" send comment successful"
-                    }
+                    comment_uuid = uuid4()
+                    request.data["id"] = request.build_absolute_uri() +  comment_uuid.hex
+                    request.data["published"] = datetime.now(tz=timezone.utc).isoformat("T","seconds")
+
+                    create_remote_comment(request.data)
+                    comment = Comment.objects.get(id=request.data["id"])
+                        
+
+                inbox.comments.add(comment)
+
+                result={
+                    "detail": str(author) +" send comment successful"
+                }
             except Exception as e:
 
                 return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)

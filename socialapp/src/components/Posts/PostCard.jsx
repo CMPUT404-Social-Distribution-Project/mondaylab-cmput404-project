@@ -31,7 +31,8 @@ export default function PostCard(props) {
     comment: "",
     type: "comment",
     contentType: "text/markdown",
-    author: loggedInUser
+    author: loggedInUser,
+    object: props.post.id
   });
   const [comments, setComments] = useState([]);
   const [showEditPost, setShowEditPost] = useState(false);
@@ -66,7 +67,8 @@ export default function PostCard(props) {
   };
 
   const sendPostLike = () => {
-    let host = baseURL + "/"
+    let host = baseURL + "/";
+    let node = emptyNode;
     console.log("LIKE SENT WITH AUTHOR", loggedInUser);
     const postLike = {
       type: "like",
@@ -75,10 +77,11 @@ export default function PostCard(props) {
       object: props.post.id,
     };
     if (!authorHostIsOurs(props.post.author.host) && postAuthorBaseApiURL != null){
-      host = postAuthorBaseApiURL
+      host = postAuthorBaseApiURL;
+      node = postAuthorNode;
     }
     api
-      .post(`${host}authors/${post_user_uuid}/inbox`, postLike)
+      .post(`${host}authors/${post_user_uuid}/inbox`, postLike, {headers: node.headers})
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -205,7 +208,7 @@ export default function PostCard(props) {
         .then((response) => {
           let node = createNodeObject(response, author);
           api
-            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox}`, { header: node.headers }, post)
+            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox`, { header: node.headers }, post)
             .then((response) => {
               console.log("Success sending to author's inbox", response);
             })
@@ -215,7 +218,7 @@ export default function PostCard(props) {
       });
     } else {
       api
-        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox}`, post)
+        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox`, post)
         .then((response) => {
           console.log("Success sending to author's inbox", response);
         })
@@ -278,42 +281,50 @@ export default function PostCard(props) {
         console.log("success send comments to inbox");
       })
       .catch((error) => {
-        console.log("Failed to send comment to inbox" + error);
+        alert("Failed to send comment to inbox of post's author");
       });
   }
 
   const sendComment = (e) => {
     e.preventDefault();
     var commentObject = {};
-    api
-      .post(
-        `${baseURL}/authors/${extractAuthorUUID(props.post.author.id)}/posts/${post_id}/comments/`,
-        postComment
-      )
-      .then((response) => {
-        
+    if (!authorHostIsOurs(props.post.author.host)) {
+      // author of post is not ours, send to their inbox to create comment
+      sendCommentToInbox(postAuthorBaseApiURL, post_user_uuid, postComment, postAuthorNode);
+      setPostComment({ ...postComment, comment: "" });
+      e.target.reset();
+      refreshState();
+    } else {
+      // otherwise create the comment on our local post, then send comment to inbox of post's author
+      api
+        .post(
+          `${baseURL}/authors/${extractAuthorUUID(props.post.author.id)}/posts/${post_id}/comments/`,
+          postComment
+        )
+        .then((response) => {
+          
 
-        commentObject["type"] = response.data.type;
-        commentObject["comment"] = response.data.comment;
-        commentObject["author"] = response.data.author;
-        commentObject["id"] = response.data.id;
-        commentObject["contentType"] = response.data.contentType;
-        commentObject["published"] = response.data.published;
-        commentObject["uuid"] = response.data.uuid;
+          commentObject["type"] = response.data.type;
+          commentObject["comment"] = response.data.comment;
+          commentObject["author"] = response.data.author;
+          commentObject["id"] = response.data.id;
+          commentObject["contentType"] = response.data.contentType;
+          commentObject["published"] = response.data.published;
+          commentObject["uuid"] = response.data.uuid;
+          commentObject["object"] = props.post.id;
 
-        if (!authorHostIsOurs(props.post.author.host)) {
-          sendCommentToInbox(postAuthorBaseApiURL, post_user_uuid, commentObject, postAuthorNode);
-        } else {
+ 
           sendCommentToInbox(baseURL+'/', post_user_uuid, commentObject, emptyNode);
-        }
-        setPostComment({ ...postComment, comment: "" });
-        e.target.reset();
-        refreshState();
-      })
-      .catch((error) => {
-        alert(`Something went wrong posting! \n Error: ${error}`);
-        console.log(error);
-      });
+          
+          setPostComment({ ...postComment, comment: "" });
+          e.target.reset();
+          refreshState();
+        })
+        .catch((error) => {
+          alert(`Something went wrong posting! \n Error: ${error}`);
+          console.log(error);
+        });
+    }
   };
 
   // only render options if the user viewing it is the author of it

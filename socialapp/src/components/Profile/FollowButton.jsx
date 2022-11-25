@@ -72,7 +72,9 @@ export default function FollowButton(props) {
           summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
           actor: currentAuthor,
           object: props.authorViewing,
-        })
+        },
+        {headers: props.authorNode.headers}
+        )
         .then((response) => {
           console.log("Success sending a friend request: " + response);
         })
@@ -83,7 +85,8 @@ export default function FollowButton(props) {
       // if we're already following, clicking will unfollow
       api
         .delete(
-          `${props.authorBaseApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`
+          `${props.authorBaseApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`,
+          {headers: props.authorNode.headers}
         )
         .then((response) => {
           console.log(

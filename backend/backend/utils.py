@@ -16,6 +16,10 @@ from django.core.exceptions import ValidationError
 from node.utils import authenticated_GET
 from uuid import uuid4
 
+
+author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
+
+
 def isUUID(val):
     try:
         UUID(val)
@@ -256,15 +260,15 @@ def is_URL(string):
 def validate_post(post_data):
     post_fields = ['type','title','id','source','origin','description',
         'contentType','content','categories','count','comments','published',
-        'visibility','unlisted','author','commentSrc', 'image']
+        'visibility','unlisted','author','commentSrc', 'image', 'uuid']
     
     
     for field in post_data.keys():
         if field not in post_fields:
-            return (None, f"Field {field} is not a valid property")
+            raise ValidationError(f"Field {field} is not a valid property")
     
     if post_data['type'].lower() != 'post':
-        return (None, f'Incorrect post type')
+        raise ValidationError(f'Incorrect post type')
 
 def create_remote_author(remote_author):
     if display_name_exists(remote_author["displayName"]):
@@ -285,7 +289,7 @@ def create_remote_author(remote_author):
                 )
         
 def validate_remote_post(post):
-    required_fields = ['type','id','contentType']
+    required_fields = ['type','id','contentType', 'author']
     remote_post = post.copy()
 
     for field in required_fields:
@@ -326,6 +330,11 @@ def validate_remote_post(post):
         except ValidationError as e:
             # if not valid url, create comment url
             remote_post["comments"] = remote_post["id"] + '/comments'
+
+    # Check if all fields in author are there
+    for required_field in author_required_fields:
+        if remote_post["author"].get(required_field) == None:
+            raise ValidationError(f"Post's author is missing required field {required_field}")
 
     return remote_post
 
@@ -379,8 +388,6 @@ def create_remote_comment(remote_comment):
         # get the comment's author and set it
         remote_author_obj = get_author_with_id(remote_comment["author"]["id"])
         del remote_comment["author"]
-        print(remote_author_obj.id)
-        print(type(remote_comment), remote_comment)
 
         comment_serializer = CommentsSerializer(data=remote_comment)
         if comment_serializer.is_valid(raise_exception=True):
@@ -426,3 +433,66 @@ def get_post_with_id(id_url):
 def get_comment_with_id(id_url):
     # returns None if author DNE
     return Comment.objects.filter(id=id_url).first()
+
+def validate_follow_rq(follow_rq):
+    '''Checks if the fields are valid, raises error if not. Must be wrapped in try-catch clause'''
+    fr_required_fields = ["type", "actor", "object"]
+    for required_field in fr_required_fields:
+        if follow_rq.get(required_field) == None:
+            raise ValidationError(f"Follow request is missing required field {required_field}")
+        
+    # Check if all the fields in actor/object are there
+    for required_field in author_required_fields:
+        if follow_rq["actor"].get(required_field) == None:
+            raise ValidationError(f"Follow request's actor is missing required field {required_field}")
+        elif follow_rq["object"].get(required_field) == None:
+            raise ValidationError(f"Follow request's object is missing required field {required_field}")
+        
+def validate_comment(comment):
+    comment_required_fields = ["type", "author", "comment", "object"]
+
+    for required_field in comment_required_fields:
+        if comment.get(required_field) == None:
+            raise ValidationError(f"Comment is missing required field {required_field}")
+        
+    # Check if all fields in author are there
+    for required_field in author_required_fields:
+        if comment["author"].get(required_field) == None:
+            raise ValidationError(f"Comment's author is missing required field {required_field}")
+
+def validate_like(like):
+    like_required_fields = ["type", "author", "object"]
+    for required_field in like_required_fields:
+        if like.get(required_field) == None:
+            raise ValidationError(f"Like is missing required field {required_field}")
+    
+    # Check if all fields in author are there
+    for required_field in author_required_fields:
+        if like["author"].get(required_field) == None:
+            raise ValidationError(f"Like's author is missing required field {required_field}")
+        
+def get_or_create_author(author):
+    '''
+    Creates an author if the author doesn't exist,
+    Gets it from DB otherwise and returns the author object
+    '''
+    author_url_id = author['id']
+    author_uuid = get_author_uuid_from_id(author_url_id)   # eg ['http://localhost:8000', 'author_uuid']
+    author_obj = None
+    # 1.check if the actor exist in the local db.() 
+    # 2.if dont exist then this actor is likely a remote author that sent this follow request to us
+                            # + the admin likely did not fetch this actor_author yet
+                            # we must create this remote author to our local db
+    #NOTE remote author in our local db have uuid = id 
+    if (not is_our_backend(author['host'])):  # this request is sent by remote
+        # create the remote author to this db
+        if (not remote_author_exists(author_url_id)):
+            create_remote_author(author)
+            author_obj = Author.objects.get(id=author_url_id)
+        else:  # this remote author already exist in our local db
+            author_obj = Author.objects.get(id=author_url_id)  # NOTE, getting by ID for now since remote_author_exist check used that too
+    else:  # case: this is request from our server
+        author_obj = Author.objects.get(uuid=author_uuid)
+
+    return author_obj
+
