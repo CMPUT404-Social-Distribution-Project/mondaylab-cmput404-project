@@ -256,18 +256,18 @@ def is_URL(string):
     except:
         return False
 
-def validate_post(post_data):
-    post_fields = ['type','title','id','source','origin','description',
-        'contentType','content','categories','count','comments','published',
-        'visibility','unlisted','author','commentSrc', 'image', 'uuid']
+# def validate_post(post_data):
+#     post_fields = ['type','title','id','source','origin','description',
+#         'contentType','content','categories','count','comments','published',
+#         'visibility','unlisted','author','commentSrc', 'image', 'uuid']
     
     
-    for field in post_data.keys():
-        if field not in post_fields:
-            raise ValidationError(f"Field {field} is not a valid property")
+#     for field in post_data.keys():
+#         if field not in post_fields:
+#             raise ValidationError(f"Field {field} is not a valid property")
     
-    if post_data['type'].lower() != 'post':
-        raise ValidationError(f'Incorrect post type')
+#     if post_data['type'].lower() != 'post':
+#         raise ValidationError(f'Incorrect post type')
 
 def create_remote_author(remote_author):
     if display_name_exists(remote_author["displayName"]):
