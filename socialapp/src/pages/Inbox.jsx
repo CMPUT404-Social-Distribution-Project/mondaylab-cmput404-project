@@ -28,7 +28,7 @@ export default function Inbox() {
   const [followRequests, setFollowRequests] = useState([]);
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
-  const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
+  const { baseURL } = useContext(AuthContext) || {}; // our api url http://127.0.0.1/service
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
   const api = useAxios();
   const [show, setShow] = useState(false);
