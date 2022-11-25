@@ -31,8 +31,8 @@ class AuthorAdmin(UserAdmin):
     form = AuthorChangeForm
     model = Author
     # display the fields of the Author
-    list_display = ('displayName', 'uuid', 'id', 'is_staff', 'is_active')
-    list_filter = ('displayName', 'uuid', 'id', 'is_staff', 'is_active')
+    list_display = ('displayName', 'uuid', 'host', 'is_staff', 'is_active')
+    list_filter = ('displayName', 'uuid', 'host', 'is_staff', 'is_active')
     fieldsets = (
         (None, {'fields': ('displayName', 'password', 'profileImage', 'host', 'github', 'url', 'id', 'uuid', 'followers')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser')}),
@@ -43,7 +43,7 @@ class AuthorAdmin(UserAdmin):
             'fields': ('displayName', 'profileImage', 'host', 'github', 'password', 'is_staff', 'is_active')
         }),
     )
-
+    filter_horizontal = ('followers',)
     search_fields = ('displayName', 'uuid', 'id')
     ordering = ('displayName', 'uuid', 'id')
     readonly_fields = ('id', 'uuid')

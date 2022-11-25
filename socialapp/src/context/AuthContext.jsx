@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         setAuthTokens(data);
         setUser(jwt_decode(data.access));
         localStorage.setItem("authTokens", JSON.stringify(data));
-        localStorage.setItem("loggedInUser", data.user);
+        localStorage.setItem("loggedInUser", JSON.stringify(data.user));
         setLoginLoading(false);
       } else {
         alert("ERROR: " + data);

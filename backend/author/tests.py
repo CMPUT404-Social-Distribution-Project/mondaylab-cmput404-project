@@ -100,7 +100,7 @@ class AuthorsTestCase(TestCase):
 
         # shouldn't need authentication
         res = self.client.get(url, format="json")
-        numAuthors = len(res.data)
+        numAuthors = len(res.data.get("items"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(numAuthors, self.NUM_AUTHORS)
         self.assertEqual(res.data.get('type'), 'authors')

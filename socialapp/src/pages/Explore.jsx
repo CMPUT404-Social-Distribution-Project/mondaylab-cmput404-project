@@ -63,9 +63,13 @@ export default function Explore() {
   const api = useAxios();
   const { baseURL } = useContext(AuthContext);
   const [remoteAuthors, setRemoteAuthors] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [friends, setFriends] = useState([]);
+  const user_id = localStorage.getItem("user_id"); // the currently logged in author
 
   useEffect(() => {
-    api
+    const fetchData = async () => {
+      api
       .get(`${baseURL}/posts/`)
       .then((response) => {
         setPostsArray(response.data.items);
@@ -73,17 +77,36 @@ export default function Explore() {
       .catch((error) => {
         console.log(error);
       });
+      api
+        .get(`${baseURL}/node/authors/`)
+        .then((response) => {
+          setRemoteAuthors(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(`${baseURL}/authors/${user_id}/followers`)
+        .then((response) => {
+          setFollowers(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/`)
+        .then((response) => {
+          setFriends(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+    fetchData();
   }, [useLocation().state]);
 
   useEffect(() => {
-    api
-      .get(`${baseURL}/node/authors/`)
-      .then((response) => {
-        setRemoteAuthors(response.data.items);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
   }, []);
 
   const search = async (val) => {
@@ -156,7 +179,7 @@ export default function Explore() {
                   <Row>
                     {searchPostsArray.map((post) => (
                       <Col key={post.id} >
-                        <ExplorePostCard post={post} />
+                        <ExplorePostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />
                       </Col>
                     ))}
                   </Row>
@@ -169,7 +192,7 @@ export default function Explore() {
                 <h5>Current public posts</h5>
                 <div className="all-posts-container">
                   {postsArray.map((post) => (
-                      <ExplorePostCard post={post} />
+                      <ExplorePostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
                   ))}
                 </div>
               </>
