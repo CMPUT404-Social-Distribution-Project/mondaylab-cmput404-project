@@ -81,7 +81,7 @@ export default function PostCard(props) {
       node = postAuthorNode;
     }
     api
-      .post(`${host}authors/${post_user_uuid}/inbox`, postLike, {headers: node.headers})
+      .post(`${host}authors/${post_user_uuid}/inbox/`, postLike, {headers: node.headers})
       .then((response) => {
         setLiked(true);
         setLikeCount((likeCount) => likeCount + 1);
@@ -109,7 +109,7 @@ export default function PostCard(props) {
     const fetchPostAuthorData = async (ApiURL, node) => {
       await api
         .get(
-          `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/likes`, 
+          `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/likes/`, 
           {headers: node.headers}
         )
         .then((response) => {
@@ -126,7 +126,7 @@ export default function PostCard(props) {
       });
     await api
       .get(
-        `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/comments?size=10`,
+        `${ApiURL}authors/${post_user_uuid}/posts/${post_id}/comments/?size=10`,
         {headers: node.headers}
       )
       .then((response) => {
@@ -208,7 +208,7 @@ export default function PostCard(props) {
         .then((response) => {
           let node = createNodeObject(response, author);
           api
-            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox`, { header: node.headers }, post)
+            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/`, post, { headers: node.headers })
             .then((response) => {
               console.log("Success sending to author's inbox", response);
             })
@@ -218,7 +218,7 @@ export default function PostCard(props) {
       });
     } else {
       api
-        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox`, post)
+        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
         .then((response) => {
           console.log("Success sending to author's inbox", response);
         })
@@ -274,7 +274,7 @@ export default function PostCard(props) {
 
   const sendCommentToInbox = (ApiURL, post_user_uuid, commentObject, node) => {
     api
-      .post(`${ApiURL}authors/${post_user_uuid}/inbox`, commentObject, {
+      .post(`${ApiURL}authors/${post_user_uuid}/inbox/`, commentObject, {
         headers: node.headers
       })
       .then((response) => {
