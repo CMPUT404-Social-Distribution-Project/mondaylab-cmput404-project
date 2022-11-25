@@ -59,3 +59,5 @@ export function isValidHTTPUrl(string) {
       }
     return url.protocol === "http:" || url.protocol === "https:";
 }
+
+export const emptyNode = {headers: {}};
