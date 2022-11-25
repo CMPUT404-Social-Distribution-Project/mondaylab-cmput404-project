@@ -6,7 +6,8 @@
     margin-left: 10px;
     border-color: none;
     --bs-card-bg: none;
-    flex-basis: 16.4rem;
+    flex-basis: 14.2rem;
+    flex-grow: 0;
 }
 
 .post-card-explore .card-header {
@@ -35,6 +36,10 @@
     align-items: center;
     gap: 1rem;
     color: var(--teal);
+}
+
+.post-card-explore .profile-pic-post:hover {
+    cursor: pointer;
 }
 
 .post-card-explore .post-author-name {

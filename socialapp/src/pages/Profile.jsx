@@ -10,7 +10,7 @@ import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
-import { authorHostIsOurs, removeDashes, createNodeObject } from '../utils/utils';
+import { authorHostIsOurs, removeDashes, createNodeObject, emptyNode } from '../utils/utils';
 import { CgRemote } from "react-icons/cg";
 
 function ProfilePosts(props) {
@@ -18,7 +18,7 @@ function ProfilePosts(props) {
     <div className="posts-container-profile">
     {
       typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard post={post} key={post.id}/>)
+        props.postsArray.items.map((post) => <PostCard loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
         : null
     }
     </div>
@@ -50,10 +50,13 @@ function ProfileFriends(props) {
 }
 
 export default function Profile() {
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
   const [postsArray, setPostsArray] = useState(""); 
   const [followersArray, setFollowersArray] = useState(""); 
   const [friendsArray, setFriendsArray] = useState(""); 
+  const [loggedInAuthorsFollowers, setLoggedInAuthorsFollowers] = useState([]); 
+  const [loggedInAuthorsFriends, setLoggedInAuthorsFriends] = useState([]); 
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
@@ -62,6 +65,27 @@ export default function Profile() {
   const [authorNode, setAuthorNode] = useState(null);     // the node object of post's author
   const [authorBaseApiURL, setAuthorBaseAPI] = useState(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      await api
+        .get(`${baseURL}/authors/${loggedInUser.uuid}/followers`)
+        .then((response) => {
+          setLoggedInAuthorsFollowers(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(`${baseURL}/authors/${loggedInUser.uuid}/friends/`)
+        .then((response) => {
+          setLoggedInAuthorsFriends(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     // first fetch the author
@@ -88,7 +112,7 @@ export default function Profile() {
     await api
     .get(`${baseURL}/node/?host=${author.host}`)
     .then((response) => {
-      let node = createNodeObject(response, author.host);
+      let node = createNodeObject(response, author);
       setAuthorNode(node);
       setAuthorBaseAPI(node.host);
     })
@@ -137,9 +161,7 @@ export default function Profile() {
       } else {
         // if the author is from our host, fetch from our API, or if something went wrong
         // trying to fetch the foreign author, then fetch that author from ours as backup.
-        let node = {};
-        node.headers = {};
-        fetchData(baseURL+'/', author_id, node);
+        fetchData(baseURL+'/', author_id, emptyNode);
       }
       
 
@@ -152,7 +174,11 @@ export default function Profile() {
           <div className="profilePicPage">
             <img id="profilePicPage" src={author.profileImage} alt="profilePic"/>
           </div>
-          <FollowButton authorViewing={author} authorNode={authorNode} authorBaseApiURL={authorBaseApiURL} />
+          <FollowButton 
+            authorViewing={author} 
+            authorNode={!authorHostIsOurs(author.host) ? authorNode : emptyNode} 
+            authorBaseApiURL={!authorHostIsOurs(author.host) ? authorBaseApiURL : baseURL+'/'} 
+          />
         </div>
 
         <div className="profileInfo">
@@ -176,7 +202,7 @@ export default function Profile() {
         </div>
       </div>
       <ProfileTabs dir={dir} author_id={author_id}/>
-      {dir === 'posts' || dir === undefined ? <ProfilePosts postsArray={postsArray}/> : <></>}
+      {dir === 'posts' || dir === undefined ? <ProfilePosts loggedInAuthorsFollowers={loggedInAuthorsFollowers} loggedInAuthorsFriends={loggedInAuthorsFriends} postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
 

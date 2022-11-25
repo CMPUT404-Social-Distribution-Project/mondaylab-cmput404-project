@@ -11,7 +11,6 @@ from author.serializers import AuthorSerializer
 from uuid import uuid4
 from django.db.models import Q
 from .models import Comment
-from datetime import date
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination

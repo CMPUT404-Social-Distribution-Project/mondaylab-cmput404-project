@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import AuthContext from "../../context/AuthContext";
 import useAxios from "../../utils/useAxios";
 import { useParams, useLocation } from "react-router-dom";
-import { authorHostIsOurs, extractAuthorUUID } from "../../utils/utils";
+import { authorHostIsOurs, emptyNode } from "../../utils/utils";
 
 // function authorInArray(id, array) {
 //   // checks if the given author id is in the array
@@ -36,37 +36,30 @@ export default function FollowButton(props) {
   }, [isNotCurrentUser, useLocation().state]);
 
   useEffect(() => {
-    const following = async () => {
-      if (!authorHostIsOurs(props.authorViewing.host) && props.authorBaseApiURL !== null) {
-        await api
-          .post(`${props.authorBaseApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`, { header: props.authorNode.headers })
-          .then((response) => {
-            if (response.data) {
-              setIsFollowing(response.data);
-              setFollowState("following");
-            } else {
-              setFollowState("notFollowing");
-            }
-          });
-      } else {
-        await api
-          .get(`${baseURL}/authors/${author_id}/followers/${currentAuthor.uuid}`)
-          .then((response) => {
-            if (response.data) {
-              setIsFollowing(response.data);
-              setFollowState("following");
-            } else {
-              setFollowState("notFollowing");
-            }
-          })
-          .catch((error) => {
-            console.log(
-              "Failed to get check if current author is following " + error
-            );
-          });
-      }
+    const following = async (ApiURL, node) => {
+      await api
+        .get(`${ApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`,
+         { header: node.headers }
+        )
+        .then((response) => {
+          if (response.data) {
+            setIsFollowing(response.data);
+            setFollowState("following");
+          } else {
+            setFollowState("notFollowing");
+          }
+        })
+        .catch((error) =>{
+          console.log(
+            "Failed to get check if current author is following ", error.response
+          );
+        })
     };
-    following();
+    if (!authorHostIsOurs(props.authorViewing.host) && props.authorBaseApiURL !== null) {
+      following(props.authorBaseApiURL, props.authorNode);
+    } else {
+      following(baseURL+'/', emptyNode);
+    }
   }, [isFollowing, useLocation().state]);
 
   const handleClick = () => {
@@ -74,12 +67,14 @@ export default function FollowButton(props) {
       setFollowState("followSent");
       // Send a friend request object to the inbox of the author we're viewing
       api
-        .post(`${props.authorBaseApiURL}authors/${author_id}/inbox/`, {
+        .post(`${props.authorBaseApiURL}authors/${author_id}/inbox`, {
           type: "follow",
           summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
           actor: currentAuthor,
           object: props.authorViewing,
-        })
+        },
+        {headers: props.authorNode.headers}
+        )
         .then((response) => {
           console.log("Success sending a friend request: " + response);
         })
@@ -90,7 +85,8 @@ export default function FollowButton(props) {
       // if we're already following, clicking will unfollow
       api
         .delete(
-          `${props.authorBaseApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`
+          `${props.authorBaseApiURL}authors/${author_id}/followers/${currentAuthor.uuid}`,
+          {headers: props.authorNode.headers}
         )
         .then((response) => {
           console.log(
