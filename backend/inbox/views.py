@@ -10,7 +10,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from backend.utils import isUUID, isAuthorized, display_name_exists, is_our_backend, remote_author_exists, create_remote_author
+from backend.utils import isUUID, isAuthorized, display_name_exists, is_our_backend, remote_author_exists, create_remote_author, get_author_uuid_from_id
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
@@ -97,9 +97,8 @@ class InboxApiView(GenericAPIView):
                 objectauthor: author that is on the receiving end of this follow request.
                 """
                 # get the actor author object
-                url_id = request.data['actor']['id']
-                url_uuid = url_id.split("authors/")   # eg ['http://localhost:8000', 'author_uuid']
-                #actor_obj = Author.objects.get(uuid=url_uuid[1])  # this author can be in remote, so get or create will need
+                actor_url_id = request.data['actor']['id']
+                actor_uuid = get_author_uuid_from_id(actor_url_id)   # eg ['http://localhost:8000', 'author_uuid']
                 actor_obj = None
                 # 1.check if the actor exist in the local db.() 
                 # 2.if dont exist then this actor is likely a remote author that sent this follow request to us
@@ -108,24 +107,19 @@ class InboxApiView(GenericAPIView):
                 #NOTE remote author in our local db have uuid = id 
                 if (not is_our_backend(request.data['actor']['host'])):  # this request is sent by remote
                     # create the remote author to this db
-                    if (not remote_author_exists(request.data['actor']['id'])):
+                    if (not remote_author_exists(actor_url_id)):
                         create_remote_author(request.data['actor'])
-                        actor_obj = Author.objects.get(id=request.data['actor']['id'])
+                        actor_obj = Author.objects.get(id=actor_url_id)
                     else:  # this remote author already exist in our local db
-                        actor_obj = Author.objects.get(id=url_id)  # NOTE, getting by ID for now since remote_author_exist check used that too
+                        actor_obj = Author.objects.get(id=actor_url_id)  # NOTE, getting by ID for now since remote_author_exist check used that too
                 else:  # case: this is request from our server
-                    actor_obj = Author.objects.get(uuid=url_uuid[1])
-
-
-
-
-
+                    actor_obj = Author.objects.get(uuid=actor_uuid)
 
 
                 # get the object author object
-                url_id = request.data['object']['id']
-                url_uuid = url_id.split("authors/")
-                object_obj = Author.objects.get(uuid=url_uuid[1])
+                object_url_id = request.data['object']['id']
+                object_uuid = get_author_uuid_from_id(object_url_id)
+                object_obj = Author.objects.get(uuid=object_uuid)
                 actor_name = str(request.data['actor']['displayName'])
                 object_name =str(request.data['object']['displayName'])
                 summary = actor_name + " wants to follow " + object_name
