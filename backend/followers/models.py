@@ -10,3 +10,6 @@ class FriendRequest(Model):
     summary = CharField(max_length=200)
     actor = ForeignKey(Author, related_name='sent_friend_request', on_delete = CASCADE, blank=True, null=True)
     object = ForeignKey(Author, related_name='recieve_friend_request', on_delete = CASCADE, blank=True, null=True)
+
+    def __str__(self):
+        return self.summary

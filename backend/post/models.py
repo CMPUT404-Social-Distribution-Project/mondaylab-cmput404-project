@@ -39,6 +39,3 @@ class Post(Model):
     published = DateTimeField(auto_now_add=True, editable=False)
     visibility = CharField(default=Visibility.PUBLIC, choices=Visibility.choices, max_length=200)
     unlisted = BooleanField(default=False, blank=False, null=False)
-
-    def __str__(self):
-        return f"'{self.title}' by {self.author.displayName} from '{self.author.host}'"
