@@ -31,6 +31,13 @@ class Comment(Model):
     published = CharField(blank=True, max_length=200)
     comment = CharField(blank=True, null=True,  max_length=200, default="empty comment")
 
+    def __str__(self):
+        displayName = ""
+        if self.author != None:
+            displayName = self.author.displayName
+
+        return f"'{self.comment}' by {displayName}"
+
 class CommentSrc(Model):
     type = CharField(blank=False, null=False, default="comments", max_length=200)
     page = PositiveIntegerField(default=1)

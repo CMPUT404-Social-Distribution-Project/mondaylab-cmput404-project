@@ -41,4 +41,9 @@ class Post(Model):
     unlisted = BooleanField(default=False, blank=False, null=False)
 
     def __str__(self):
-        return f"'{self.title}' by {self.author.displayName} from '{self.author.host}'"
+        displayName = ""
+        host = ""
+        if self.author != None:
+            displayName = self.author.displayName
+            host = self.author.host
+        return f"'{self.title}' by {displayName} from '{host}'"
