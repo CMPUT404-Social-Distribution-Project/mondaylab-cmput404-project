@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
 from backend.utils import (isUUID, isAuthorized, validate_follow_rq, validate_comment, 
-validate_like, validate_remote_post, get_author_uuid_from_id, get_or_create_author, create_remote_post, create_remote_like, create_remote_comment)
+validate_like, validate_remote_post, get_author_uuid_from_id, get_or_create_author, 
+    create_remote_post, create_remote_like, create_remote_comment, add_end_slash)
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
@@ -219,9 +220,9 @@ class InboxApiView(GenericAPIView):
         elif request.data['type'].lower() == "comment":
             try:
                 validate_comment(request.data)
-                comment_author_obj = get_or_create_author(request.data["author"])
-                if comment_author_obj == None:
-                    return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                # comment_author_obj = get_or_create_author(request.data["author"])
+                # if comment_author_obj == None:
+                #     return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
                 if request.data.get("id") != None:
                     # There's an id field in comment, then assume that the comment has already been created.
@@ -234,13 +235,13 @@ class InboxApiView(GenericAPIView):
                         return response.Response("Post object does not exist", status=status.HTTP_400_BAD_REQUEST)
                     
                     # clean up request data to be serialized
-                    request.data["author"] = comment_author_obj
+                    # request.data["author"] = comment_author_obj
 
                     comment_uuid = uuid4()
-                    request.data["id"] = request.build_absolute_uri() +  comment_uuid.hex
+                    request.data["id"] = add_end_slash(request.data["object"]) + 'comments/' + comment_uuid.hex
                     request.data["published"] = datetime.now(tz=timezone.utc).isoformat("T","seconds")
-
                     create_remote_comment(request.data)
+
                     comment = Comment.objects.get(id=request.data["id"])
                         
 
