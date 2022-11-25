@@ -168,21 +168,37 @@ class InboxApiView(GenericAPIView):
             try:
                 likes_serializer = LikeAuthorSerializer(data=request.data)
                 if likes_serializer.is_valid(raise_exception=True):
-                    object_field = likes_serializer.validated_data.get("object")
+                    object_field = likes_serializer.validated_data.get("object")  # NOTE, a bit redundant here
                     like_type = get_like_type(object_field)
                     if like_type == None:
                         # object field is not properly formatted
                         return response.Response("Object field is not formatted correctly", status=status.HTTP_400_BAD_REQUEST)
-                    actor_id = request.data.get("author")["id"]
-                    actor_object = Author.objects.get(id = actor_id)
-                    actor_name = actor_object.displayName
+                    """
+                    def:
+                        actor_obj: is the person who sent the like
+                        object field in like model: is the url field of author getting this like
+                    """
+                    actor_obj = None
+                    if (not is_our_backend(request.data['author']['host'])):  # this request is sent by remote
+                        # create the remote author to this db if not exist
+                        if (not remote_author_exists(request.data['author']['id'])):  # checked by 'id' because all remote author have uuid=id
+                            create_remote_author(request.data['author'])
+                            actor_obj = Author.objects.get(id=request.data['author']['id'])  # NOTE, get by id because some group dont have UUID so uuid=id, same thing
+                        else:  # case: this remote author already exist locally
+                            actor_obj = Author.objects.get(id=request.data['author']['id'])
+                    else:  # case: this like object is sent by author in our server
+                        actor_obj = Author.objects.get(uuid=request.data['author']['uuid'])
 
+
+                    actor_name = actor_obj.displayName
+
+                    assert(likes_serializer.validated_data["object"] == object_field)  # NOTE, checking to see if they refer to same thing
                     # summary changes depending on the type it's liked on
                     summary = f"{actor_name} likes your {like_type}"
             
-                    like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
+                    like = Like.objects.filter(author = actor_obj,object = likes_serializer.validated_data["object"]).first()
                     if like == None:
-                        like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
+                        like = Like.objects.create(author = actor_obj,object = likes_serializer.validated_data["object"], summary =summary)
                     else:
                         return response.Response("Like already exist", status=status.HTTP_403_FORBIDDEN)
                     # add like object to inbox of author
