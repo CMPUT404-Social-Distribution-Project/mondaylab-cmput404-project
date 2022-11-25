@@ -211,13 +211,13 @@ def get_comment_uuid_from_id(id_url):
 
 def is_our_frontend(origin):
     # returns true if it's our front end
-    our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
+    our_frontends = ["https://superlative-gelato-dcf1b6.netlify.app"]
     return origin in our_frontends
 
 def is_our_backend(host):
     # return true if it's our back end
     host_no_slash = remove_end_slash(host)
-    our_backends = ["http://localhost:8000", "https://cs404-project.herokuapp.com"]  # TODO, add the heroku host origin here too
+    our_backends = ["https://cs404-project.herokuapp.com"]  # TODO, add the heroku host origin here too
     return host_no_slash in our_backends
 
 def display_name_exists(display_name):
