@@ -35,8 +35,8 @@ def getNodeRemoteAuthors(node):
 
     node_authors_endpoint = f"{node.host}authors/"
     res = authenticated_GET(node_authors_endpoint, node)
-    print(f"getNodeRemoteAuthors: Failed with res {res.status_code}:{res.content}")
     if (res.status_code == 200):
         return res.json()["items"]
     else:
+        print(f"getNodeRemoteAuthors: Failed with res {res.status_code}:{res.content}")
         return []
