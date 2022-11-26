@@ -286,7 +286,7 @@ def create_remote_author(remote_author):
     if not isUUID(remote_author_uuid):
         remote_author_uuid = uuid4()
 
-    if author_serializer.is_valid():
+    if author_serializer.is_valid(raise_exception=True):
         author_serializer.save(
                 uuid= remote_author_uuid,
                 id=remote_author.get("id"),
