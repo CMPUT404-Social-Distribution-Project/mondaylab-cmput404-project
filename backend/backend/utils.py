@@ -150,13 +150,14 @@ def get_friends_list(current_author):
     # This indicates they're friends
     try: 
         for follower in current_author.followers.all():
-            if is_our_backend(follower.host):
-                # follower is not from our local
-                # fetch to their <follow_id>/followers/<current_author> endpoint
-                followers_node = Node.objects.filter(host__contains=follower.host)
-                if followers_node.exists():
-                    followers_endpoint = f"{followers_node.host}authors/{get_author_uuid_from_id(follower.id)}/followers/"
-                # TODO:
+            # if not is_our_backend(follower.host):
+            #     # follower is not from our local
+            #     # fetch to their <follow_id>/followers/<current_author> endpoint
+            #     followers_node = Node.objects.filter(host__contains=follower.host)
+            #     if followers_node.exists():
+            #         followers_endpoint = f"{followers_node.host}authors/{get_author_uuid_from_id(follower.id)}/followers/"
+            #         authenticated_GET(followers_endpoint)
+            #     # TODO:
             followerObject = Author.objects.get(uuid=follower.uuid)
             followersFollowers = followerObject.followers.all()
             if current_author in followersFollowers:
