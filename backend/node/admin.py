@@ -18,7 +18,7 @@ def create_node_authors(modeladmin, request, queryset):
             all_remote_authors.extend(res)
         except Exception as e:
             print("Failed to get nodes remote authors. ", e)
-    print(all_remote_authors)
+
     for remote_author in all_remote_authors:
         if not remote_author_exists(remote_author["id"]):
             try:
@@ -41,13 +41,14 @@ def create_node_posts(modeladmin, request, queryset):
 
         for remote_author in node_authors:
             remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
+            print(remote_author_uuid)
             # make sure author exists/ create it if it doesn't
             if not remote_author_exists(remote_author["id"]):
                 create_remote_author(remote_author)
 
             # Once author exists, we try to fetch to the remote node author's posts endpoint
             # to create it's posts locally
-            node_posts_endpoint = f"{node.host}authors/{remote_author_uuid}/posts"
+            node_posts_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/"
             res = authenticated_GET(node_posts_endpoint, node)
             if (res.status_code == 200):
                     remote_author_posts = res.json().get("items")
@@ -57,13 +58,15 @@ def create_node_posts(modeladmin, request, queryset):
                                 remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
                                 remote_post = validate_remote_post(remote_post)
                                 remote_post = create_remote_post(remote_post, remote_author)
-
+                            except Exception as e:
+                                print(f"Could not create remote post {remote_post.get('title')} from host {node.host} locally.", e)
+                            try:
                                 #TODO: If one of these points fail the rest won't get created
                                 # e.g. if creating comments fails, then creating the likes won't happen.
                                 # Maybe need separate try-catch clauses for each??
 
                                 # create it's comments as well
-                                node_post_comment_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/comments"
+                                node_post_comment_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/comments/"
                                 res = authenticated_GET(node_post_comment_endpoint, node)
                                 remote_post_comments = res.json().get("comments")
                                 if res.status_code == 200 and remote_post_comments:
@@ -72,7 +75,7 @@ def create_node_posts(modeladmin, request, queryset):
                                         remote_comment_uuid = get_comment_uuid_from_id(remote_comment["id"])
 
                                         # create comment's likes
-                                        node_likes_comment_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/comments/{remote_comment_uuid}/likes"
+                                        node_likes_comment_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/comments/{remote_comment_uuid}/likes/"
                                         res = authenticated_GET(node_likes_comment_endpoint, node) 
                                         remote_comment_likes = res.json().get("items")
                                         if res.status_code == 200 and remote_comment_likes:
@@ -80,17 +83,17 @@ def create_node_posts(modeladmin, request, queryset):
                                                 create_remote_like(remote_comment_like)
 
                                 # create post's likes
-                                node_likes_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/likes"
+                                node_likes_endpoint = f"{node.host}authors/{remote_author_uuid}/posts/{remote_post_uuid}/likes/"
                                 res = authenticated_GET(node_likes_endpoint, node) 
                                 remote_post_likes = res.json().get("items")
                                 if res.status_code == 200 and remote_post_likes:
                                     for remote_post_like in remote_post_likes:
                                         create_remote_like(remote_post_like)
                             except Exception as e:
-                                print("Could not create remote post locally.", e)
+                                print(f"Could not create remote post's {remote_post.get('title')} objects from host {node.host} locally", e)
                
             else:
-                print("Failed to retrieve node posts.")
+                print(f"Failed to retrieve node posts from {node_posts_endpoint}. Failed with status code {res.status_code}")
 
 def create_node_objects(modeladmin, request, queryset):
     create_node_posts(modeladmin, request, queryset)

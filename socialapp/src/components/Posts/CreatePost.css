@@ -18,7 +18,7 @@
 .create-post-modal .modal-body {
     height: 200%;
     width: auto;
-    padding: 15px;
+    padding: 0rem 2rem;
 }
 
 .create-post-modal .modal-title {
@@ -200,4 +200,38 @@
     margin: 0;
     padding: 0;
     padding-bottom: 1%;
+}
+
+.private-search-container {
+    display: grid;
+    padding: 0rem 2rem;
+    grid-template-columns: auto 30fr;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1em;
+}
+
+.private-search-container .private-search-authors {
+    grid-column: 1 / -1;
+}
+.create-post-modal .userCard {
+    width: 100%;
+}
+
+.private-search-container .private-search-input {
+    background-color: var(--slightly-darker-blue);
+    color: var(--teal);
+    border: none;
+    padding: 0.5em 0em 0.5em 1em;
+    align-self: center;
+}
+
+.private-search-container .private-search-input:focus {
+    background-color: var(--darker-blue);
+    color: var(--teal);
+    border: none;
+    outline: none;
+    border-radius: 0.5em;
+
 }
