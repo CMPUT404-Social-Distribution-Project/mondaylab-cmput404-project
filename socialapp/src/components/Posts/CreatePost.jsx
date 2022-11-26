@@ -114,30 +114,32 @@ export default function CreatePost(props) {
           return;
         }
         const resultPost = response.data;
-        if (!authorHostIsOurs(value.host)) {
+        console.log(sendTo, !authorHostIsOurs(sendTo.host));
+        if (!authorHostIsOurs(sendTo.host)) {
           // author is not ours, send post to inbox of author
+          console.log("YAAAAS BII", sendTo)
           api
-            .get(`${baseURL}/node/?host=${value.host}`)
+            .get(`${baseURL}/node/?host=${sendTo.host}`)
             .then((response) => {
-              let node = createNodeObject(response, resultPost.author);
+              let node = createNodeObject(response, sendTo);
               api
-                .post(`${value.id}/inbox/`, resultPost, {headers: node.headers})
+                .post(`${sendTo.id}/inbox/`, resultPost, {headers: node.headers})
                 .then((response) => {
-                  console.log(`Success sending private post to inbox of ${value.displayName}`);
+                  console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
                 })
                 .catch((error) => {
                   console.log("Failed to send private post. " + error);
-            });
-          })
-          .catch((err) => {
-            console.log("Failed to get node", err);
-          });
+                })
+            })
+            .catch((err) => {
+              console.log("Failed to fetch node. " + err);
+            })
         } else {
           // author is ours
           api
-            .post(`${value.id}/inbox/`, resultPost)
+            .post(`${sendTo.id}/inbox/`, resultPost)
             .then((response) => {
-              console.log(`Success sending private post to inbox of ${value.displayName}`);
+              console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
             })
             .catch((error) => {
               console.log("Failed to send private post. " + error);
