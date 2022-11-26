@@ -150,6 +150,13 @@ def get_friends_list(current_author):
     # This indicates they're friends
     try: 
         for follower in current_author.followers.all():
+            if is_our_backend(follower.host):
+                # follower is not from our local
+                # fetch to their <follow_id>/followers/<current_author> endpoint
+                followers_node = Node.objects.filter(host__contains=follower.host)
+                if followers_node.exists():
+                    followers_endpoint = f"{followers_node.host}authors/{get_author_uuid_from_id(follower.id)}/followers/"
+                # TODO:
             followerObject = Author.objects.get(uuid=follower.uuid)
             followersFollowers = followerObject.followers.all()
             if current_author in followersFollowers:
@@ -271,16 +278,29 @@ def is_URL(string):
 #         raise ValidationError(f'Incorrect post type')
 
 def create_remote_author(remote_author):
-    if display_name_exists(remote_author["displayName"]):
-        remote_author["displayName"] = remote_author["displayName"]+':'+remote_author["host"]
-    
-    remote_author["followers"] = []
-    author_serializer = AuthorSerializer(data=remote_author)
     remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
     if not isUUID(remote_author_uuid):
         remote_author_uuid = uuid4()
 
-    if author_serializer.is_valid():
+    if Author.objects.filter(uuid=remote_author_uuid).exists():
+        return
+    
+    if display_name_exists(remote_author["displayName"]):
+        remote_author["displayName"] = remote_author["displayName"]+':'+remote_author["host"]
+
+    remote_author["followers"] = []
+
+    if remote_author.get("github") != None and not is_URL(remote_author["github"]):
+        # create github url for them
+        remote_author["github"] = f"https://github.com/{remote_author['github']}"
+
+    if not is_URL(remote_author["profileImage"]):
+        remote_author["profileImage"] = ""
+
+    author_serializer = AuthorSerializer(data=remote_author)
+
+
+    if author_serializer.is_valid(raise_exception=True):
         author_serializer.save(
                 uuid= remote_author_uuid,
                 id=remote_author.get("id"),
@@ -346,6 +366,8 @@ def create_remote_post(remote_post, remote_author):
     IMPORTANT: Call validate_remote_post() before call this.
     '''
     remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
+    if not isUUID(remote_post_uuid):
+        remote_post_uuid = uuid4()
     if (not remote_post_exists(remote_post["id"])):
         # if remote post doesn't exist, create it.
         # get the post's author and set the remote post's author to our local
@@ -379,6 +401,8 @@ def create_remote_post(remote_post, remote_author):
 
 def create_remote_comment(remote_comment):
     remote_comment_uuid = get_comment_uuid_from_id(remote_comment["id"])
+    if not isUUID(remote_comment_uuid):
+        remote_comment_uuid = uuid4()
     if (not remote_comment_exists(remote_comment["id"])):
         # create the remote comment locally
         # but first create the comment's author if they don't exist 

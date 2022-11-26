@@ -12,7 +12,8 @@ import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
 import { FaImage, FaLink, FaSearch } from "react-icons/fa";
 import { search2 } from "../../utils/searchUtil";
-import UserCard from "../UserCard.css";
+import UserCard from "../UserCard.jsx";
+import { extractAuthorUUID, createNodeObject, authorHostIsOurs } from "../../utils/utils"
 
 
 export default function CreatePost(props) {
@@ -28,7 +29,8 @@ export default function CreatePost(props) {
   const user_id = localStorage.getItem("user_id");
   const [imagePost, setImagePost] = useState(null);
   const [showLinkForm, setShowLinkForm] = useState(false);
-  const [sendTo, setSentTo] = useState();
+  const [sendTo, setSendTo] = useState(null);
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
   const [uri, setURI] = useState("");
   const [value, setValue] = useState("");
   const [post, setPost] = useState({
@@ -36,7 +38,7 @@ export default function CreatePost(props) {
     source: "",
     orgin: "",
     description: "",
-    contentType: "text/plain",
+    contentType: "text/markdown",
     content: "",
     categories: "",
     visibility: "PUBLIC",
@@ -98,37 +100,62 @@ export default function CreatePost(props) {
    *
    */
 
-  const sendPost = async () => {
+  const sendPost = async (response) => {
+    if (post.unlisted) {
+      setURI(
+        `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
+      );
+      setShowURI(true);
+      props.onHide();
+    } else {
+      if (post.visibility === "PRIVATE") {
+        if (sendTo === null) {
+          alert("Select an author to send to!");
+          return;
+        }
+        const resultPost = response.data;
+        if (!authorHostIsOurs(value.host)) {
+          // author is not ours, send post to inbox of author
+          api
+            .get(`${baseURL}/node/?host=${value.host}`)
+            .then((response) => {
+              let node = createNodeObject(response, resultPost.author);
+              api
+                .post(`${value.id}/inbox/`, resultPost, {headers: node.headers})
+                .then((response) => {
+                  console.log(`Success sending private post to inbox of ${value.displayName}`);
+                })
+                .catch((error) => {
+                  console.log("Failed to send private post. " + error);
+            });
+          })
+          .catch((err) => {
+            console.log("Failed to get node", err);
+          });
+        } else {
+          // author is ours
+          api
+            .post(`${value.id}/inbox/`, resultPost)
+            .then((response) => {
+              console.log(`Success sending private post to inbox of ${value.displayName}`);
+            })
+            .catch((error) => {
+              console.log("Failed to send private post. " + error);
+            });
+        }
+      }
+      props.onHide();
+    }
+  }
+
+  const handleSubmitPost = async () => {
     // No image
     if (!imagePost) {
-        api
+        await api
           .post(`${baseURL}/authors/${user_id}/posts/`, post)
           .then((response) => {
-            if (post.unlisted) {
-              setURI(
-                `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
-              );
-              setShowURI(true);
-            } else {
-              if (post.visibility === "PRIVATE") {
-                const sharedPost = {
-                  type: "post",
-                  summary: `${user_id} shared a post.`,
-                  author: value,
-                  object: post,
-                };
-                api
-                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, response.data)
-                  .then((response) => {
-                    console.log(response.data)
-                  })
-                  .catch((error) => {
-                    console.log("Failed to send private post. " + error);
-                });
-                
-            }
-            props.onHide();
-          }})
+            sendPost(response);
+            })
           .catch((error) => {
             alert(`Something went wrong posting! \n Error: ${error.response.data}`);
             console.log(error);
@@ -139,40 +166,16 @@ export default function CreatePost(props) {
           .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
           .then((response) => {
             // image post created successfully, now link the post with the image post
-
             // set the image field
             const new_post = {
               ...post,
               image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
             };
-
             return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
           })
           .then((response) => {
-            if (post.unlisted) {
-              setURI(
-                `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
-              );
-              setShowURI(true);
-            } else {
-              if (post.visibility === "PRIVATE") {
-                const sharedPost = {
-                  type: "post",
-                  summary: `${user_id} shared a post.`,
-                  author: value,
-                  object: post.id,
-                };
-                api
-                  .post(`${baseURL}/authors/${value.uuid}/inbox/`, response.data)
-                  .then((response) => {
-                    console.log(response)
-                  })
-                  .catch((error) => {
-                    console.log("Failed to send private post. " + error);
-                  });
-              }
-              props.onHide();
-          }})
+            sendPost(response);
+          })
           .catch((error) => {
             alert(
               `Something went wrong posting the image post! \n Error: ${error.response.data}`
@@ -265,7 +268,7 @@ export default function CreatePost(props) {
   const search = async (val) => {
     setLoading(true);
     const res = await search2(
-      `${baseURL}/authors?search=${val}` // TODO: need to search with pagination
+      `${baseURL}/authors?search=${val}&size=3`
     );
     setAuthors(res);
 
@@ -278,15 +281,18 @@ export default function CreatePost(props) {
   };
 
   const privatePost = (author) => {
-    setValue(author)
+    setSendTo(author);
+    setValue(author);
+    setSelectedAuthor(author);
+    setAuthors();
   }
 
   function RenderAuthors(props) {
     // given the list of authors from the query, creates the user cards
     if (props.authors) {
       return (
-        <div>
-          { props.authors.items != "undefined" ? (
+        <div className="private-search-authors">
+          { props.authors.items !== "undefined" ? (
             props.authors.items.length !== 0 ? (
               props.authors.items.map((author) =>
                 <div>
@@ -407,36 +413,28 @@ export default function CreatePost(props) {
                 />
               </div>
             </Modal.Header>
-            <Modal.Header className = "searchHeader">
-              <Container>
                 {(() => {
                   if (post.visibility === "PRIVATE") {
                     return (
-                      <div style={{ marginLeft: "3%" }}>
+                      <div className="private-search-container">
                         <FaSearch style={{
                         color: "#BFEFE9",
                         height: "1em",
                         width: "1em",
+                        margin: "0.5em",
                         zIndex: "3px", }} className="FaSearch" />
                         <input
-                          style={{ color: "#BFEFE9", 
-                          backgroundColor: "#1C212B", 
-                          marginLeft: "1%", 
-                          borderRadius: "3%", 
-                          boderColor: "#1C212B"}}
+                          className="private-search-input"
                           value={value.displayName}
                           onChange={(e) => onChangeHandler(e)}
                           placeholder="Search for an author"
                         />
-                        <div style={{zIndex: "100px"}}>
-                          {value !== "" ? <RenderAuthors authors={authors} /> : null}
-                        </div>
+                        {value !== "" ? <RenderAuthors authors={authors} /> : null}
+                        {selectedAuthor && <UserCard author={selectedAuthor} />}
                       </div>
                     )
                   }
                 })()}
-              </Container>
-            </Modal.Header>
             <Modal.Body>
               <Form.Group className="title">
                 <Form.Control
@@ -517,7 +515,7 @@ export default function CreatePost(props) {
                 <FaLink className="link-icon" onClick={() => linkClickHandler()}/>
               </div>
               
-              <Button className="postButton" onClick={sendPost}>
+              <Button className="postButton" onClick={handleSubmitPost}>
                 Post
               </Button>
             </Modal.Footer>

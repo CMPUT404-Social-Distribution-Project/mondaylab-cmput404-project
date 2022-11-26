@@ -161,19 +161,31 @@ class InboxApiView(GenericAPIView):
             try:
                 likes_serializer = LikeAuthorSerializer(data=request.data)
                 if likes_serializer.is_valid(raise_exception=True):
-                    object_field = likes_serializer.validated_data.get("object")
+                    object_field = likes_serializer.validated_data.get("object")  # NOTE, a bit redundant here
                     like_type = get_like_type(object_field)
                     if like_type == None:
                         # object field is not properly formatted
                         return response.Response("Object field is not formatted correctly", status=status.HTTP_400_BAD_REQUEST)
-                    actor_id = request.data.get("author")["id"]
-                    actor_object = Author.objects.get(id = actor_id)
-                    actor_name = actor_object.displayName
+                    """
+                    def:
+                        actor_obj: is the person who sent the like
+                        object field in like model: is the url field of author getting this like
+                    """
+                    actor_object = None
+                    
+                    validate_like(request.data)
+                    actor_object = get_or_create_author(request.data['author'])
+                    if actor_object == None:
+                        return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+                    assert(likes_serializer.validated_data["object"] == object_field)  # NOTE, checking to see if they refer to same thing
                     # summary changes depending on the type it's liked on
+                    actor_name = actor_object.displayName
                     summary = f"{actor_name} likes your {like_type}"
-            
+                    
+
                     like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
+
                     if like == None:
                         like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
                     else:
