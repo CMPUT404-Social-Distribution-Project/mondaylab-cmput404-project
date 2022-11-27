@@ -1,14 +1,6 @@
-.comment-card .comment-profile-pic {
+.comment-card .profile-pic {
     width: 1.5em;
     min-width: 1.5em;
-    height: auto;
-    aspect-ratio: 1/1;
-    border-radius: 100%;
-    text-align: center;
-    display: flex;
-    color: var(--white-teal);
-    overflow:hidden;
-    place-content: center;
     flex: 0.05;
 }
 

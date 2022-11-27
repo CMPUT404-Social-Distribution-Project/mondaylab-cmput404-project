@@ -15,6 +15,8 @@ export default function Post() {
   const api = useAxios();
   const [followers, setFollowers] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [liked, setLiked] = useState([]);
+  
 
   // route to 404 if post not found
   const navigate = useNavigate();
@@ -53,13 +55,23 @@ export default function Post() {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/liked`
+        )
+        .then((response) => {
+          setLiked(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+      });
     };
     fetchData();
   }, [useLocation().state]);
 
   return (
     <div className="post-container">
-        {post && <PostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />}
+        {post && <PostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />}
 
     </div>
   );

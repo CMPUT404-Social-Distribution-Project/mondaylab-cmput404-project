@@ -50,10 +50,11 @@ class FollowersForeignApiView(GenericAPIView):
     def get(self, request, author_id, foreign_author_id):
         try:
             current_author = Author.objects.get(uuid = author_id)
+            foreign_author = Author.objects.get(uuid = foreign_author_id)
             followers = current_author.followers.all()
             if followers.exists():
                 # check if the foreign author is following author
-                isFollowing = current_author.followers.filter(uuid = foreign_author_id).first()
+                isFollowing = current_author.followers.filter(uuid = foreign_author.uuid).first()
                 if isFollowing != None:
                     return response.Response(True, status=status.HTTP_200_OK)
                 else:
