@@ -25,7 +25,6 @@ root.render(
         <Routes>
           <Route element={<AuthLayout />}>
             <Route path="/" element={<Main />}>
-              <Route path='post' element={<CreatePost/>} />
               <Route path='stream' element={<StreamHome/>} />
               <Route path='stream/github' element={<GithubPage/>} />
               <Route path='inbox' element={<Inbox/>} />
@@ -34,6 +33,7 @@ root.render(
               <Route path='authors/:author_id/:dir/' element={<Profile/>} />
               <Route path='authors/:author_id/posts/:post_id' element={<Post/>} />
               <Route path='404' element={<Page404/>} />
+              <Route path="*" element={<Page404/>} />
             </Route>
           </Route>
           <Route path="/login" element={<Login />} />
