@@ -4,13 +4,12 @@ import "./CommentCard.css";
 import { useNavigate } from "react-router-dom";
 import { BsFillHeartFill } from "react-icons/bs";
 import AuthContext from "../../context/AuthContext";
-import { extractAuthorUUID, authorHostIsOurs, emptyNode } from "../../utils/utils";
+import { extractAuthorUUID } from "../../utils/utils";
 import useAxios from "../../utils/useAxios";
 import ProfilePicture from "../ProfilePicture";
 
 export default function CommentCard(props) {
   const [liked, setLiked] = useState(props.liked);
-  const [node, setNode] = useState(emptyNode);
   const { baseURL } = useContext(AuthContext);
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const api = useAxios();
@@ -22,23 +21,18 @@ export default function CommentCard(props) {
 
   useEffect(() => {
     setLiked(props.liked);
-    setNode(props.node);
-  }, [props.node, props.liked])
+  }, [props.liked])
 
 
   const sendLike = () => {
-    let host = baseURL + "/";
     const postLike = {
       type: "like",
       summary: `${loggedInUser.displayName} Likes your post.`,
       author: loggedInUser,
       object: props.comment.id,
     };
-    if (!authorHostIsOurs(props.author.host) && props.node.host != null){
-      host = props.node.host;
-    }
     api
-      .post(`${host}authors/${extractAuthorUUID(props.author.id)}/inbox/`, postLike, {headers: node.headers})
+      .post(`${baseURL}/authors/${extractAuthorUUID(props.author.id)}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
 

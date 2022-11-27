@@ -16,7 +16,7 @@ import "reactjs-popup/dist/index.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { confirmAlert } from "react-confirm-alert";
-import { authorHostIsOurs, extractAuthorUUID, extractPostUUID, createNodeObject, emptyNode } from "../../utils/utils";
+import { authorHostIsOurs, extractAuthorUUID, extractPostUUID} from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
 
 export default function PostCard(props) {
@@ -32,10 +32,6 @@ export default function PostCard(props) {
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
   const [friends, setFriends] = useState(props.loggedInAuthorsFriends);
   const loggedInAuthorsLiked = props.loggedInAuthorsLiked;
-
-  // node
-  const [postAuthorNode, setPostAuthorNode] = useState(null);     // the node object of post's author
-  const [postAuthorBaseApiURL, setPostAuthorBaseAPI] = useState("");
   
   const navigate = useNavigate();
   const routeChange = () => {
@@ -60,18 +56,14 @@ export default function PostCard(props) {
   };
 
   const sendPostLike = () => {
-    let host = baseURL + "/";
     const postLike = {
       type: "like",
       summary: `${loggedInUser.displayName} Likes your post.`,
       author: loggedInUser,
       object: props.post.id,
     };
-    if (!authorHostIsOurs(props.post.author.host) && postAuthorBaseApiURL != null){
-      host = postAuthorBaseApiURL
-    }
     api
-      .post(`${host}authors/${post_user_uuid}/inbox/`, postLike)
+      .post(`${baseURL}/authors/${post_user_uuid}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
 
@@ -91,25 +83,6 @@ export default function PostCard(props) {
   };
 
   useEffect(() => {
-    if (!authorHostIsOurs(props.post.author.host)) {
-      const fetchNode = async () => {
-        // fetches the node object
-        await api
-        .get(`${baseURL}/node/?host=${props.post.author.host}`)
-        .then((response) => {
-          let node = createNodeObject(response, props.post.author);
-          setPostAuthorNode(node);
-          setPostAuthorBaseAPI(node.host);
-        })
-        .catch((err) => {
-          console.log(err.response.data);
-        })
-      }
-      fetchNode();
-    }
-  }, []);
-
-  useEffect(() => {
     // check if post is liked by logged in author
     if (loggedInAuthorsLiked && typeof(loggedInAuthorsLiked) !== 'undefined') {
       for (let data of loggedInAuthorsLiked) {
@@ -122,30 +95,14 @@ export default function PostCard(props) {
   }, [loggedInAuthorsLiked])
 
   const sendPostToAuthorInbox = (author, post) => {
-    if (!authorHostIsOurs(author.host)) {
-      api
-        .get(`${baseURL}/node/?host=${author.host}`)
-        .then((response) => {
-          let node = createNodeObject(response, author);
-          api
-            .post(`${node.host}authors/${extractAuthorUUID(author.id)}/inbox/`, post, { headers: node.headers })
-            .then((response) => {
-              console.log("Success sending to author's inbox", response);
-            })
-            .catch((error) => {
-              console.log("Failed to send post to inbox of author", error.response);
-            });
+    api
+      .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
+      .then((response) => {
+        console.log("Success sending to author's inbox", response);
+      })
+      .catch((error) => {
+        console.log("Failed to send post to inbox of author", error.response);
       });
-    } else {
-      api
-        .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
-        .then((response) => {
-          console.log("Success sending to author's inbox", response);
-        })
-        .catch((error) => {
-          console.log("Failed to send post to inbox of author", error.response);
-        });
-    }
   }
 
   const sharePost = (post) => {
