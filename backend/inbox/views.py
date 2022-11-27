@@ -232,10 +232,7 @@ class InboxApiView(GenericAPIView):
         elif request.data['type'].lower() == "comment":
             try:
                 validate_comment(request.data)
-                # comment_author_obj = get_or_create_author(request.data["author"])
-                # if comment_author_obj == None:
-                #     return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                
+
                 if request.data.get("id") != None:
                     # There's an id field in comment, then assume that the comment has already been created.
                     # Attempt to get comment object
@@ -249,6 +246,8 @@ class InboxApiView(GenericAPIView):
                         create_remote_comment(request.data)
                         
                         comment = Comment.objects.get(id=request.data["id"])
+                        post_obj.update(count=post_obj.first().count + 1)
+
                 else:
                     # Otherwise, no id field, then assume comment needs to be created
                     # check to make sure object (post) exists
@@ -264,9 +263,13 @@ class InboxApiView(GenericAPIView):
                     create_remote_comment(request.data)
 
                     comment = Comment.objects.get(id=request.data["id"])
-                        
-
+                
+                    # update count
+                    post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
+                    post_obj.update(count=post_obj.first().count + 1)
+                    
                 inbox.comments.add(comment)
+                
 
                 result={
                     "detail": str(author) +" send comment successful"
