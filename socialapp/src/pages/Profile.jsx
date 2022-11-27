@@ -153,10 +153,12 @@ export default function Profile() {
         )
         .then((response) => {
           setFollowersArray(response.data);
+
         })
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
         });
+
     };
       if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
         console.log("THE AUTHOR IS", author);
