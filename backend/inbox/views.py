@@ -239,7 +239,16 @@ class InboxApiView(GenericAPIView):
                 if request.data.get("id") != None:
                     # There's an id field in comment, then assume that the comment has already been created.
                     # Attempt to get comment object
-                    comment = Comment.objects.get(id=request.data["id"])
+                    comment_obj = Comment.objects.filter(id=request.data["id"])
+                    if comment_obj.exists():
+                        comment = comment_obj.first()
+                    else:
+                        # Create comment if it doesn't exist.
+                        if request.data.get("published") == None:
+                            request.data["published"] = datetime.now(tz=timezone.utc).isoformat("T","seconds")
+                        create_remote_comment(request.data)
+                        
+                        comment = Comment.objects.get(id=request.data["id"])
                 else:
                     # Otherwise, no id field, then assume comment needs to be created
                     # check to make sure object (post) exists

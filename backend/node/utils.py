@@ -15,7 +15,7 @@ def authenticated_GET(url, node):
     return res
 
 def authenticated_POST(url, node, data):
-    res = requests.post(url, data=data, auth=(node.username, node.password))
+    res = requests.post(url, json=data, auth=(node.username, node.password))
     return res
 
 def getRemoteAuthors():

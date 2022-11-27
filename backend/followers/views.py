@@ -7,7 +7,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
-from backend.utils import isAuthorized, check_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
+from backend.utils import isAuthorized, check_true_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
 
 class FollowersApiView(GenericAPIView):
     """
@@ -120,7 +120,7 @@ class TrueFriendApiView(GenericAPIView):
     def get(self, request, author_id, foreign_author_id):
         
         try:
-            result = check_friend(author_id, foreign_author_id)
+            result = check_true_friend(author_id, foreign_author_id)
             if result ==True:
                 return response.Response(True, status=status.HTTP_200_OK)
             else:

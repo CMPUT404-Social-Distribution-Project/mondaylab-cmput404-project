@@ -56,7 +56,7 @@ export default function LikeCard(props) {
             </Card.Title>
           </Col>
           <Col >
-            <p className="text"> like your post! </p>
+            <p className="text"> liked your {props.like.object.includes("comment") ? "comment" : "post"}! </p>
           </Col>
           <Col>
             <Popup
