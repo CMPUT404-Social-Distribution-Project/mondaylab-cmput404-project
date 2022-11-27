@@ -475,7 +475,7 @@ def validate_follow_rq(follow_rq):
             raise ValidationError(f"Follow request's object is missing required field {required_field}")
         
 def validate_comment(comment):
-    comment_required_fields = ["type", "author", "comment", "object"]
+    comment_required_fields = ["type", "author", "comment"]
 
     for required_field in comment_required_fields:
         if comment.get(required_field) == None:
