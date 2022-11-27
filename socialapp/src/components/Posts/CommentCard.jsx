@@ -1,4 +1,4 @@
-import { React, useState, useContext } from "react";
+import { React, useState, useContext, useEffect } from "react";
 import { Card } from "react-bootstrap";
 import "./CommentCard.css";
 import { useNavigate } from "react-router-dom";
@@ -6,9 +6,11 @@ import { BsFillHeartFill } from "react-icons/bs";
 import AuthContext from "../../context/AuthContext";
 import { extractAuthorUUID, authorHostIsOurs, emptyNode } from "../../utils/utils";
 import useAxios from "../../utils/useAxios";
+import ProfilePicture from "../ProfilePicture";
 
 export default function CommentCard(props) {
   const [liked, setLiked] = useState(props.liked);
+  const [node, setNode] = useState(emptyNode);
   const { baseURL } = useContext(AuthContext);
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const api = useAxios();
@@ -18,10 +20,14 @@ export default function CommentCard(props) {
     navigate(`/authors/${extractAuthorUUID(props.author.id)}/`, { state: { refresh: true } });
   };
 
+  useEffect(() => {
+    setLiked(props.liked);
+    setNode(props.node);
+  }, [props.node, props.liked])
+
 
   const sendLike = () => {
     let host = baseURL + "/";
-    let node = emptyNode;
     const postLike = {
       type: "like",
       summary: `${loggedInUser.displayName} Likes your post.`,
@@ -30,7 +36,6 @@ export default function CommentCard(props) {
     };
     if (!authorHostIsOurs(props.author.host) && props.node.host != null){
       host = props.node.host;
-      node = props.node;
     }
     api
       .post(`${host}authors/${extractAuthorUUID(props.author.id)}/inbox/`, postLike, {headers: node.headers})
@@ -56,9 +61,7 @@ export default function CommentCard(props) {
     <Card className="comment-card">
       <Card.Body style={{ width: "auto", display: "flex" }}>
         <div className="comment-author-container" onClick={routeChange}>
-          <div className="comment-profile-pic">
-            <img src={props.author.profileImage} alt="profilePic" />
-          </div>
+          <ProfilePicture profileImage={props.author.profileImage} />
           <div className="comment-author">{props.author.displayName}</div>
         </div>
         <div className="comment-content">{props.comment.comment}</div>
