@@ -63,7 +63,7 @@ export default function FollowButton(props) {
     } else {
       following(baseURL+'/', emptyNode);
     }
-  }, [props.authorViewing, props.authorBaseApiURL, isFollowing, useLocation().state]);
+  }, [props.authorViewing, props.authorBaseApiURL, useLocation().state]);
 
   const handleClick = () => {
     if (followState === "notFollowing") {
