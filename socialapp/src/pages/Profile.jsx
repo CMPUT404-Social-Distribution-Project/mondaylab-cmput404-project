@@ -129,7 +129,7 @@ export default function Profile() {
         });
     };
     fetchData();
-  }, []);
+  }, [useLocation().state]);
 
   return (
     <div className="profileContainer">

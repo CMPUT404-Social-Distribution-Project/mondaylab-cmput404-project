@@ -23,7 +23,7 @@ export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_id = extractPostUUID(props.post.id);
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-  const post_user_uuid = extractAuthorUUID(props.post.author.id);
+  const post_user_uuid = props.post.author.uuid;
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();
@@ -51,8 +51,7 @@ export default function PostCard(props) {
     }
   });
   const postRouteChange = () => {
-    var rout = props.post.id.split("authors/")[1];
-    navigate(`/authors/${rout}`);
+    navigate(`/authors/${post_user_uuid}/posts/${props.post.uuid}`);
   };
 
   const sendPostLike = () => {
@@ -96,7 +95,7 @@ export default function PostCard(props) {
 
   const sendPostToAuthorInbox = (author, post) => {
     api
-      .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
+      .post(`${baseURL}/authors/${author.uuid}/inbox/`, post)
       .then((response) => {
         console.log("Success sending to author's inbox", response);
       })
@@ -134,7 +133,7 @@ export default function PostCard(props) {
 
   const deletePost = (uuid) => {
     api
-      .delete(`${baseURL}/authors/${extractAuthorUUID(loggedInUser.id)}/posts/${uuid}`)
+      .delete(`${baseURL}/authors/${loggedInUser.uuid}/posts/${uuid}`)
       .then((response) => {
         refreshState();
       })
