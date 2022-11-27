@@ -36,7 +36,7 @@ def add_end_slash(url):
 def remove_end_slash(url):
     # Removes the end slash to a url, if it exists.
     if url[-1] == '/':
-        return url[-1]
+        return url[:-1]
     return url
 
 def isAuthorized(request, author_uuid):
@@ -231,7 +231,7 @@ def is_our_frontend(origin):
 def is_our_backend(host):
     # return true if it's our back end
     our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
-    return host in our_backends
+    return remove_end_slash(host) in our_backends
 
 def display_name_exists(display_name):
     obj = Author.objects.filter(displayName=display_name)
