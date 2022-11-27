@@ -24,16 +24,18 @@ def create_node_authors(modeladmin, request, queryset):
             try:
                 create_remote_author(remote_author)
                 remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
-                
-                # create author's likes
-                node_author_likes_endpoint = f"{node.host}authors/{remote_author_uuid}/liked"
-                res = authenticated_GET(node_author_likes_endpoint, node) 
-                remote_author_likes = res.json().get("items")
-                if res.status_code == 200 and remote_author_likes:
-                    for remote_author_like in remote_author_likes:
-                        create_remote_like(remote_author_like)
             except Exception as e:
-                print("Could not create remote author locally.", e)
+                print(f"Could not create remote author from {node.host} locally.", e)
+            
+            # Probably don't need to do this
+                # # create author's likes
+                # node_author_likes_endpoint = f"{node.host}authors/{remote_author_uuid}/liked"
+                # res = authenticated_GET(node_author_likes_endpoint, node) 
+                # remote_author_likes = res.json().get("items")
+                # if res.status_code == 200 and remote_author_likes:
+                #     for remote_author_like in remote_author_likes:
+                #         create_remote_like(remote_author_like)
+
 
 def create_node_posts(modeladmin, request, queryset):
     for node in queryset:
@@ -41,7 +43,6 @@ def create_node_posts(modeladmin, request, queryset):
 
         for remote_author in node_authors:
             remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
-            print(remote_author_uuid)
             # make sure author exists/ create it if it doesn't
             if not remote_author_exists(remote_author["id"]):
                 create_remote_author(remote_author)
