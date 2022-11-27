@@ -65,6 +65,7 @@ export default function Explore() {
   const [remoteAuthors, setRemoteAuthors] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [liked, setLiked] = useState([]);
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
 
   useEffect(() => {
@@ -86,7 +87,7 @@ export default function Explore() {
           console.log(error);
         });
       await api
-        .get(`${baseURL}/authors/${user_id}/followers`)
+        .get(`${baseURL}/authors/${user_id}/followers/`)
         .then((response) => {
           setFollowers(response.data.items);
         })
@@ -101,6 +102,16 @@ export default function Explore() {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/liked`
+        )
+        .then((response) => {
+          setLiked(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+      });
     }
     fetchData();
   }, [useLocation().state]);
@@ -179,7 +190,7 @@ export default function Explore() {
                   <Row>
                     {searchPostsArray.map((post) => (
                       <Col key={post.id} >
-                        <ExplorePostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />
+                        <ExplorePostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />
                       </Col>
                     ))}
                   </Row>
@@ -192,7 +203,7 @@ export default function Explore() {
                 <h5>Current public posts</h5>
                 <div className="all-posts-container">
                   {postsArray.map((post) => (
-                      <ExplorePostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
+                      <ExplorePostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
                   ))}
                 </div>
               </>

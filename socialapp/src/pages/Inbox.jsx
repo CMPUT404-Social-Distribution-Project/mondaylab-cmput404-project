@@ -32,8 +32,41 @@ export default function Inbox() {
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
   const [followers, setFollowers] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [liked, setLiked] = useState([]);
   const api = useAxios();
   const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const fetchLoggedInAuthorData = async () => {
+      await api
+      .get(`${baseURL}/authors/${user_id}/followers/`)
+      .then((response) => {
+        setFollowers(response.data.items);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+      await api
+        .get(`${baseURL}/authors/${user_id}/friends/`)
+        .then((response) => {
+          setFriends(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/liked`
+        )
+        .then((response) => {
+          setLiked(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+      });
+    }
+    fetchLoggedInAuthorData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,22 +115,6 @@ export default function Inbox() {
         .catch((error) => {
           console.log("Failed to get inbox of author. " + error);
         });
-      await api
-        .get(`${baseURL}/authors/${user_id}/followers`)
-        .then((response) => {
-          setFollowers(response.data.items);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      await api
-        .get(`${baseURL}/authors/${user_id}/friends/`)
-        .then((response) => {
-          setFriends(response.data.items);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
     };
     fetchData();
   }, [useLocation().state]);
@@ -121,7 +138,7 @@ export default function Inbox() {
   
   const deleteInbox = () => {
     api
-      .delete(`${baseURL}/authors/${user_id}/inbox`)
+      .delete(`${baseURL}/authors/${user_id}/inbox/`)
       .then(
         (response) => setShow(true),
         setPosts([]),
@@ -201,7 +218,7 @@ export default function Inbox() {
                 <Tab.Pane eventKey="post">
                   {typeof posts !== "undefined" ? (
                     posts.length !== 0 ? (
-                      posts.map((item, i) => <PostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={item} key={i}/>)
+                      posts.map((item, i) => <PostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={item} key={i}/>)
                     ) : (
                       <h4>No posts yet! </h4>
                     )

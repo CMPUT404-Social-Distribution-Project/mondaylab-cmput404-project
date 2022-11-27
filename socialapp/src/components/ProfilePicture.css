@@ -1,0 +1,12 @@
+.profile-pic {
+    width: 2em;
+    height: auto;
+    aspect-ratio: 1/1;
+    border-radius: 100%;
+    outline: solid var(--orange) 2px;
+    text-align: center;
+    display: flex;
+    color: var(--white-teal);
+    overflow:hidden;
+    place-content: center;
+}

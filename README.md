@@ -5,6 +5,10 @@
 ***Frontend:*** https://superlative-gelato-dcf1b6.netlify.app  
 ***Backend:*** https://cs404-project.herokuapp.com/
 
+Backend HTTP Basic Auth Credentials:
+Username = F22cmput404team1SD
+Password = ZuluACKAlpha
+
 ##  Team Members  
   
 | <img src="https://avatars.githubusercontent.com/u/49131259?v=4" width="120">| <img src="https://avatars.githubusercontent.com/u/57372321?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/66976914?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/77299977?v=4" width="120"> | <img src="https://avatars.githubusercontent.com/u/98789620?v=4" width="120"> |

@@ -11,6 +11,7 @@ const AuthLayout = () => {
       setUser(null);
       localStorage.removeItem("authTokens");
       localStorage.removeItem("user_id");
+      localStorage.removeItem("loggedInUser");
       return <Navigate to={"/login"} replace />
     }
     const userToken = jwt_decode(authTokens.access);
@@ -19,7 +20,7 @@ const AuthLayout = () => {
     // if token is expired, try to refresh it
     if (isExpired === true) {
         const req = async () => {
-            const response = await axios.post(`${baseURL}/auth/refresh/`, {
+            await axios.post(`${baseURL}/auth/refresh/`, {
                 refresh: authTokens.refresh
               })
               .then((response) => {

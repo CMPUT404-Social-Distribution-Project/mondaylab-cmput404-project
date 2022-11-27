@@ -18,6 +18,19 @@
     border: transparent;
     border-radius: 11px;
     width: auto;
+    display: flex;
+    gap: 1rem;
+}
+
+.follow-request-card .decline-button {
+    background-color: var(--orange);
+    border: none;
+}
+
+.follow-request-card .btn {
+    font-family: "Readex Pro Bold";
+    font-size: small;
+    border-radius: 2rem;
 }
 
 .follow-request-card .card-header {
