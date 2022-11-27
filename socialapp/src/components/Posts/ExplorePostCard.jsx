@@ -30,6 +30,7 @@ export default function PostCard(props) {
   const [liked, setLiked] = useState(false);
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
   const [friends, setFriends] = useState(props.loggedInAuthorsFriends);
+  const loggedInAuthorsLiked = props.loggedInAuthorsLiked;
 
   // node
   const [postAuthorNode, setPostAuthorNode] = useState(null);     // the node object of post's author
@@ -69,10 +70,9 @@ export default function PostCard(props) {
       host = postAuthorBaseApiURL
     }
     api
-      .post(`${host}authors/${post_user_uuid}/inbox`, postLike)
+      .post(`${host}authors/${post_user_uuid}/inbox/`, postLike)
       .then((response) => {
         setLiked(true);
-        setLikeCount((likeCount) => likeCount + 1);
 
         // Need this for checking if author liked remote post or not.
         // Since when sending a like object to remote host's inbox,
@@ -108,36 +108,17 @@ export default function PostCard(props) {
     }
   }, []);
 
-  // Checks the logged in user's liked objects,
-  // if it matches this post's ID, then set liked to be true.
   useEffect(() => {
-    const fetchLoggedUsersLiked = async () => {
-      await api
-        .get(
-          `${baseURL}/authors/${loggedInUser.uuid}/liked`
-        )
-        .then((response) => {
-          let resLikedItems = response.data.items;
-          if (typeof(response.data.items) === 'undefined') {
-            resLikedItems = response.data;
-          }
-          if (typeof(resLikedItems) !== 'undefined') {
-            // console.log(props.post.id);
-
-            for (let data of resLikedItems) {
-              if (data.object === props.post.id) {
-                setLiked(true);
-                break;
-              }
-            }
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-      });
+    // check if post is liked by logged in author
+    if (loggedInAuthorsLiked && typeof(loggedInAuthorsLiked) !== 'undefined') {
+      for (let data of loggedInAuthorsLiked) {
+        if (data.object === props.post.id) {
+          setLiked(true);
+          break;
+        }
+      }
     }
-    fetchLoggedUsersLiked();
-  }, [])
+  }, [loggedInAuthorsLiked])
 
   const sendPostToAuthorInbox = (author, post) => {
     if (!authorHostIsOurs(author.host)) {
@@ -167,15 +148,10 @@ export default function PostCard(props) {
   }
 
   const sharePost = (post) => {
-    if (post.visibility === "PUBLIC") {
+    if (post.visibility === "PUBLIC" || post.visibility === "FRIENDS") {
       for (let index = 0; index < followers.length; index++) {
         const follower = followers[index];
         sendPostToAuthorInbox(follower, post);
-      };
-    } else if (post.visibility === "FRIENDS") {
-      for (let index = 0; index < friends.length; index++) {
-        const friend = friends[index];
-        sendPostToAuthorInbox(friend, post);
       };
     };
   };
@@ -291,7 +267,7 @@ export default function PostCard(props) {
             <div>
               <BsFillHeartFill
                 className="like-icon"
-                style={{color: liked ? "var(--orange)": "var(--white)",}}
+                style={{color: liked ? "var(--orange)": "var(--white-teal)",}}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>

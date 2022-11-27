@@ -18,7 +18,9 @@ function ProfilePosts(props) {
     <div className="posts-container-profile">
     {
       typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
+        props.postsArray.items.map((post) => <PostCard 
+        loggedInAuthorsLiked={props.loggedInAuthorsLiked}
+        loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
         : null
     }
     </div>
@@ -57,6 +59,7 @@ export default function Profile() {
   const [friendsArray, setFriendsArray] = useState(""); 
   const [loggedInAuthorsFollowers, setLoggedInAuthorsFollowers] = useState([]); 
   const [loggedInAuthorsFriends, setLoggedInAuthorsFriends] = useState([]); 
+  const [liked, setLiked] = useState([]);
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
@@ -66,7 +69,7 @@ export default function Profile() {
   const [authorBaseApiURL, setAuthorBaseAPI] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loggedInUserData = async () => {
       await api
         .get(`${baseURL}/authors/${loggedInUser.uuid}/followers/`)
         .then((response) => {
@@ -83,8 +86,18 @@ export default function Profile() {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${loggedInUser.uuid}/liked`
+        )
+        .then((response) => {
+          setLiked(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+      });
     };
-    fetchData();
+    loggedInUserData();
   }, []);
 
   useEffect(() => {
@@ -104,7 +117,7 @@ export default function Profile() {
       });
     }
     fetchAuthor();
-  }, [useLocation().state, dir])
+  }, [useLocation().state])
 
 
   const fetchNode = async (author) => {
@@ -145,16 +158,7 @@ export default function Profile() {
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
         });
-      await api      
-        .get(`${ApiURL}authors/${authorId}/friends/`,
-        {headers: node.headers}
-        )
-        .then((response) => {
-          setFriendsArray(response.data);
-        })
-        .catch((error) => {
-          console.log("Failed to get friends of author. " + error);
-        });
+
     };
       if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
         console.log("THE AUTHOR IS", author);
@@ -163,6 +167,16 @@ export default function Profile() {
         // if the author is from our host, fetch from our API, or if something went wrong
         // trying to fetch the foreign author, then fetch that author from ours as backup.
         fetchData(baseURL+'/', author_id, emptyNode);
+        // fetch the authors friends only if the author we're viewing is ours.
+        // This is other groups don't have a friends endpoint.
+        api      
+          .get(`${baseURL}/authors/${author_id}/friends/`)
+          .then((response) => {
+            setFriendsArray(response.data);
+          })
+          .catch((error) => {
+            console.log("Failed to get friends of author. " + error);
+          });
       }
       
 
@@ -203,7 +217,11 @@ export default function Profile() {
         </div>
       </div>
       <ProfileTabs dir={dir} author_id={author_id}/>
-      {dir === 'posts' || dir === undefined ? <ProfilePosts loggedInAuthorsFollowers={loggedInAuthorsFollowers} loggedInAuthorsFriends={loggedInAuthorsFriends} postsArray={postsArray}/> : <></>}
+      {dir === 'posts' || dir === undefined ? 
+      <ProfilePosts 
+        loggedInAuthorsLiked={liked} 
+        loggedInAuthorsFollowers={loggedInAuthorsFollowers} 
+        loggedInAuthorsFriends={loggedInAuthorsFriends} postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
 
