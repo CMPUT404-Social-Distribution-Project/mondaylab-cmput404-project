@@ -43,6 +43,7 @@ export default function PostCard(props) {
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
   const [friends, setFriends] = useState(props.loggedInAuthorsFriends);
+  const loggedInAuthorsLiked = props.loggedInAuthorsLiked;
 
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
@@ -84,7 +85,9 @@ export default function PostCard(props) {
       .post(`${host}authors/${post_user_uuid}/inbox/`, postLike, {headers: node.headers})
       .then((response) => {
         setLiked(true);
-        setLikeCount((likeCount) => likeCount + 1);
+        if (props.post.visibility === "FRIENDS" || props.post.author.id === loggedInUser.id) {
+          setLikeCount((likeCount) => likeCount + 1);
+        }
 
         // Need this for checking if author liked remote post or not.
         // Since when sending a like object to remote host's inbox,
@@ -147,6 +150,7 @@ export default function PostCard(props) {
       fetchPostAuthorData(postAuthorBaseApiURL, postAuthorNode);
     } else {
       fetchPostAuthorData(baseURL+'/', emptyNode);
+      
     }
   }, [postAuthorNode, useLocation().state])
 
@@ -170,36 +174,17 @@ export default function PostCard(props) {
     }
   }, []);
 
-  // Checks the logged in user's liked objects,
-  // if it matches this post's ID, then set liked to be true.
   useEffect(() => {
-    const fetchLoggedUsersLiked = async () => {
-      await api
-        .get(
-          `${baseURL}/authors/${loggedInUser.uuid}/liked`
-        )
-        .then((response) => {
-          let resLikedItems = response.data.items;
-          if (typeof(response.data.items) === 'undefined') {
-            resLikedItems = response.data;
-          }
-          if (typeof(resLikedItems) !== 'undefined') {
-            // console.log(props.post.id);
-
-            for (let data of resLikedItems) {
-              if (data.object === props.post.id) {
-                setLiked(true);
-                break;
-              }
-            }
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-      });
+    // check if post is liked by logged in author
+    if (loggedInAuthorsLiked && typeof(loggedInAuthorsLiked) !== 'undefined') {
+      for (let data of loggedInAuthorsLiked) {
+        if (data.object === props.post.id) {
+          setLiked(true);
+          break;
+        }
+      }
     }
-    fetchLoggedUsersLiked();
-  }, [])
+  }, [loggedInAuthorsLiked])
 
   const sendPostToAuthorInbox = (author, post) => {
     if (!authorHostIsOurs(author.host)) {

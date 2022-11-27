@@ -3,7 +3,7 @@ import Button from "react-bootstrap/Button";
 import AuthContext from "../../context/AuthContext";
 import useAxios from "../../utils/useAxios";
 import { useParams, useLocation } from "react-router-dom";
-import { authorHostIsOurs, emptyNode } from "../../utils/utils";
+import { authorHostIsOurs, emptyNode, extractAuthorUUID } from "../../utils/utils";
 
 // function authorInArray(id, array) {
 //   // checks if the given author id is in the array
@@ -22,7 +22,7 @@ export default function FollowButton(props) {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const api = useAxios(); // use this to add authorization header
   const currentAuthor = JSON.parse(localStorage.getItem("authTokens")).user; // the currently logged in author as an object
-  const { author_id } = useParams(); // gets the author id in the url
+  const author_id = extractAuthorUUID(props.authorViewing.id); // gets the author id in the url
   // Check if the currently logged in user is following the author they're viewing
   const [isFollowing, setIsFollowing] = useState(false);
   // set the follow state
