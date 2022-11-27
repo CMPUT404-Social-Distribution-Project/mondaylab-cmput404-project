@@ -52,16 +52,8 @@
     border-color: transparent;
 }
 
-.profilePicPage {
+.profileHeader .profile-pic {
     width: 4rem;
-    height: 4rem;
-    border-radius: 100%;
-    outline: solid var(--orange) 3px;
-    text-align: center;
-    display: flex;
-    color: var(--white-teal);
-    overflow:hidden;
-    place-content: center;
 }
 
 .profilePicWithFollowButton {

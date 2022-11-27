@@ -12,6 +12,7 @@ import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
 import { authorHostIsOurs, extractAuthorUUID, createNodeObject, emptyNode } from '../utils/utils';
 import { CgRemote } from "react-icons/cg";
+import ProfilePicture from '../components/ProfilePicture';
 
 function ProfilePosts(props) {
   return (
@@ -186,9 +187,7 @@ export default function Profile() {
     <div className="profileContainer">
       <div className="profileHeader">
         <div className="profilePicWithFollowButton">
-          <div className="profilePicPage">
-            <img id="profilePicPage" src={author.profileImage} alt="profilePic"/>
-          </div>
+          <ProfilePicture profileImage={author.profileImage} />
           <FollowButton 
             authorViewing={author} 
             authorNode={!authorHostIsOurs(author.host) ? authorNode : emptyNode} 
