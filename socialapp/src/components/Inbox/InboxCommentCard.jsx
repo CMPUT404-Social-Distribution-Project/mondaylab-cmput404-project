@@ -41,9 +41,9 @@ export default function InboxCommentCard(props) {
   return (
     <Card className="inbox-comment-card">
       <Card.Body>
-        <Row>
-          <Col md="auto">
-            <Card.Title onClick={routeChange}>
+        <Row xs="auto" className="card-row align-items-center">
+          <Col md="4">
+            <div className="inbox-comment-card-profile" onClick={routeChange}>
               <div className="profilePicCard">
                 <img
                   id="profilePicCard"
@@ -52,10 +52,10 @@ export default function InboxCommentCard(props) {
                 />
               </div>
               <div className="text">{props.comment.author.displayName}</div>
-            </Card.Title>
+            </div>
           </Col>
-          <Col md="auto">
-            <p className="text"> commented your post!</p>
+          <Col className="col-6">
+            <p className="text" style={{fontFamily:"Readex Pro Light"}}> commented on your post!</p>
           </Col>
           <Col>
             <Popup
@@ -75,16 +75,20 @@ export default function InboxCommentCard(props) {
               position="right center"
               on="hover"
               closeOnDocumentClick
-              mouseLeaveDelay={300}
+              mouseLeaveDelay={100}
               mouseEnterDelay={0}
-              contentStyle={{ padding: "0px", border: "none" }}
+              contentStyle={{ padding: "0.5rem", backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content" }}
+              arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
               arrow={true}
             >
-              <span> Click to see Post! </span>
+              <span> View Post </span>
             </Popup>
           </Col>
         </Row>
       </Card.Body>
+      <div className="inbox-comment-card-comment">
+        {props.comment.comment}
+      </div>
     </Card>
   );
 }

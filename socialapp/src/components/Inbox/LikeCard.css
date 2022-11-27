@@ -1,23 +1,28 @@
 .like-card {
-    width: 50%;
+    width: 35rem;
     height: fit-content;
     margin: 0.2em 0em;
-    --bs-card-bg: var(--orange);
-}
-
-.like-card .card:hover {
-    cursor: pointer;
+    --bs-card-bg: var(--dark-blue);
 }
 
 .like-card .card-body {
     margin-bottom: 0;
-    padding: 1em;
+    padding: 0;
     color: var(--white-teal);
     background-color: var(--orange);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border: transparent;
     border-radius: 11px;
-    width: auto;
+    /* width: auto; */
+    height: 3rem;
+    display: flex;
+    align-items: center;
+}
+
+.like-card .card-row {
+    height: 4rem;
+    width: 100%;
+    flex-wrap: nowrap;
 }
 
 .like-card .card-header {
@@ -25,8 +30,8 @@
 }
 
 .like-card .profilePicCard {
-    width: 5em;
-    height: 3em;
+    width: 3em;
+    /* height: 2em; */
     aspect-ratio: 1/1;
     border-radius: 100%;
     outline: solid var(--orange) 2px;
@@ -39,20 +44,28 @@
 }
 
 .like-card .text {
-    color: black;
+    color: var(--dark-blue);
     font-size: 1em;
     align-items: center;
     width: 100%;
     vertical-align: middle;
     margin-top: 1em;
     margin-bottom: 1em;
-    
-
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: small;
 }
 
-.like-card .card-title {
+.like-card .like-card-profile {
     display: flex;
     gap: 0.5em;
-    align-self: center;
+    align-items: center;
     margin-bottom: 0;
+    max-width: 15rem;
+    font-size: small;
+}
+
+.like-card .like-card-profile {
+    cursor: pointer;
 }
