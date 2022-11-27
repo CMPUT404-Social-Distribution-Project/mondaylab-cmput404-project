@@ -16,6 +16,7 @@ import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl, emptyNode } from "../../utils/utils";
+import ProfilePicture from "../ProfilePicture"
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -42,8 +43,7 @@ export default function PostCard(props) {
   const [liked, setLiked] = useState(false);
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
-  const [friends, setFriends] = useState(props.loggedInAuthorsFriends);
-  const loggedInAuthorsLiked = props.loggedInAuthorsLiked;
+  const [loggedInAuthorsLiked, setFriends] = useState(props.loggedInAuthorsLiked);
 
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
@@ -175,15 +175,15 @@ export default function PostCard(props) {
 
   useEffect(() => {
     // check if post is liked by logged in author
-    if (loggedInAuthorsLiked && typeof(loggedInAuthorsLiked) !== 'undefined') {
-      for (let data of loggedInAuthorsLiked) {
+    if (typeof(props.loggedInAuthorsLiked) !== 'undefined') {
+      for (let data of props.loggedInAuthorsLiked) {
         if (data.object === props.post.id) {
           setLiked(true);
           break;
         }
       }
     }
-  }, [loggedInAuthorsLiked])
+  }, [props.loggedInAuthorsLiked])
 
   const sendPostToAuthorInbox = (author, post) => {
     if (!authorHostIsOurs(author.host)) {
@@ -319,13 +319,25 @@ export default function PostCard(props) {
               <MdShare /> Share Post
             </Dropdown.Item>
             {(() => {
-              if (loggedInUser.uuid === post_user_uuid) {
+              if (loggedInUser.uuid === post_user_uuid && props.post.visibility === "PUBLIC") {
                 return (
                   <div>
                     <Dropdown.Item onClick={() => setShowEditPost(true)}>
                       <MdModeEdit /> Edit Post
                     </Dropdown.Item>
 
+                    <Dropdown.Item
+                      className="delete-post"
+                      onClick={() => confirmDelete(post_id)}
+                    >
+                      <MdDelete /> Delete Post
+                    </Dropdown.Item>
+                  </div>
+                );
+              } else if (loggedInUser.uuid === post_user_uuid) {
+                // Shouldn't be allowed to edit PRIVATE or FRIENDS posts, as they are already sent
+                return (
+                  <div>
                     <Dropdown.Item
                       className="delete-post"
                       onClick={() => confirmDelete(post_id)}
@@ -401,9 +413,7 @@ export default function PostCard(props) {
     <Card className="post-card">
       <Card.Header>
         <div className="post-author" onClick={routeChange}>
-          <div className="profile-pic-post">
-            <img src={props.post.author.profileImage} alt="profilePic" />
-          </div>
+          <ProfilePicture profileImage={props.post.author.profileImage} />
           <div className="post-author-name">
             {props.post.author.displayName}
           </div>
@@ -481,7 +491,7 @@ export default function PostCard(props) {
                               comment={comment}
                               node={postAuthorNode}
                               liked={() => {
-                                for (let likedObj of loggedInAuthorsLiked) {
+                                for (let likedObj of props.loggedInAuthorsLiked) {
                                   if (likedObj.object === comment.id) {
                                     return true;
                                   }

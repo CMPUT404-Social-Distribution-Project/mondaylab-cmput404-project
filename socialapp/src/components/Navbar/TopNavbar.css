@@ -1,4 +1,4 @@
-#topnav {
+.topnav {
     position: sticky;
     width: 100%;
     top:0;
@@ -6,19 +6,12 @@
     z-index: 100; 
 }
 
-#profilePicContainer {
+.topnav .profile-pic {
     width: 40px;
-    height: 40px;
-    border-radius: 100%;
-    outline: solid var(--orange) 3px;
-    overflow: hidden;
-    text-align: center;
-    display: flex;
-    place-content: center;
     align-self: center;
 }
 
-#profilePicContainer:hover {
+.topnav .profile-pic:hover {
     outline: solid var(--teal) 5px;
     cursor: pointer;
     transition: outline 0.2s ease-in-out;

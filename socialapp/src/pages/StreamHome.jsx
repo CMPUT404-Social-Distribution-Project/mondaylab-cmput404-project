@@ -16,6 +16,7 @@ export default function StreamHome() {
   const [postsArray, setPostsArray] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [liked, setLiked] = useState();
   const user_id = localStorage.getItem("user_id");
   const api = useAxios();
   const navigate = useNavigate();
@@ -64,6 +65,16 @@ export default function StreamHome() {
         .catch((error) => {
           console.log(error);
         });
+      await api
+        .get(
+          `${baseURL}/authors/${user_id}/liked`
+        )
+        .then((response) => {
+          setLiked(response.data.items);
+        })
+        .catch((error) => {
+          console.log(error);
+      });
     };
     fetchData();
   }, []);
@@ -107,7 +118,7 @@ export default function StreamHome() {
       <Container style={{ zIndex: 10 }}>
         <div className="posts">
           {postsArray.map((post) => (
-            <PostCard loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
+            <PostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
           ))}
         </div>
       </Container>

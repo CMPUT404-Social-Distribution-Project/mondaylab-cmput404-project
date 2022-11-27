@@ -6,33 +6,20 @@ import axios from "axios";
 import AuthContext from "../../context/AuthContext";
 import "./TopNavbar.css"
 import { useNavigate } from "react-router-dom";
+import ProfilePicture from '../ProfilePicture';
 
 function TopNavbar() {
-    const [res, setRes] = useState("");
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
     const { baseURL } = useContext(AuthContext) || {};
     const user_id = localStorage.getItem("user_id");
     const navigate = useNavigate();
     const routeChange = () => {
         navigate(`/authors/${user_id}/`, {state: {refresh:true}});
     }
-  
-    // Called after rendering. Fetches data
-    useEffect(() => {
-      const fetchData = async () => {
-        axios
-          .get(baseURL + `/authors/${user_id}/`)
-          .then((response) => {
-            setRes(response.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      };
-      fetchData();
-    }, []);
 
     return (
-        <Navbar id="topnav" bg="teal-alt" variant="dark">
+        <Navbar className="topnav" bg="teal-alt" variant="dark">
             <Container fluid className=".me-1">
                 <Navbar.Brand className="me-auto">
                     <img
@@ -46,12 +33,8 @@ function TopNavbar() {
                         alt="logo-text"
                     />
                 </Navbar.Brand>
-                <Nav className="ml-auto">
-                    {/* <Nav.Link href="#features"><FaCog size={30}/>&emsp;</Nav.Link> */}
-                    <span id="profilePicContainer" onClick={routeChange}
-                    >
-                        <img id="profilePic" src={res.profileImage} alt="profilepic"/>
-                    </span>
+                <Nav className="ml-auto" onClick={routeChange}>
+                    <ProfilePicture profileImage={loggedInUser.profileImage} />
                 </Nav>
             </Container>
         </Navbar>
