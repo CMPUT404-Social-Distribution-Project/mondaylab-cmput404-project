@@ -9,6 +9,8 @@ import { BsCursorFill } from "react-icons/bs";
 import "./InboxCommentCard.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import ProfilePicture from "../ProfilePicture";
+
 export default function InboxCommentCard(props) {
   // pass in the follow request object in props
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -44,13 +46,7 @@ export default function InboxCommentCard(props) {
         <Row xs="auto" className="card-row align-items-center">
           <Col md="4">
             <div className="inbox-comment-card-profile" onClick={routeChange}>
-              <div className="profilePicCard">
-                <img
-                  id="profilePicCard"
-                  src={props.comment.author.profileImage}
-                  alt="profilePic"
-                />
-              </div>
+              <ProfilePicture profileImage={props.comment.author.profileImage} />
               <div className="text">{props.comment.author.displayName}</div>
             </div>
           </Col>

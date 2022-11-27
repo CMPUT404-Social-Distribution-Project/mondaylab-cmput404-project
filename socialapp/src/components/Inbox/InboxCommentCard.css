@@ -29,18 +29,9 @@
     background-color: var(--orange);
 }
 
-.inbox-comment-card .profilePicCard {
+.inbox-comment-card .profile-pic {
     width: 3em;
-    /* height: 2em; */
-    aspect-ratio: 1/1;
-    border-radius: 100%;
-    outline: solid var(--orange) 2px;
-    text-align: center;
-    display: flex;
-    color: var(--white-teal);
-    overflow: hidden;
-    place-content: center;
-    margin-left: -1.5em;
+    margin-left: -1em;
 }
 
 .inbox-comment-card .text {

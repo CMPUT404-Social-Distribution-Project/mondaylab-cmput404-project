@@ -16,6 +16,7 @@ import CommentCard from "./CommentCard";
 import { BsFillChatFill, BsFillHeartFill } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { extractAuthorUUID, extractPostUUID, authorHostIsOurs, createNodeObject, isValidHTTPUrl, emptyNode } from "../../utils/utils";
+import ProfilePicture from "../ProfilePicture"
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -174,15 +175,15 @@ export default function PostCard(props) {
 
   useEffect(() => {
     // check if post is liked by logged in author
-    if (typeof(loggedInAuthorsLiked) !== 'undefined') {
-      for (let data of loggedInAuthorsLiked) {
+    if (typeof(props.loggedInAuthorsLiked) !== 'undefined') {
+      for (let data of props.loggedInAuthorsLiked) {
         if (data.object === props.post.id) {
           setLiked(true);
           break;
         }
       }
     }
-  }, [loggedInAuthorsLiked])
+  }, [props.loggedInAuthorsLiked])
 
   const sendPostToAuthorInbox = (author, post) => {
     if (!authorHostIsOurs(author.host)) {
@@ -412,9 +413,7 @@ export default function PostCard(props) {
     <Card className="post-card">
       <Card.Header>
         <div className="post-author" onClick={routeChange}>
-          <div className="profile-pic-post">
-            <img src={props.post.author.profileImage} alt="profilePic" />
-          </div>
+          <ProfilePicture profileImage={props.post.author.profileImage} />
           <div className="post-author-name">
             {props.post.author.displayName}
           </div>

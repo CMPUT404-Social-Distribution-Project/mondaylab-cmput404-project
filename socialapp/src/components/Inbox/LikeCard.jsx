@@ -9,6 +9,8 @@ import "reactjs-popup/dist/index.css";
 import { BsCursorFill } from "react-icons/bs";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import ProfilePicture from "../ProfilePicture";
+
 export default function LikeCard(props) {
   // pass in the follow request object in props
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -46,13 +48,7 @@ export default function LikeCard(props) {
         <Row xs="auto" className="card-row align-items-center">
           <Col md="4">
             <div className="like-card-profile" onClick={routeChange}>
-              <div className="profilePicCard">
-                <img
-                  id="profilePicCard"
-                  src={props.like.author.profileImage}
-                  alt="profilePic"
-                />
-              </div>
+              <ProfilePicture profileImage={props.like.author.profileImage} />
               <div className="text">{props.like.author.displayName}</div>
             </div>
           </Col>

@@ -17,6 +17,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { confirmAlert } from "react-confirm-alert";
 import { authorHostIsOurs, extractAuthorUUID, extractPostUUID, createNodeObject, emptyNode } from "../../utils/utils";
+import ProfilePicture from "../ProfilePicture";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -227,9 +228,7 @@ export default function PostCard(props) {
     <Card className="post-card-explore">
       <Card.Header>
         <div className="post-author" onClick={routeChange}>
-          <div className="profile-pic-post">
-            <img src={props.post.author.profileImage} alt="profilePic" />
-          </div>
+          <ProfilePicture profileImage={props.post.author.profileImage} />
           <div className="post-author-name">
             {props.post.author.displayName}
           </div>
