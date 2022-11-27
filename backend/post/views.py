@@ -12,7 +12,7 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import get_friends_list, is_URL, isAuthorized, is_friends, get_friends_list, get_author_url_id
+from backend.utils import is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64, requests
@@ -232,35 +232,39 @@ class PostsApiView(GenericAPIView):
                     )
 
                     # only send if it's not unlisted
-                    if serialize.data['unlisted'] == False:
+                    if serialize.data['unlisted'] == False and serialize.data['visibility'].upper() != "PRIVATE":
                         """
                         SEND to friends only
                         if visibility is friends, then send this post to every frineds
                         """
                         try:
-                            friends_list = get_friends_list(authorObj)
-                            for friend in friends_list:
-                                author = get_object_or_404(Author, pk=friend["uuid"])
-                                friend_inbox = Inbox.objects.get(author=author)
-                                friend_inbox.posts.add(Post.objects.get(id=postId))
+                            followers_list = get_followers_list(authorObj)
+                            for follower in followers_list:
+                                author = get_object_or_404(Author, id=follower["id"])
+                                if not is_our_backend(author.host):
+                                    # Attempt to send inbox of remote author
+                                    send_to_remote_inbox(author, serialize.data)
+                                else:
+                                    follower_inbox = Inbox.objects.get(author=author)
+                                    follower_inbox.posts.add(Post.objects.get(id=postId))
                         except Exception as e:
                             result =f"Failed to send post {postId} to inbox of friend"
                             return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
                         
-                        """
-                        SEND to followers
-                        if visibility is friends, then send this post to every follower
-                        """
-                        if serialize.data['visibility'].lower()=="public":
-                            try:
-                                followers_list = get_followers_list(authorObj)
-                                for follower in followers_list:
-                                    author = get_object_or_404(Author, pk=follower["uuid"])
-                                    follower_inbox = Inbox.objects.get(author=author)
-                                    follower_inbox.posts.add(Post.objects.get(id=postId))
-                            except Exception as e:
-                                result =f"Failed to send post {postId} to inbox of followers"
-                                return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+                        # """
+                        # SEND to followers
+                        # if visibility is friends, then send this post to every follower
+                        # """
+                        # if serialize.data['visibility'].lower()=="public":
+                        #     try:
+                        #         followers_list = get_followers_list(authorObj)
+                        #         for follower in followers_list:
+                        #             author = get_object_or_404(Author, pk=follower["uuid"])
+                        #             follower_inbox = Inbox.objects.get(author=author)
+                        #             follower_inbox.posts.add(Post.objects.get(id=postId))
+                        #     except Exception as e:
+                        #         result =f"Failed to send post {postId} to inbox of followers"
+                        #         return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 
                         

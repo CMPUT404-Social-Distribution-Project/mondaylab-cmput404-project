@@ -13,7 +13,7 @@ from node.models import Node
 from django.contrib.auth.hashers import make_password
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from node.utils import authenticated_GET
+from node.utils import authenticated_GET, authenticated_POST
 from uuid import uuid4
 
 
@@ -73,12 +73,16 @@ def check_github_valid(request):
 
 def is_friends(request, author_uuid):
     ''' Checks if the requester is friends with the author they are viewing <author_id>
-        This is different from check_friend because check_friend requires
-        you to get both IDs from the URL. But in this case it's not possible
-        to get both IDs from the URL, only the author_id can be extracted.
-        So we exploit JWT. 
+        Returns True if they're friends, False if not.
     '''
     if request.META.get("HTTP_ORIGIN") is None:
+        print("is_friends: Request is missing an Origin header")
+    
+    try:
+        # Try to get the author they're viewing
+        author = Author.objects.get(uuid=author_uuid)
+    except Exception as e:
+        print(f"is_friends: Could not get the author. {e}")
         return False
 
     if is_our_frontend(request.META.get("HTTP_ORIGIN")):
@@ -89,18 +93,15 @@ def is_friends(request, author_uuid):
             requesterID = user.id           # the current user that is viewing the author on the screen
             
             try:
-                author = Author.objects.get(uuid=author_uuid)
                 requester_author = Author.objects.get(id=requesterID)
                 # see if the requester is in the followers list of author
-                in_followers = author.followers.get(id=requesterID)
-                # see if author is in the followers list of requester
-                author_in_req_followers = requester_author.followers.get(uuid=author_uuid)
-                if in_followers and author_in_req_followers:
+                # author_in_req_followers = requester_author.followers.get(uuid=author_uuid)
+                if requester_author in author.followers.all():
                     return True
                 else:
                     return False
             except Exception as e:
-                print(f"is_friends: {e}")
+                print(f"is_friends: Failed to check if requester is friends. {e}")
                 return False
     else:
         # Not our frontend, check the Request-Author header
@@ -109,23 +110,28 @@ def is_friends(request, author_uuid):
             if remote_author_exists(requester_url):
                 try:
                     # requester's author exists in our db, check if they're friends
-                    return check_friend(author_uuid, get_author_uuid_from_id(requester_url))
+                    requester_obj = Author.objects.get(id=requester_url)
+                    if requester_obj in author.followers.all():
+                        return True
+                    else:
+                        return False
                 except Exception as e:
-                    print(f"is_friends: {e}")
+                    print(f"is_friends: Failed to check if friends. {e}")
                     return False
             else:
+                print("is_friends: Remote author does not exist.")
                 return False
         else:
             print("is_friends: No 'Request-Author' header found in request. ")
             return False
 
 
-def check_friend(author_uuid, foreign_uuid):
-    '''Checks if the two authors with the given uuid's are friends'''
+def check_true_friend(author_uuid, foreign_id):
+    '''Checks if the two authors with the given uuid's are true friends'''
     try:
         current_author = Author.objects.get(uuid = author_uuid)
-        foreign_author = Author.objects.get(uuid = author_uuid)
-        foreign_following_current = current_author.followers.filter(uuid = foreign_uuid).exists()
+        foreign_author = Author.objects.get(id = foreign_id)
+        foreign_following_current = current_author.followers.filter(id = foreign_id).exists()
         
         if is_our_backend(foreign_author.host):
             # The foreign author is our author, so just check followers field
@@ -133,34 +139,30 @@ def check_friend(author_uuid, foreign_uuid):
         else:
             # The foreign author is not ours, fetch to its /followers/<current_author.uuid> endpoint
             # to see if our author is following the foreign author
-            res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}")
-            if res.status_code == 200:
-                print("Checking friends result = ", res.json())
-                current_following_foreign = res.json()
+            node_obj = Node.objects.filter(host__contains=foreign_author.host)
+            if node_obj.exists():
+                node_obj = node_obj.first()
+                res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}", node_obj)
+                if res.status_code == 200:
+                    print("Checking friends result = ", res.json())
+                    current_following_foreign = res.json()
 
         if foreign_following_current and current_following_foreign:
             return True
+        else:
+            return False
 
     except:
         return False
 
-def get_friends_list(current_author):
+def get_friends_list(current_author_obj):
     friends_list = []
     # Loop through followers and check if current author is following
     # This indicates they're friends
     try: 
-        for follower in current_author.followers.all():
-            # if not is_our_backend(follower.host):
-            #     # follower is not from our local
-            #     # fetch to their <follow_id>/followers/<current_author> endpoint
-            #     followers_node = Node.objects.filter(host__contains=follower.host)
-            #     if followers_node.exists():
-            #         followers_endpoint = f"{followers_node.host}authors/{get_author_uuid_from_id(follower.id)}/followers/"
-            #         authenticated_GET(followers_endpoint)
-            #     # TODO:
+        for follower in current_author_obj.followers.all():
             followerObject = Author.objects.get(uuid=follower.uuid)
-            followersFollowers = followerObject.followers.all()
-            if current_author in followersFollowers:
+            if check_true_friend(current_author_obj.uuid, follower.id):
                 friends_list.append(LimitedAuthorSerializer(followerObject).data)
     except Exception as e:
         print(e)
@@ -520,3 +522,18 @@ def get_or_create_author(author):
 
     return author_obj
 
+
+def send_to_remote_inbox(remote_author_obj, data):
+    '''
+    Attempts to fetch the node that hosts the remote author from DB.
+    If successful, will attempt to send the data to that remote author's inbox
+    '''
+    node_obj = Node.objects.filter(host__contains=remote_author_obj.host)
+    if node_obj.exists():
+        node_obj = node_obj.first()
+        res = authenticated_POST(f"{remove_end_slash(remote_author_obj.id)}/inbox/", node_obj, data)
+        if res.status_code != 200:
+            print(f"Failed to send data to inbox of remote author {remote_author_obj.id}")
+            print(res.content)
+    else:
+        print(f"Could not send to remote inbox, author '{remote_author_obj.displayName}' is not part of an accepted node")

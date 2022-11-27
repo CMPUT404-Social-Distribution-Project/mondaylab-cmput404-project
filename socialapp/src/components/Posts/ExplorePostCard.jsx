@@ -148,15 +148,10 @@ export default function PostCard(props) {
   }
 
   const sharePost = (post) => {
-    if (post.visibility === "PUBLIC") {
+    if (post.visibility === "PUBLIC" || post.visibility === "FRIENDS") {
       for (let index = 0; index < followers.length; index++) {
         const follower = followers[index];
         sendPostToAuthorInbox(follower, post);
-      };
-    } else if (post.visibility === "FRIENDS") {
-      for (let index = 0; index < friends.length; index++) {
-        const friend = friends[index];
-        sendPostToAuthorInbox(friend, post);
       };
     };
   };

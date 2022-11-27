@@ -87,7 +87,7 @@ export default function Explore() {
           console.log(error);
         });
       await api
-        .get(`${baseURL}/authors/${user_id}/followers`)
+        .get(`${baseURL}/authors/${user_id}/followers/`)
         .then((response) => {
           setFollowers(response.data.items);
         })
