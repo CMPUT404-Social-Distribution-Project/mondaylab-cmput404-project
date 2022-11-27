@@ -70,7 +70,6 @@ export default function PostCard(props) {
   const sendPostLike = () => {
     let host = baseURL + "/";
     let node = emptyNode;
-    console.log("LIKE SENT WITH AUTHOR", loggedInUser);
     const postLike = {
       type: "like",
       summary: `${loggedInUser.displayName} Likes your post.`,
@@ -442,7 +441,7 @@ export default function PostCard(props) {
             className="like-icon"
             style={{
               color:
-                likeCount !== 0 && liked ? "var(--orange)" : "var(--white)",
+                likeCount !== 0 && liked ? "var(--orange)" : "var(--white-teal)",
             }}
             onClick={() => sendPostLike(post_id)}
           />
@@ -479,7 +478,16 @@ export default function PostCard(props) {
                             <CommentCard
                               key={i}
                               author={comment.author}
-                              comment={comment.comment}
+                              comment={comment}
+                              node={postAuthorNode}
+                              liked={() => {
+                                for (let likedObj of loggedInAuthorsLiked) {
+                                  if (likedObj.object === comment.id) {
+                                    return true;
+                                  }
+                                }
+                                return false;
+                              }}
                             />
                           ))}
                         </div>

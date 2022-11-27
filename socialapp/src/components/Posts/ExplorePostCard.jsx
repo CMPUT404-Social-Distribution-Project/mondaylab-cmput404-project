@@ -267,7 +267,7 @@ export default function PostCard(props) {
             <div>
               <BsFillHeartFill
                 className="like-icon"
-                style={{color: liked ? "var(--orange)": "var(--white)",}}
+                style={{color: liked ? "var(--orange)": "var(--white-teal)",}}
                 onClick={() => sendPostLike(props.post.uuid)}
               />
             </div>

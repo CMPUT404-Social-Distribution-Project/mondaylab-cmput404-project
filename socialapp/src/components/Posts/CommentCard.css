@@ -33,6 +33,9 @@
     --bs-card-border-width: 1px;
     --bs-card-border-color: var(--slightly-darker-blue);
     --bs-card-border-radius: 11px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .comment-card .card-body {
@@ -43,9 +46,7 @@
     box-shadow: none;
     width: 100%;
     flex-wrap: wrap;
-
 }
-
 
 .comment-card .comment-content {
     margin-top: 0.5rem;
@@ -54,4 +55,20 @@
     white-space: pre-line;
     font-family: 'Readex Pro Light';
     font-size: 0.8rem;
+}
+
+.comment-like-icon {
+    margin: 1em 2em;
+    height: 1.3em;
+    width: 1.3em;
+    padding: 0.2em;
+    color: var(--white-teal);
+}
+
+.comment-like-icon:hover {
+    color: var(--teal) !important;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
 }
