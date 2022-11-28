@@ -45,7 +45,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 /service/authors/
         '''
         try:
-            if not is_our_frontend(request.META.get("HTTP_ORIGIN")):
+            if request.META.get("HTTP_ORIGIN") == None or (request.META.get("HTTP_ORIGIN") != None and 
+            not is_our_frontend(request.META.get("HTTP_ORIGIN"))):
                 # if not our frontend (is remote node) then only include our
                 # authors and not remote authors in the list
                 self.queryset = Author.objects.filter(host__in=our_hosts)
