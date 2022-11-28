@@ -16,7 +16,8 @@ from django.core.exceptions import ValidationError
 from node.utils import authenticated_GET, authenticated_POST
 from uuid import uuid4
 
-
+our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
+our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
 
@@ -225,12 +226,10 @@ def get_comment_uuid_from_id(id_url):
 
 def is_our_frontend(origin):
     # returns true if it's our front end
-    our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
-    return origin in our_frontends
+    return remove_end_slash(origin) in our_frontends
 
 def is_our_backend(host):
     # return true if it's our back end
-    our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
     return remove_end_slash(host) in our_backends
 
 def display_name_exists(display_name):
