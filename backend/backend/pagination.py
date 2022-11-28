@@ -4,12 +4,15 @@ from rest_framework.exceptions import NotFound
 from django.core.paginator import InvalidPage
 
 class CustomPagination(pagination.PageNumberPagination):
+    # https://stackoverflow.com/questions/31251036/404-when-page-number-is-too-high
     page_size = 5
     page_size_query_param = "size"
-    max_page_size = 100
     page_query_param = "page"
+    max_page_size = 100
 
     def get_paginated_response(self, data):
+        if hasattr(self, 'page') and self.page is not None:
+            return super(CustomPagination, self).get_paginated_response(data)
         return Response(
             {
                 "page" : self.page.number,
@@ -17,6 +20,13 @@ class CustomPagination(pagination.PageNumberPagination):
                 "results" : data
             }
         )
+    
+    def paginate_queryset(self, queryset, request, view=None):
+        """Checking NotFound exception"""
+        try:
+            return super(CustomPagination, self).paginate_queryset(queryset, request, view=view)
+        except NotFound:  # intercept NotFound exception
+            return list()
 
 class CustomPaginationCommentsSrc(pagination.PageNumberPagination):
     page_size = 5

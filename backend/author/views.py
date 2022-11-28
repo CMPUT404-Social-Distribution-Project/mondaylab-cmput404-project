@@ -49,12 +49,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 # if not our frontend (is remote node) then only include our
                 # authors and not remote authors in the list
                 self.queryset = Author.objects.filter(host__in=our_hosts)
-            
+
             authorsQuerySet = self.filter_queryset(self.queryset)
-            authorsPaginateQuerySet = self.paginate_queryset(authorsQuerySet)
+            authorsPaginateQuerySet = self.paginate_queryset(queryset=authorsQuerySet)
             authorsSerializer = AuthorSerializer(authorsPaginateQuerySet, many=True, context={"request": request})
-            authorsPaginationResult = self.get_paginated_response(authorsSerializer.data)
-            authors = authorsPaginationResult.data.get("results")
+            # authorsPaginationResult = self.get_paginated_response(authorsSerializer.data)
+            # authors = authorsPaginationResult.data.get("results")
+            authors = authorsSerializer.data
             
             result = {
                 "type": "authors",
