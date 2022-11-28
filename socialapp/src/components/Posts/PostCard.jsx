@@ -376,9 +376,9 @@ export default function PostCard(props) {
         )) || (!authorHostIsOurs(props.post.author.host) && props.post.contentType.startsWith("image") 
         && isValidHTTPUrl(props.post.content) && 
         <img className="post-image" src={props.post.content} alt="postImage" />)}
-        <Card.Text>
-          {showContent && <ReactMarkdown>{props.post.content}</ReactMarkdown>}
-        </Card.Text>
+        <div className="card-text">
+          {showContent && <ReactMarkdown components={{img:({node,...props})=><img style={{maxWidth:'100%'}}{...props}/>}}>{props.post.content}</ReactMarkdown>}
+        </div>
         <hr />
         <div className="like-comment-container">
           <BsFillHeartFill
