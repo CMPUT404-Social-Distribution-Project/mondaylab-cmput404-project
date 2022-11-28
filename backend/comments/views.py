@@ -59,9 +59,7 @@ class CommentsApiView(GenericAPIView):
                 # older comments first/top
                 commentsQuerySet = Comment.objects.filter(id__contains = post_id).order_by("published")
                 commentsPaginateQuerySet = self.paginate_queryset(commentsQuerySet)
-                print(commentsPaginateQuerySet)
                 commentsSerializer = CommentsSerializer(commentsPaginateQuerySet, many=True)
-                print(commentsSerializer.data)
                 comments = commentsSerializer.data
                 # commentsPaginationResult = self.get_paginated_response(commentsSerializer.data)
                 # comments = commentsPaginationResult.data.get("results")
