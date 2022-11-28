@@ -51,19 +51,16 @@ class FollowersForeignApiView(GenericAPIView):
         try:
             current_author = Author.objects.get(uuid = author_id)
             foreign_author = Author.objects.get(uuid = foreign_author_id)
-            followers = current_author.followers.all()
-            if followers.exists():
-                # check if the foreign author is following author
-                isFollowing = current_author.followers.filter(uuid = foreign_author.uuid).first()
-                if isFollowing != None:
-                    return response.Response(True, status=status.HTTP_200_OK)
-                else:
-                    return response.Response(False, status=status.HTTP_200_OK)
+
+            # check if the foreign author is following author
+            isFollowing = current_author.followers.filter(uuid = foreign_author.uuid).first()
+            if isFollowing != None:
+                return response.Response(True, status=status.HTTP_200_OK)
             else:
-                return response.Response(False, status=status.HTTP_200_OK)
+                return response.Response("Error: Foreign author not found in followers.", status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            return response.Response(f"Error: Foreign author not found in followers. {e}", status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, author_id, foreign_author_id):
         if not isAuthorized(request, author_id): 
