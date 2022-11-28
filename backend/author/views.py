@@ -53,8 +53,9 @@ class UserViewSet(viewsets.ModelViewSet):
             authorsQuerySet = self.filter_queryset(self.queryset)
             authorsPaginateQuerySet = self.paginate_queryset(authorsQuerySet)
             authorsSerializer = AuthorSerializer(authorsPaginateQuerySet, many=True, context={"request": request})
-            authorsPaginationResult = self.get_paginated_response(authorsSerializer.data)
-            authors = authorsPaginationResult.data.get("results")
+            # authorsPaginationResult = self.get_paginated_response(authorsSerializer.data)
+            # authors = authorsPaginationResult.data.get("results")
+            authors = authorsSerializer.data
             
             result = {
                 "type": "authors",
