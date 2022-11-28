@@ -36,7 +36,7 @@ def add_end_slash(url):
 def remove_end_slash(url):
     # Removes the end slash to a url, if it exists.
     if url[-1] == '/':
-        return url[-1]
+        return url[:-1]
     return url
 
 def isAuthorized(request, author_uuid):
