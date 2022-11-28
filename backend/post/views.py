@@ -12,13 +12,14 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox
+from backend.utils import is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox, is_our_frontend
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64, requests
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from node.utils import our_hosts
 
 class PostApiView(GenericAPIView):
     """
@@ -237,19 +238,19 @@ class PostsApiView(GenericAPIView):
                         SEND to friends only
                         if visibility is friends, then send this post to every frineds
                         """
-                        try:
-                            followers_list = get_followers_list(authorObj)
-                            for follower in followers_list:
-                                author = get_object_or_404(Author, id=follower["id"])
+                        followers_list = get_followers_list(authorObj)
+                        for follower in followers_list:
+                            try:
+                                author = Author.objects.get(id=follower["id"])
                                 if not is_our_backend(author.host):
                                     # Attempt to send inbox of remote author
                                     send_to_remote_inbox(author, serialize.data)
                                 else:
                                     follower_inbox = Inbox.objects.get(author=author)
                                     follower_inbox.posts.add(Post.objects.get(id=postId))
-                        except Exception as e:
-                            result =f"Failed to send post {postId} to inbox of friend"
-                            return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+                            except Exception as e:
+                                result =f"Failed to send post {postId} to inbox of friend"
+                                print(result)
                         
                         # """
                         # SEND to followers
@@ -280,15 +281,22 @@ class AllPostsApiView(GenericAPIView):
     """
     permission_classes = [IsAuthenticatedOrReadOnly,]
     serializer_class = PostSerializer
+    pagination_class = CustomPagination
 
     def get(self, request):
         '''
         Gets all public posts.
         '''
         try:
-            posts_list = list(Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published'))
+            if request.GET.get("HTTP_ORIGIN") != None and is_our_frontend(request.GET.get("HTTP_ORIGIN")):
+                # Get all posts, including remote ones
+                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published')
+            else:
+                # Remote is requesting our posts, only include posts from our host
+                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts)
 
-            post_serializer = PostSerializer(posts_list, many=True)
+            posts_paginated = self.paginate_queryset(posts_list)
+            post_serializer = PostSerializer(posts_paginated, many=True)
             result = {
                 "type":"posts",
                 "items": post_serializer.data

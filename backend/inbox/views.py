@@ -246,6 +246,7 @@ class InboxApiView(GenericAPIView):
                         create_remote_comment(request.data)
                         
                         comment = Comment.objects.get(id=request.data["id"])
+                        post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
                         post_obj.update(count=post_obj.first().count + 1)
 
                 else:

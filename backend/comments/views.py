@@ -60,11 +60,18 @@ class CommentsApiView(GenericAPIView):
                 commentsQuerySet = Comment.objects.filter(id__contains = post_id).order_by("published")
                 commentsPaginateQuerySet = self.paginate_queryset(commentsQuerySet)
                 commentsSerializer = CommentsSerializer(commentsPaginateQuerySet, many=True)
-                commentsPaginationResult = self.get_paginated_response(commentsSerializer.data)
-                comments = commentsPaginationResult.data.get("results")
-                page = commentsPaginationResult.data.get("page")
-                size = commentsPaginationResult.data.get("size")
+                comments = commentsSerializer.data
+                # commentsPaginationResult = self.get_paginated_response(commentsSerializer.data)
+                # comments = commentsPaginationResult.data.get("results")
+                # page = commentsPaginationResult.data.get("page")
+                # size = commentsPaginationResult.data.get("size")
+                if request.GET.get("page") != None:
+                    page = int(request.GET["page"])
+                else:
+                    page = 1
 
+                if request.GET.get("size") != None:
+                    size = int(request.GET["size"])
                 result = {
                     "type": "comments",
                     "page": page,
