@@ -237,19 +237,20 @@ class PostsApiView(GenericAPIView):
                         SEND to friends only
                         if visibility is friends, then send this post to every frineds
                         """
-                        try:
-                            followers_list = get_followers_list(authorObj)
-                            for follower in followers_list:
-                                author = get_object_or_404(Author, id=follower["id"])
+                        
+                        followers_list = get_followers_list(authorObj)
+                        for follower in followers_list:
+                            try:
+                                author = Author.objects.get(id=follower["id"])
                                 if not is_our_backend(author.host):
                                     # Attempt to send inbox of remote author
                                     send_to_remote_inbox(author, serialize.data)
                                 else:
                                     follower_inbox = Inbox.objects.get(author=author)
                                     follower_inbox.posts.add(Post.objects.get(id=postId))
-                        except Exception as e:
-                            result =f"Failed to send post {postId} to inbox of friend"
-                            return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+                            except Exception as e:
+                                result =f"Failed to send post {postId} to inbox of friend"
+                                print(result)
                         
                         # """
                         # SEND to followers
