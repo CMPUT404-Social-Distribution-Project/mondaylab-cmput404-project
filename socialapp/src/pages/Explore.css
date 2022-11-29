@@ -69,3 +69,29 @@
     width: 100%;
     margin-top: 0.5em;
 }
+
+.remote-authors-container .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: var(--dark-blue);
+    color: var(--teal);
+    --bs-btn-border-radius: 2rem;
+}
+
+.remote-authors-container .dropdown-toggle::after {
+    margin-left: auto;
+}
+
+.remote-authors-container .dropdown-menu {
+    width: 100%;
+    z-index: 2;
+    background-color: var(--slightly-darker-blue);
+    box-shadow: rgb(0 0 0 / 50%) 1px 1px 10px;
+    outline: 2px solid var(--light-dark-blue);
+    --bs-dropdown-link-hover-bg: var(--darker-blue);
+    --bs-dropdown-link-hover-color: var(--teal);
+    --bs-dropdown-link-active-bg: var(--orange);
+    --bs-dropdown-link-active-color: var(--dark-blue);
+    --bs-dropdown-link-color: var(--white-teal);
+}

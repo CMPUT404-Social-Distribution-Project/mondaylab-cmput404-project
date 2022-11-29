@@ -187,7 +187,7 @@ export default function Inbox() {
         </Col>
       </Row>
 
-      <div className="inbox-items-container">
+      <div className="inbox-container">
         <Tab.Container id="left-tabs-example" defaultActiveKey="post">
           <Row>
             <Row>
