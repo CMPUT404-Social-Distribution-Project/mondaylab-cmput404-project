@@ -134,13 +134,15 @@ span {
     flex-direction: column;
     align-items: center;
     width: 50vw;
+    max-width: 50rem;
     align-self: center;
+    gap: 1rem;
+
 }
 
 .posts-container-profile .post-card {
-    margin-top: -2rem;
+    margin: 0 2rem;
     width: auto !important;
-    scale: 0.8;
 }
 
 .followers-container-profile, .friends-container-profile {
@@ -149,7 +151,9 @@ span {
     align-items: center;
     padding: 1em 0em 0em;
     width: 65vw;
+    max-width: 50rem;
     align-self: center;
+    gap: 0.5rem;
 }
 
 .host-indicator {

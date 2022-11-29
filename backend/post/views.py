@@ -12,13 +12,12 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox, is_our_frontend
+from backend.utils import is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox, is_our_frontend, check_remote_fetch, fetch_author
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64, requests
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from node.utils import our_hosts
 
 class PostApiView(GenericAPIView):
@@ -35,7 +34,11 @@ class PostApiView(GenericAPIView):
     def get(self, request, author_id, post_id):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
-            authorObj = Author.objects.get(uuid=author_id)
+            authorObj = fetch_author(author_id)
+            res = check_remote_fetch(authorObj, f"/posts/{post_id}")
+            if res:
+                return response.Response(res, status=status.HTTP_200_OK)
+
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
                 postObj = Post.objects.get(uuid = post_id, author=authorObj)
             elif is_friends(request, author_id):
@@ -129,7 +132,18 @@ class PostsApiView(GenericAPIView):
     def get(self, request, author_id):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
-            authorObj = Author.objects.get(uuid=author_id)
+            authorObj = fetch_author(author_id)
+
+            page = 1
+            size = 5
+            if request.GET.get("page"):
+                page = request.GET["page"]
+            if request.GET.get("size"):
+                size = request.GET["size"]
+            res = check_remote_fetch(authorObj, f"/posts/?page={page}&size={size}")
+            if res:
+                return response.Response(res, status=status.HTTP_200_OK)
+
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
                 postsQuerySet = Post.objects.filter(author=authorObj).order_by("published").reverse()
             elif is_friends(request, author_id):             # if the current author is friends with the viewed author, show the friend posts
@@ -251,23 +265,6 @@ class PostsApiView(GenericAPIView):
                             except Exception as e:
                                 result =f"Failed to send post {postId} to inbox of friend"
                                 print(result)
-                        
-                        # """
-                        # SEND to followers
-                        # if visibility is friends, then send this post to every follower
-                        # """
-                        # if serialize.data['visibility'].lower()=="public":
-                        #     try:
-                        #         followers_list = get_followers_list(authorObj)
-                        #         for follower in followers_list:
-                        #             author = get_object_or_404(Author, pk=follower["uuid"])
-                        #             follower_inbox = Inbox.objects.get(author=author)
-                        #             follower_inbox.posts.add(Post.objects.get(id=postId))
-                        #     except Exception as e:
-                        #         result =f"Failed to send post {postId} to inbox of followers"
-                        #         return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
-
-
                         
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 

@@ -2,11 +2,12 @@ import React from "react";
 import Card from "react-bootstrap/Card";
 import "./UserCard.css";
 import { useNavigate } from "react-router-dom";
+import { extractAuthorUUID } from "../utils/utils"
 
 export default function UserCard(props) {
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.author.uuid}/`, { state: { refresh: true } });
+    navigate(`/authors/${extractAuthorUUID(props.author.id)}/`, { state: { refresh: true } });
   };
 
   return (

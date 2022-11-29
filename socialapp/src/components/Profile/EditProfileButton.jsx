@@ -59,7 +59,7 @@ function VerticallyCenteredModal(props) {
               .post(`${baseURL}/authors/${props.author.uuid}/`, toSend)
               .then((response) => {
                 if (response.status === 202) {
-                  localStorage.setItem("loggedInUser", JSON.stringify(response.data.user));
+                  localStorage.setItem("loggedInUser", JSON.stringify(response.data));
                   props.onHide();
                   window.location.reload(); // refreshes page...not ideal.
                 }

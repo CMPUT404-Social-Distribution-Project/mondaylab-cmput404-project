@@ -10,6 +10,7 @@ import { BsCursorFill } from "react-icons/bs";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import ProfilePicture from "../ProfilePicture";
+import { extractAuthorUUID } from "../../utils/utils";
 
 export default function LikeCard(props) {
   // pass in the follow request object in props
@@ -21,7 +22,7 @@ export default function LikeCard(props) {
   const [postsArray, setPostsArray] = useState({});
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.like.author.uuid}/`, {
+    navigate(`/authors/${extractAuthorUUID(props.like.author.id)}/`, {
       state: { refresh: true },
     });
   };

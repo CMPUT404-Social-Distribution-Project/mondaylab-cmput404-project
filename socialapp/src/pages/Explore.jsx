@@ -13,6 +13,8 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Container from "react-bootstrap/Container";
 import { useLocation } from "react-router-dom";
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
@@ -50,6 +52,16 @@ function RenderRemoteAuthors(props) {
   }
 }
 
+function TeamSelect(props) {
+  return (
+    <DropdownButton onSelect={props.onSelect} title={"Team " + props.title} >
+      <Dropdown.Item eventKey="2">Team 2</Dropdown.Item>
+      <Dropdown.Item eventKey="4">Team 4</Dropdown.Item>
+      <Dropdown.Item eventKey="16">Team 16</Dropdown.Item>
+    </DropdownButton>
+  );
+}
+
 export default function Explore() {
   // const validate = Yup.object().shape({
   //   search: Yup.string(),
@@ -67,6 +79,7 @@ export default function Explore() {
   const [friends, setFriends] = useState([]);
   const [liked, setLiked] = useState([]);
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
+  const [teamSelected, setTeamSelected] = useState("2");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,7 +92,7 @@ export default function Explore() {
         console.log(error);
       });
       api
-        .get(`${baseURL}/node/authors/`)
+        .get(`${baseURL}/node/authors/?team=${teamSelected}`)
         .then((response) => {
           setRemoteAuthors(response.data.items);
         })
@@ -157,6 +170,23 @@ export default function Explore() {
     searchPosts(e.target.value);
   };
 
+  const fetchTeamAuthors = (e) => {
+    api
+      .get(`${baseURL}/node/authors/?team=${e}`)
+      .then((response) => {
+        setRemoteAuthors(response.data.items);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  const handleTeamSelect = (e) => {
+    console.log(e);
+    setTeamSelected(e);
+    fetchTeamAuthors(e);
+  }
+
   return (
     <div className="explore-page-container">
       {/* Stack the columns on mobile by making one full-width and the other half-width */}
@@ -210,7 +240,18 @@ export default function Explore() {
             )}
           </Card.Body>
         </Card>
-        <RenderRemoteAuthors authors={remoteAuthors}/>
+        <Card className="remote-authors-container" style={{ backgroundColor: "var(--darker-blue)" }}>
+          <Card.Body>
+            <h5>Remote Authors</h5>
+            <TeamSelect
+              onSelect={handleTeamSelect}
+              title={teamSelected}
+            />
+            {remoteAuthors.map((author) => <UserCard author={author} key={author.id}/>)}
+
+          </Card.Body>
+        </Card>
+        {/* <RenderRemoteAuthors authors={remoteAuthors}/> */}
 
       </div>
       
