@@ -509,7 +509,7 @@ def check_remote_fetch(author_obj, endpoint):
     '''
     if not is_our_backend(author_obj.host):
         target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
-        res = authenticated_GET_host(target, author_obj.host)
+        res = authenticated_GET_host(target, author_obj.host, author_obj.id)
         if res.status_code == 200:
             return res.json()
         else:
