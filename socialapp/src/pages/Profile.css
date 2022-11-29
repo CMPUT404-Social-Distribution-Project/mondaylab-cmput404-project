@@ -137,14 +137,12 @@ span {
     max-width: 50rem;
     align-self: center;
     gap: 1rem;
-    scale: 0.8;
-    margin-top: -15rem;
+
 }
 
 .posts-container-profile .post-card {
     margin: 0 2rem;
     width: auto !important;
-    /* scale: 0.8; */
 }
 
 .followers-container-profile, .friends-container-profile {
