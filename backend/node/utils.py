@@ -1,6 +1,7 @@
 import requests
 from .models import Node
 
+# NOTE: Used for querying with objects. E.g. Author.objects.get(host__in=our_hosts) returns authors from our host.
 # TODO: Add "https://cs404-project.herokuapp.com/service/" later
 our_hosts_api = ["http://localhost:8000/service/", ]
 our_hosts = ["http://localhost:8000/", ]
