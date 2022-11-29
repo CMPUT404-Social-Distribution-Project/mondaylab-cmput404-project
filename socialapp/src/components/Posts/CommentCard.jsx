@@ -16,7 +16,7 @@ export default function CommentCard(props) {
 
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.author.uuid}/`, { state: { refresh: true } });
+    navigate(`/authors/${extractAuthorUUID(props.author.id)}/`, { state: { refresh: true } });
   };
 
   useEffect(() => {

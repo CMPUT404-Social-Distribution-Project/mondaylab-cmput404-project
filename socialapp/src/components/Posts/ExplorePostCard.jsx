@@ -23,7 +23,7 @@ export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
   const post_id = extractPostUUID(props.post.id);
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-  const post_user_uuid = props.post.author.uuid;
+  const post_user_uuid = extractAuthorUUID(props.post.author.id);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();

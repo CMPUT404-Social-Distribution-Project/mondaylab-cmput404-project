@@ -12,7 +12,7 @@ from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
 from backend.utils import (is_our_backend, isAuthorized, validate_follow_rq, validate_comment, 
 validate_like, validate_remote_post, get_author_uuid_from_id, get_or_create_author, 
-    create_remote_post, create_remote_like, create_remote_comment, add_end_slash)
+    create_remote_post, fetch_author, create_remote_comment, add_end_slash)
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
@@ -88,7 +88,7 @@ class InboxApiView(GenericAPIView):
         if the type is “comment” then add that comment to AUTHOR_ID’s inbox  
         """
         try:
-            author = get_object_or_404(Author, pk=author_id)
+            author = fetch_author(author_id)
             if not is_our_backend(author.host):
                 # The author is not from our backend, try and send the data to their inbox instead
                 node_obj = Node.objects.get(host__contains=author.host)
@@ -98,12 +98,14 @@ class InboxApiView(GenericAPIView):
                     node_obj,
                     request.data
                 )
-                if res.status_code >= 200:
+                if res.status_code >= 200 and res.status_code < 300:
                     print(f"Success sending data to inbox of remote author {node_author_inbox_url}")
                     return response.Response("Sent data to inbox of remote author", status=status.HTTP_200_OK)
                 else:
                     print(f"Failed to send data to remote author '{author.displayName}' to {node_author_inbox_url}")
-                    return response.Response(f"{res.status_code}: {res.text}. Failed to send data to remote author '{author.displayName}' to {node_author_inbox_url}")
+                    print(f"{res.status_code}:{res.text}")
+                    return response.Response(f"{res.status_code}: {res.text}. Failed to send data to remote author ' \
+                    {author.displayName}' to {node_author_inbox_url}", status=status.HTTP_404_NOT_FOUND)
 
 
             inbox , created= Inbox.objects.get_or_create(author=author)
@@ -228,6 +230,10 @@ class InboxApiView(GenericAPIView):
                 validate_comment(request.data)
                 if request.data.get("id") != None:
                     # There's an id field in comment, then assume that the comment has already been created.
+                    # check to make sure post exists
+                    if not Post.objects.filter(id=request.data["id"].split("/comments")[0]).exists():
+                        return response.Response("Post object does not exist", status=status.HTTP_400_BAD_REQUEST)
+
                     # Attempt to get comment object
                     comment_obj = Comment.objects.filter(id=request.data["id"])
                     if comment_obj.exists():
@@ -239,8 +245,8 @@ class InboxApiView(GenericAPIView):
                         create_remote_comment(request.data)
                         
                         comment = Comment.objects.get(id=request.data["id"])
-                        post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
-                        post_obj.update(count=post_obj.first().count + 1)
+                        # post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
+                        # post_obj.update(count=post_obj.first().count + 1)
 
                 else:
                     # Otherwise, no id field, then assume comment needs to be created

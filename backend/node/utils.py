@@ -15,6 +15,18 @@ def authenticated_GET(url, node):
     res = requests.get(url, auth=(node.username, node.password))
     return res
 
+def authenticated_GET_host(endpoint, host):
+    '''
+    Given the endpoint to send to the specified node,
+    sends a GET request to that url with HTTP Basic Auth
+    Example:
+    endpoint = "authors/<author_id>"
+    host = "localhost:8000"
+    '''
+    node = Node.objects.get(host__contains=host)
+    res = requests.get(f"{node.host}{endpoint}", auth=(node.username, node.password))
+    return res
+
 def authenticated_POST(url, node, data):
     res = requests.post(url, json=data, auth=(node.username, node.password))
     return res

@@ -20,8 +20,8 @@ import ProfilePicture from "../ProfilePicture"
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
-  const post_user_uuid = props.post.author.uuid;
-  const post_id = props.post.uuid;
+  const post_user_uuid = extractAuthorUUID(props.post.author.id);
+  const post_id = extractPostUUID(props.post.id);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
 
   const [postComment, setPostComment] = useState({
@@ -216,7 +216,6 @@ export default function PostCard(props) {
       )
       .then((response) => {
         
-
         commentObject["type"] = response.data.type;
         commentObject["comment"] = response.data.comment;
         commentObject["author"] = response.data.author;
@@ -225,7 +224,7 @@ export default function PostCard(props) {
         commentObject["published"] = response.data.published;
         commentObject["uuid"] = response.data.uuid;
         commentObject["object"] = props.post.id;
-
+        console.log("Comment obj is", response.data);
 
         sendCommentToInbox(post_user_uuid, commentObject);
         
