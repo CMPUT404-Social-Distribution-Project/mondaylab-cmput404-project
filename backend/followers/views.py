@@ -7,7 +7,10 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer, LimitedAuthorSerializer
-from backend.utils import isAuthorized, check_true_friend, get_friends_list, get_author_url_id, get_foreign_id, get_friend_id
+from backend.utils import isAuthorized, fetch_author, is_our_backend, remove_end_slash, check_remote_fetch
+from node.utils import authenticated_GET
+from node.models import Node
+
 
 class FollowersApiView(GenericAPIView):
     """
@@ -18,7 +21,12 @@ class FollowersApiView(GenericAPIView):
     serializer_class = FollowerSerializer
     def get(self, request, author_id):
         try:
-            current_author = Author.objects.get(uuid=author_id)
+            current_author = fetch_author(author_id)
+
+            res = check_remote_fetch(current_author, "/followers/")
+            if res:
+                return response.Response(res, status=status.HTTP_200_OK)
+
             followers = current_author.followers.all()
             if followers.exists():
                 followers = current_author.followers.all().order_by('displayName')
@@ -50,19 +58,22 @@ class FollowersForeignApiView(GenericAPIView):
     def get(self, request, author_id, foreign_author_id):
         try:
             current_author = Author.objects.get(uuid = author_id)
-            followers = current_author.followers.all()
-            if followers.exists():
-                # check if the foreign author is following author
-                isFollowing = current_author.followers.filter(uuid = foreign_author_id).first()
-                if isFollowing != None:
-                    return response.Response(True, status=status.HTTP_200_OK)
-                else:
-                    return response.Response(False, status=status.HTTP_200_OK)
+
+            res = check_remote_fetch(current_author, f"/followers/{foreign_author_id}")
+            if res:
+                return response.Response(res, status=status.HTTP_200_OK)
+
+            foreign_author = Author.objects.get(id__contains = foreign_author_id)
+
+            # check if the foreign author is following author
+            isFollowing = current_author.followers.filter(uuid = foreign_author.uuid).first()
+            if isFollowing != None:
+                return response.Response(True, status=status.HTTP_200_OK)
             else:
-                return response.Response(False, status=status.HTTP_200_OK)
+                return response.Response("Error: Foreign author not found in followers.", status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
-            return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
+            return response.Response(f"Error: Foreign author not found in followers. {e}", status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, author_id, foreign_author_id):
         if not isAuthorized(request, author_id): 
@@ -148,4 +159,45 @@ class TrueFriendsApiView(GenericAPIView):
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
+def check_true_friend(author_uuid, foreign_id):
+    '''Checks if the two authors with the given uuid's are true friends'''
+    try:
+        current_author = Author.objects.get(uuid = author_uuid)
+        foreign_author = Author.objects.get(id = foreign_id)
+        foreign_following_current = current_author.followers.filter(id = foreign_id).exists()
+        
+        if is_our_backend(foreign_author.host):
+            # The foreign author is our author, so just check followers field
+            current_following_foreign = foreign_author.followers.filter(uuid = author_uuid).exists()
+        else:
+            # The foreign author is not ours, fetch to its /followers/<current_author.uuid> endpoint
+            # to see if our author is following the foreign author
+            node_obj = Node.objects.filter(host__contains=foreign_author.host)
+            if node_obj.exists():
+                node_obj = node_obj.first()
+                res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}", node_obj)
+                if res.status_code == 200:
+                    print("Checking friends result = ", res.json())
+                    current_following_foreign = res.json()
 
+        if foreign_following_current and current_following_foreign:
+            return True
+        else:
+            return False
+
+    except:
+        return False
+
+def get_friends_list(current_author_obj):
+    friends_list = []
+    # Loop through followers and check if current author is following
+    # This indicates they're friends
+    try: 
+        for follower in current_author_obj.followers.all():
+            followerObject = Author.objects.get(uuid=follower.uuid)
+            if check_true_friend(current_author_obj.uuid, follower.id):
+                friends_list.append(LimitedAuthorSerializer(followerObject).data)
+    except Exception as e:
+        print(e)
+
+    return friends_list

@@ -9,6 +9,10 @@ import { BsCursorFill } from "react-icons/bs";
 import "./InboxCommentCard.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import ProfilePicture from "../ProfilePicture";
+import { extractAuthorUUID } from '../../utils/utils';
+
+
 export default function InboxCommentCard(props) {
   // pass in the follow request object in props
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -19,7 +23,7 @@ export default function InboxCommentCard(props) {
   const [postsArray, setPostsArray] = useState({});
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.comment.author.uuid}/`);
+    navigate(`/authors/${extractAuthorUUID(props.comment.author.id)}/`);
   };
   const postRouteChange = () => {
     var rout = props.comment.id.split("authors/")[1].split("/comments")[0];
@@ -41,21 +45,15 @@ export default function InboxCommentCard(props) {
   return (
     <Card className="inbox-comment-card">
       <Card.Body>
-        <Row>
-          <Col md="auto">
-            <Card.Title onClick={routeChange}>
-              <div className="profilePicCard">
-                <img
-                  id="profilePicCard"
-                  src={props.comment.author.profileImage}
-                  alt="profilePic"
-                />
-              </div>
+        <Row xs="auto" className="card-row align-items-center">
+          <Col md="4">
+            <div className="inbox-comment-card-profile" onClick={routeChange}>
+              <ProfilePicture profileImage={props.comment.author.profileImage} />
               <div className="text">{props.comment.author.displayName}</div>
-            </Card.Title>
+            </div>
           </Col>
-          <Col md="auto">
-            <p className="text"> commented your post!</p>
+          <Col className="col-6">
+            <p className="text" style={{fontFamily:"Readex Pro Light"}}> commented on your post!</p>
           </Col>
           <Col>
             <Popup
@@ -75,16 +73,20 @@ export default function InboxCommentCard(props) {
               position="right center"
               on="hover"
               closeOnDocumentClick
-              mouseLeaveDelay={300}
+              mouseLeaveDelay={100}
               mouseEnterDelay={0}
-              contentStyle={{ padding: "0px", border: "none" }}
+              contentStyle={{ padding: "0.5rem", backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content" }}
+              arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
               arrow={true}
             >
-              <span> Click to see Post! </span>
+              <span> View Post </span>
             </Popup>
           </Col>
         </Row>
       </Card.Body>
+      <div className="inbox-comment-card-comment">
+        {props.comment.comment}
+      </div>
     </Card>
   );
 }

@@ -5,6 +5,8 @@ import "./FollowRequestCard.css";
 import { useNavigate } from "react-router-dom";
 import useAxios from "../../utils/useAxios";
 import AuthContext from "../../context/AuthContext";
+import ProfilePicture from "../ProfilePicture";
+import { extractAuthorUUID } from "../../utils/utils";
 
 export default function FollowRequestCard(props) {
   // pass in the follow request object in props
@@ -14,7 +16,7 @@ export default function FollowRequestCard(props) {
 
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.followRequest.actor.uuid}/`);
+    navigate(`/authors/${extractAuthorUUID(props.followRequest.actor.id)}/`);
   };
 
   const handleAccept = async () => {
@@ -52,13 +54,7 @@ export default function FollowRequestCard(props) {
     <Card className="follow-request-card">
       <Card.Header onClick={routeChange}>
         <Card.Title>
-          <div className="profilePicCard">
-            <img
-              id="profilePicCard"
-              src={props.followRequest.actor.profileImage}
-              alt="profilePic"
-            />
-          </div>
+          <ProfilePicture profileImage={props.followRequest.actor.profileImage} />
           <div className="text">{props.followRequest.actor.displayName}</div>
         </Card.Title>
       </Card.Header>

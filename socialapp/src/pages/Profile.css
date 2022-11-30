@@ -52,16 +52,8 @@
     border-color: transparent;
 }
 
-.profilePicPage {
+.profileHeader .profile-pic {
     width: 4rem;
-    height: 4rem;
-    border-radius: 100%;
-    outline: solid var(--orange) 3px;
-    text-align: center;
-    display: flex;
-    color: var(--white-teal);
-    overflow:hidden;
-    place-content: center;
 }
 
 .profilePicWithFollowButton {
@@ -142,13 +134,24 @@ span {
     flex-direction: column;
     align-items: center;
     width: 50vw;
+    max-width: 50rem;
     align-self: center;
+    gap: 1rem;
+
 }
 
 .posts-container-profile .post-card {
-    margin-top: -2rem;
+    margin: 0 2rem;
     width: auto !important;
-    scale: 0.8;
+}
+
+.posts-container-profile .load-more-posts-button {
+    width: 40rem;
+    border-radius: 2rem;
+    padding: 0.5rem 0rem;
+    background-color: var(--teal-alt);
+    border: none;
+    margin-top: 1rem;
 }
 
 .followers-container-profile, .friends-container-profile {
@@ -157,7 +160,9 @@ span {
     align-items: center;
     padding: 1em 0em 0em;
     width: 65vw;
+    max-width: 50rem;
     align-self: center;
+    gap: 0.5rem;
 }
 
 .host-indicator {

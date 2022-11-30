@@ -10,15 +10,18 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from post.serializers import PostSerializer
 from author.serializers import AuthorSerializer, FollowerSerializer
-from backend.utils import (isUUID, isAuthorized, validate_follow_rq, validate_comment, 
+from backend.utils import (is_our_backend, isAuthorized, validate_follow_rq, validate_comment, 
 validate_like, validate_remote_post, get_author_uuid_from_id, get_or_create_author, 
-    create_remote_post, create_remote_like, create_remote_comment, add_end_slash)
+    create_remote_post, fetch_author, create_remote_comment, add_end_slash)
 from followers.models import FriendRequest
 from followers.serializers import FriendRequestSerializer
 from comments.serializers import CommentSrcSerializer, CommentsInboxSerializer, CommentsSerializer
 from uuid import uuid4
 from datetime import datetime, timezone
+from node.models import Node
+from node.utils import authenticated_POST
 
+from backend.pagination import CustomPagination
 
 class AuthenticateGET(BasePermission):
     def has_permission(self, request, view):
@@ -41,11 +44,16 @@ class InboxApiView(GenericAPIView):
     URL: ://service/authors/{AUTHOR_ID}/inbox
     DELETE [local]: clear the inbox
     """
+
     permission_classes = [AuthenticateGET]
     serializer_class = PostSerializer
     http_method_names=['get', 'post', 'delete']
 
+    pagination_class = CustomPagination
+    
     def get(self, request, author_id):
+    
+        print("in GET")
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
         """
@@ -62,7 +70,15 @@ class InboxApiView(GenericAPIView):
             try:
                 
                 posts_list = list(inbox.posts.all().order_by("published"))
+
+                print()
+                print()
+                print("--- posts_list")
+                print(posts_list)
+                print()
+
                 posts_serializers = self.serializer_class(posts_list, many=True)
+
 
                 result = {
                     'type': 'inbox',
@@ -77,6 +93,8 @@ class InboxApiView(GenericAPIView):
 
 
     def post(self, request, author_id):
+
+        print("in post")
         """
         POST [local, remote]: send a post to the author
         if the type is “post” then add that post to AUTHOR_ID’s inbox
@@ -85,7 +103,26 @@ class InboxApiView(GenericAPIView):
         if the type is “comment” then add that comment to AUTHOR_ID’s inbox  
         """
         try:
-            author = get_author(author_id)
+            author = fetch_author(author_id)
+            if not is_our_backend(author.host):
+                # The author is not from our backend, try and send the data to their inbox instead
+                node_obj = Node.objects.get(host__contains=author.host)
+                node_author_inbox_url = f"{node_obj.host}authors/{get_author_uuid_from_id(author.id)}/inbox/"
+                res = authenticated_POST(
+                    node_author_inbox_url,
+                    node_obj,
+                    request.data
+                )
+                if res.status_code >= 200 and res.status_code < 300:
+                    print(f"Success sending data to inbox of remote author {node_author_inbox_url}")
+                    return response.Response("Sent data to inbox of remote author", status=status.HTTP_200_OK)
+                else:
+                    print(f"Failed to send data to remote author '{author.displayName}' to {node_author_inbox_url}")
+                    print(f"{res.status_code}:{res.text}")
+                    return response.Response(f"{res.status_code}: {res.text}. Failed to send data to remote author ' \
+                    {author.displayName}' to {node_author_inbox_url}", status=status.HTTP_404_NOT_FOUND)
+
+
             inbox , created= Inbox.objects.get_or_create(author=author)
         except Exception as e:
             try:
@@ -93,8 +130,8 @@ class InboxApiView(GenericAPIView):
             except Exception as e:
                 result = {'detail':"Inbox Created faild", "error": str(e)}
                 return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
+
             
-       
         if request.data['type'].lower() == "follow":
             try:
                 """
@@ -196,33 +233,7 @@ class InboxApiView(GenericAPIView):
                     result={
                         "detail": str(like.author) +" send like successful"
                     }
-                    ####################################################
-                    # Consider a test case, when a remote use wants to send their like into our node, 
-                    # we do not have this use information in database, 
-                    # so it will get error : query matching does not exist, 
-                    # so in this case, I use get_or_create method. So they can pass test, 
-                    # however, this is not good, we need to discess them  in meeeting
-                    """ if likes_serializer.is_valid(raise_exception=True):
-                        object_field = likes_serializer.validated_data.get("object")
-                        like_type = get_like_type(object_field)
-                        if like_type == None:
-                            # object field is not properly formatted
-                            return response.Response("Object field is not formatted correctly", status=status.HTTP_400_BAD_REQUEST)
-                        actor_id = request.data.get("author")["id"]
 
-                        actor_object, create = Author.objects.get_or_create(id = actor_id)
-                        actor_name = actor_object.displayName
-                        # summary changes depending on the type it's liked on
-                        summary = f"{actor_name} likes your {like_type}"
-                        like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
-                        if like == None:
-                            like = Like.objects.create(author = actor_object,object = likes_serializer.validated_data["object"], summary =summary)
-                        # add like object to inbox of author
-                        inbox.likes.add(like)
-
-                        result={
-                            "detail": str(like.author) +" send like successful"
-                        } """
             except Exception as e:
                 return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
 
@@ -232,12 +243,12 @@ class InboxApiView(GenericAPIView):
         elif request.data['type'].lower() == "comment":
             try:
                 validate_comment(request.data)
-                # comment_author_obj = get_or_create_author(request.data["author"])
-                # if comment_author_obj == None:
-                #     return response.Response("Something went wrong getting or creating author.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                
                 if request.data.get("id") != None:
                     # There's an id field in comment, then assume that the comment has already been created.
+                    # check to make sure post exists
+                    if not Post.objects.filter(id=request.data["id"].split("/comments")[0]).exists():
+                        return response.Response("Post object does not exist", status=status.HTTP_400_BAD_REQUEST)
+
                     # Attempt to get comment object
                     comment_obj = Comment.objects.filter(id=request.data["id"])
                     if comment_obj.exists():
@@ -249,6 +260,9 @@ class InboxApiView(GenericAPIView):
                         create_remote_comment(request.data)
                         
                         comment = Comment.objects.get(id=request.data["id"])
+                        # post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
+                        # post_obj.update(count=post_obj.first().count + 1)
+
                 else:
                     # Otherwise, no id field, then assume comment needs to be created
                     # check to make sure object (post) exists
@@ -264,9 +278,13 @@ class InboxApiView(GenericAPIView):
                     create_remote_comment(request.data)
 
                     comment = Comment.objects.get(id=request.data["id"])
-                        
-
+                
+                    # update count
+                    post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
+                    post_obj.update(count=post_obj.first().count + 1)
+                    
                 inbox.comments.add(comment)
+                
 
                 result={
                     "detail": str(author) +" send comment successful"
@@ -372,6 +390,7 @@ class InboxAllApiView(GenericAPIView):
                 else:
                     comments_serializers_data=[]
                     
+                print("HEREEEE")
                 result = {
                     'type': 'inbox',
                     'author': author.url,
@@ -381,14 +400,15 @@ class InboxAllApiView(GenericAPIView):
                     comments_serializers_data
                     
                 }
+                print(result)
                 return response.Response(result, status=status.HTTP_200_OK) 
 
             except Exception as e:
                 result = {'detail':"Posts Not Found" , "error": str(e)}
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
-
 class InboxDeleteFRApiView(GenericAPIView):
+    print("here!-!")
     '''
     URL: ://service/authors/{AUTHOR_ID}/inbox/{FOREIGN_AUTHOR_ID}
     DELETE [local]: deletes the follow request(s) from the 
@@ -419,6 +439,8 @@ class InboxDeleteFRApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_400_BAD_REQUEST)
 
 def get_author(author_id):
+
+    print("in get_author")
     """
     Given author id, check if the author exists in database
     """
@@ -426,10 +448,11 @@ def get_author(author_id):
         author = Author.objects.get(uuid = author_id)
         return author
     except:
-        result = {'detail':"Author Not Found"}
-        return response.Response(result, status=status.HTTP_404_NOT_FOUND)
+        return None
 
 def get_like_type(object_field):
+
+    print("in get_link_type")
     if "posts" in object_field and "comments" in object_field:
         return "comment"
     elif "post" in object_field:

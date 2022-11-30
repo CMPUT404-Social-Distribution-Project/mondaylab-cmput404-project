@@ -13,17 +13,8 @@
     border: 2px solid var(--dark-blue);
 }
 
-.post-card .profile-pic-post {
-    width: 3em;
-    height: auto;
-    aspect-ratio: 1/1;
-    border-radius: 100%;
-    outline: solid var(--orange) 2px;
-    text-align: center;
-    display: flex;
-    color: var(--white-teal);
-    overflow:hidden;
-    place-content: center;
+.post-card .profile-pic {
+    width: 3rem;
 }
 
 .post-card .post-author {
@@ -33,7 +24,7 @@
 }
 
 .post-card .post-author:hover {
-    cursor: pointer
+    cursor: pointer;
 }
 
 .post-card .card-title {

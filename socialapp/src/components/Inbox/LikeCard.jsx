@@ -9,6 +9,9 @@ import "reactjs-popup/dist/index.css";
 import { BsCursorFill } from "react-icons/bs";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import ProfilePicture from "../ProfilePicture";
+import { extractAuthorUUID } from "../../utils/utils";
+
 export default function LikeCard(props) {
   // pass in the follow request object in props
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -19,12 +22,13 @@ export default function LikeCard(props) {
   const [postsArray, setPostsArray] = useState({});
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.like.author.uuid}/`, {
+    navigate(`/authors/${extractAuthorUUID(props.like.author.id)}/`, {
       state: { refresh: true },
     });
   };
   const postRouteChange = () => {
     var rout = props.like.object.split("authors/")[1];
+    rout = rout.split('/comments/')[0];
     navigate(`/authors/${rout}`, { state: { refresh: true } });
   };
   useEffect(() => {
@@ -42,23 +46,17 @@ export default function LikeCard(props) {
   return (
     <Card className="like-card">
       <Card.Body>
-        <Row>
-          <Col md="auto">
-            <Card.Title onClick={routeChange}>
-              <div className="profilePicCard">
-                <img
-                  id="profilePicCard"
-                  src={props.like.author.profileImage}
-                  alt="profilePic"
-                />
-              </div>
+        <Row xs="auto" className="card-row align-items-center">
+          <Col md="4">
+            <div className="like-card-profile" onClick={routeChange}>
+              <ProfilePicture profileImage={props.like.author.profileImage} />
               <div className="text">{props.like.author.displayName}</div>
-            </Card.Title>
+            </div>
           </Col>
-          <Col >
-            <p className="text"> liked your {props.like.object.includes("comment") ? "comment" : "post"}! </p>
+          <Col className="col-5">
+            <p className="text" style={{fontFamily:"Readex Pro Light"}}> liked your {props.like.object.includes("comment") ? "comment" : "post"}! </p>
           </Col>
-          <Col>
+          <Col md="auto">
             <Popup
               trigger={
                 <button style={{ background: "none", border: "none" }}>
@@ -76,12 +74,13 @@ export default function LikeCard(props) {
               position="right center"
               on="hover"
               closeOnDocumentClick
-              mouseLeaveDelay={300}
+              mouseLeaveDelay={100}
               mouseEnterDelay={0}
-              contentStyle={{ padding: "0px", border: "none" }}
+              contentStyle={{ padding: "0.5rem", backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content" }}
+              arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
               arrow={true}
             >
-              <span> Click to see Post! </span>
+              <span> View Post </span>
             </Popup>
           </Col>
         </Row>

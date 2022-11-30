@@ -122,11 +122,19 @@ def getNodeAuthors(request):
     then returns those authors
     '''
     #TODO: should be a local method only.
-    remote_authors = Author.objects.exclude(host__in=our_hosts)
-    serializer = AuthorSerializer(remote_authors, many=True)
 
-    result = {"type": "authors", "items": serializer.data}
-    return response.Response(result, status=status.HTTP_200_OK)
+    if request.GET.get("team") == None:
+        return response.Response("Must include 'team' query parameter.", status=status.HTTP_400_BAD_REQUEST)
+
+    # remote_authors = Author.objects.exclude(host__in=our_hosts)
+    team_number = int(request.GET["team"])
+    node_obj = Node.objects.get(team=team_number)
+    res = requests.get(f"{node_obj.host}authors/")
+    if res.status_code >= 200:
+        return response.Response(res.json(), status=status.HTTP_200_OK)
+    else:
+        return response.Response(f"Could not retrieve team {team_number}", status=status.HTTP_404_NOT_FOUND)
+
 
 """
 NOTE, I moved this inside  AcceptConnectionRemote() api

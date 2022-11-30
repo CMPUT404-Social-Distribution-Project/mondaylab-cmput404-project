@@ -3,7 +3,6 @@ from rest_framework.generics import GenericAPIView
 from author.serializers import AuthorSerializer
 from author.models import Author
 from rest_framework import response, status
-from uuid import uuid4, UUID
 from .serializers import AuthorSerializer
 from .models import Author
 from rest_framework import viewsets, filters
@@ -11,8 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticate
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import filters
-from django.shortcuts import get_list_or_404
-from backend.utils import isAuthorized, check_github_valid, is_our_frontend
+from backend.utils import isAuthorized, check_github_valid, is_our_frontend, fetch_author, check_remote_fetch
 from backend.pagination import CustomPagination
 from node.utils import our_hosts
 
@@ -45,7 +43,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 /service/authors/
         '''
         try:
-            if not is_our_frontend(request.META.get("HTTP_ORIGIN")):
+            if request.META.get("HTTP_ORIGIN") == None or (request.META.get("HTTP_ORIGIN") != None and 
+            not is_our_frontend(request.META.get("HTTP_ORIGIN"))):
                 # if not our frontend (is remote node) then only include our
                 # authors and not remote authors in the list
                 self.queryset = Author.objects.filter(host__in=our_hosts)
@@ -72,15 +71,17 @@ class UserViewSet(viewsets.ModelViewSet):
             Use: Send a GET to
                 /service/authors/<author_uuid>/
         '''
-        # check if pk is a uuid
+
         try:
-            UUID(pk)
-            obj = Author.objects.get(uuid=pk)
-            serializer = self.serializer_class(obj)
+            author_obj = fetch_author(pk)
+            res = check_remote_fetch(author_obj, "")
+            if res:
+                Response(res, status=status.HTTP_200_OK)
+            serializer = self.serializer_class(author_obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        except:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(e, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=False, methods=['post'])
     def post(self, request, pk=None):

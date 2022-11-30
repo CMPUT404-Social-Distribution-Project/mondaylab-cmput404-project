@@ -26,6 +26,7 @@ from node.views import AcceptConnectionFromRemote, getNode, getNodeAuthors
 from inbox.views import InboxApiView
 from django.conf import settings
 from django.conf.urls.static import static
+from inbox.views import InboxApiView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -48,7 +49,6 @@ urlpatterns = [
     # Inbox Endpoints
     path("service/authors/<str:author_id>/inbox/",include("inbox.urls"), name="get all post from inbox"),
     path("service/authors/<str:author_id>/inbox", InboxApiView.as_view(), name="get all post from inbox"),
-
 
     # Like Endpoints
     path('service/authors/<str:author_id>/posts/<str:post_id>/likes/', LikesPostApiView.as_view(), name="post like"),

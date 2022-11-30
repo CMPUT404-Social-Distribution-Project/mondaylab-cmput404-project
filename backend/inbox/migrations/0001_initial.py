@@ -15,6 +15,8 @@ class Migration(migrations.Migration):
         ('post', '0001_initial'),
         ('author', '0001_initial'),
         ('comments', '0001_initial'),
+        ('author', '0001_initial'),
+        ('followers', '0001_initial'),
     ]
 
     operations = [

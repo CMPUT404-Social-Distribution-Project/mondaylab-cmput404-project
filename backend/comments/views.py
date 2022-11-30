@@ -14,7 +14,7 @@ from .models import Comment
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
-from backend.utils import isAuthorized
+from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CommentsApiView(GenericAPIView):
@@ -31,7 +31,19 @@ class CommentsApiView(GenericAPIView):
     """
     def get(self, request, author_id, post_id):
         size = 5
-        post_id_full_path = get_post_id(request)
+        page = 1
+        author_obj = fetch_author(author_id)
+        if request.GET.get("page"):
+            page = int(request.GET["page"])
+        if request.GET.get("size"):
+            size = int(request.GET["size"])
+        
+        res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments?page={page}&size={size}")
+        if res:
+            result = res
+            if res.get("items"):
+                result = {"type": "comments", "comments": res["items"]}
+            return response.Response(result, status=status.HTTP_200_OK)
 
         # First try and get the post object
         post_obj = Post.objects.filter(uuid=post_id)
@@ -61,16 +73,11 @@ class CommentsApiView(GenericAPIView):
                 commentsPaginateQuerySet = self.paginate_queryset(commentsQuerySet)
                 print(commentsPaginateQuerySet)
                 commentsSerializer = CommentsSerializer(commentsPaginateQuerySet, many=True)
-                print(commentsSerializer.data)
                 comments = commentsSerializer.data
                 # commentsPaginationResult = self.get_paginated_response(commentsSerializer.data)
                 # comments = commentsPaginationResult.data.get("results")
                 # page = commentsPaginationResult.data.get("page")
                 # size = commentsPaginationResult.data.get("size")
-                if request.GET.get("page") != None:
-                    page = int(request.GET["page"])
-                else:
-                    page = 1
 
                 if request.GET.get("size") != None:
                     size = int(request.GET["size"])
@@ -78,8 +85,8 @@ class CommentsApiView(GenericAPIView):
                     "type": "comments",
                     "page": page,
                     "size": size,
-                    "post": post_id_full_path,
-                    "id": post_id_full_path + "/comments",
+                    "post": post_obj.id,
+                    "id": post_obj.id + "/comments",
                     'comments': comments
                 }
                 
@@ -98,20 +105,29 @@ class CommentsApiView(GenericAPIView):
         """
         try:
             authorObj = Author.objects.get(id=request.data["author"]["id"])
+            
+            commentUuid = uuid4()
+            commentId = request.data["object"] + "/comments/" + commentUuid.hex
             del request.data["author"]
+            request.data["id"] = commentId
+            request.data["uuid"] = commentUuid
+            # published date is in the following format 
+            # 2015-03-09T13:07:04+00:00
+            publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
+            request.data["published"] = publishedDate
+            
             serialize = self.serializer_class(data=request.data)  # converts request.data to jsonlike object
 
             if serialize.is_valid(raise_exception=True):
-                post_obj = Post.objects.get(uuid=post_id)
-                commentUuid = uuid4()
-                commentId = request.build_absolute_uri() +  commentUuid.hex
-                # published date is in the following format 
-                # 2015-03-09T13:07:04+00:00
-                publishedDate = datetime.now(tz=timezone.utc).isoformat("T","seconds")
-                
-                serialize.save(id=commentId, author=authorObj, published=publishedDate, uuid=commentUuid)  # save to db with additional field injected
-                post_obj.count = post_obj.count + 1         # update count
-                post_obj.save(update_fields=["count"])
+                serialize.save(author=authorObj, id=commentId, published=publishedDate)
+
+                # If foreign post, don't need to update count, let them update it.
+                post_obj = Post.objects.filter(id__contains=post_id)
+                if post_obj.exists() and is_our_backend(post_obj.first().author.host):
+                    print(post_obj.first().author)
+                    post_obj = Post.objects.get(uuid=post_id)
+                    post_obj.count = post_obj.count + 1         # update count
+                    post_obj.save(update_fields=["count"])
                 
                 return response.Response(serialize.data, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -119,7 +135,11 @@ class CommentsApiView(GenericAPIView):
 
 class CommentApiView(GenericAPIView):
     def get(self, request, author_id, post_id, comment_id):
-        post_id_full_path = get_post_id(request)
+        author_obj = fetch_author(author_id)
+        
+        res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments/{comment_id}")
+        if res:
+            return response.Response(res, status=status.HTTP_200_OK)
 
         # First try and get the post object
         post_obj = Post.objects.filter(uuid=post_id)
@@ -144,24 +164,3 @@ def get_author_id(request):
     abs_uri=request.build_absolute_uri()
     author_id = abs_uri.split('authors/')[1].split('/')[0]
     return author_id
-
-
-"""
-input    http ..../service/authors/....../comments/
-output   http...../authors/.../comments/
-""" 
-def get_post_id(request):
-#xx is  ['http://127.0.0.1:8000/', 'authors/5548b3f8-016b-4719-be48-0f40ffbbddde/posts/3ad3daa5-9ff0-4024-8f85-8332caad59c4/comments/']
-    xx=request.build_absolute_uri().split('authors/')
-    noComment = xx[1].split("/comments")
-#  after comment split is  ['authors/5548b3f8-016b-4719-be48-0f40ffbbddde/posts/3ad3daa5-9ff0-4024-8f85-8332caad59c4', '/']
-    post_id= xx[0]+noComment[0]
-    return post_id
-
-def check_post_id(request):
-    post_id = get_post_id(request)
-    post = Post.objects.get(id=post_id)
-    if post:
-        return True
-    else:
-        return False

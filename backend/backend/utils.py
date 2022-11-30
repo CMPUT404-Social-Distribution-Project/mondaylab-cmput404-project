@@ -13,10 +13,11 @@ from node.models import Node
 from django.contrib.auth.hashers import make_password
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from node.utils import authenticated_GET, authenticated_POST
+from node.utils import authenticated_GET, authenticated_POST, authenticated_GET_host
 from uuid import uuid4
 
-
+our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
+our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
 
@@ -77,6 +78,7 @@ def is_friends(request, author_uuid):
     '''
     if request.META.get("HTTP_ORIGIN") is None:
         print("is_friends: Request is missing an Origin header")
+        return False
     
     try:
         # Try to get the author they're viewing
@@ -105,8 +107,8 @@ def is_friends(request, author_uuid):
                 return False
     else:
         # Not our frontend, check the Request-Author header
-        if request.META.get("HTTP_REQUEST_AUTHOR") is not None:
-            requester_url = request.META.get("HTTP_REQUEST_AUTHOR")         # Request-Author header has the requester's authors' URL/id
+        if request.META.get("HTTP_X_REQUEST_AUTHOR") is not None:
+            requester_url = request.META.get("HTTP_X_REQUEST_AUTHOR")         # Request-Author header has the requester's authors' URL/id
             if remote_author_exists(requester_url):
                 try:
                     # requester's author exists in our db, check if they're friends
@@ -124,50 +126,6 @@ def is_friends(request, author_uuid):
         else:
             print("is_friends: No 'Request-Author' header found in request. ")
             return False
-
-
-def check_true_friend(author_uuid, foreign_id):
-    '''Checks if the two authors with the given uuid's are true friends'''
-    try:
-        current_author = Author.objects.get(uuid = author_uuid)
-        foreign_author = Author.objects.get(id = foreign_id)
-        foreign_following_current = current_author.followers.filter(id = foreign_id).exists()
-        
-        if is_our_backend(foreign_author.host):
-            # The foreign author is our author, so just check followers field
-            current_following_foreign = foreign_author.followers.filter(uuid = author_uuid).exists()
-        else:
-            # The foreign author is not ours, fetch to its /followers/<current_author.uuid> endpoint
-            # to see if our author is following the foreign author
-            node_obj = Node.objects.filter(host__contains=foreign_author.host)
-            if node_obj.exists():
-                node_obj = node_obj.first()
-                res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}", node_obj)
-                if res.status_code == 200:
-                    print("Checking friends result = ", res.json())
-                    current_following_foreign = res.json()
-
-        if foreign_following_current and current_following_foreign:
-            return True
-        else:
-            return False
-
-    except:
-        return False
-
-def get_friends_list(current_author_obj):
-    friends_list = []
-    # Loop through followers and check if current author is following
-    # This indicates they're friends
-    try: 
-        for follower in current_author_obj.followers.all():
-            followerObject = Author.objects.get(uuid=follower.uuid)
-            if check_true_friend(current_author_obj.uuid, follower.id):
-                friends_list.append(LimitedAuthorSerializer(followerObject).data)
-    except Exception as e:
-        print(e)
-
-    return friends_list
 
 def get_author_url_id(request):
     '''
@@ -190,23 +148,6 @@ def get_author_url_id(request):
         
     return author_url_id[:-1]
 
-def get_foreign_id(request):
-    split_followers = request.build_absolute_uri().split("followers/")
-    foreign_author_id = split_followers[1].split('/')[0]
-    foreign_author_url_id = split_followers[0].split('authors')[0] + "authors/" + foreign_author_id
-    return foreign_author_url_id
-
-def get_friend_id(request):
-    author_url_id=request.build_absolute_uri().split("/friends")[0]
-    return author_url_id  
-
-def get_post_id(request):
-    if "likes" in request.build_absolute_uri():
-        post_url_id=request.build_absolute_uri().split("/likes")[0]
-    else:
-        post_url_id=request.build_absolute_uri()
-    
-    return post_url_id
 
 def get_author_uuid_from_id(id_url):
     author_uuid = id_url.split('authors/')[1]
@@ -225,22 +166,23 @@ def get_comment_uuid_from_id(id_url):
 
 def is_our_frontend(origin):
     # returns true if it's our front end
-    our_frontends = ["https://superlative-gelato-dcf1b6.netlify.app"]
-    return origin in our_frontends
+    return remove_end_slash(origin) in our_frontends
 
 def is_our_backend(host):
     # return true if it's our back end
-    host_no_slash = remove_end_slash(host)
-    our_backends = ["https://cs404-project.herokuapp.com"]  # TODO, add the heroku host origin here too
-    return host_no_slash in our_backends
+    return remove_end_slash(host) in our_backends
 
 def display_name_exists(display_name):
     obj = Author.objects.filter(displayName=display_name)
     return obj.exists()
 
-def remote_author_exists(id_url):
-    obj = Author.objects.filter(id=id_url)
-    return obj.exists()
+def remote_author_exists(ID):
+    obj = Author.objects.filter(id=ID)
+    # ID could be a UUID/the id that is extracted from the URL.
+    # Use that to check if it is in the id field
+    contains = Author.objects.filter(id__contains=ID)
+    uuid = Author.objects.filter(uuid=ID)
+    return obj.exists() or contains.exists() or uuid.exists()
 
 def remote_post_exists(post_id):
     obj = Post.objects.filter(id=post_id)
@@ -267,27 +209,16 @@ def is_URL(string):
     except:
         return False
 
-# def validate_post(post_data):
-#     post_fields = ['type','title','id','source','origin','description',
-#         'contentType','content','categories','count','comments','published',
-#         'visibility','unlisted','author','commentSrc', 'image', 'uuid']
-    
-    
-#     for field in post_data.keys():
-#         if field not in post_fields:
-#             raise ValidationError(f"Field {field} is not a valid property")
-    
-#     if post_data['type'].lower() != 'post':
-#         raise ValidationError(f'Incorrect post type')
-
 def create_remote_author(remote_author):
+    '''remote_author is a dict (JSON)'''
     remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
     if not isUUID(remote_author_uuid):
         remote_author_uuid = uuid4()
 
-    if Author.objects.filter(uuid=remote_author_uuid).exists():
+    if Author.objects.filter(id__contains=remote_author_uuid).exists() or \
+        Author.objects.filter(uuid=remote_author_uuid):
         return
-    
+
     if display_name_exists(remote_author["displayName"]):
         remote_author["displayName"] = remote_author["displayName"]+':'+remote_author["host"]
 
@@ -302,14 +233,16 @@ def create_remote_author(remote_author):
 
     author_serializer = AuthorSerializer(data=remote_author)
 
-
-    if author_serializer.is_valid(raise_exception=True):
-        author_serializer.save(
-                uuid= remote_author_uuid,
-                id=remote_author.get("id"),
-                password=make_password(remote_author["displayName"]+"password"),
-                host= add_end_slash(remote_author.get("host"))
-                )
+    try:
+        if author_serializer.is_valid(raise_exception=True):
+            author_serializer.save(
+                    uuid= remote_author_uuid,
+                    id=remote_author.get("id"),
+                    password=make_password(remote_author["displayName"]+"password"),
+                    host= add_end_slash(remote_author.get("host"))
+                    )
+    except Exception as e:
+        print(f"Failed to create remote author. {e}")
         
 def validate_remote_post(post):
     required_fields = ['type','id','contentType', 'author']
@@ -502,6 +435,7 @@ def get_or_create_author(author):
     '''
     Creates an author if the author doesn't exist,
     Gets it from DB otherwise and returns the author object
+    author = the JSON dict
     '''
     author_url_id = author['id']
     author_uuid = get_author_uuid_from_id(author_url_id)   # eg ['http://localhost:8000', 'author_uuid']
@@ -523,7 +457,6 @@ def get_or_create_author(author):
 
     return author_obj
 
-
 def send_to_remote_inbox(remote_author_obj, data):
     '''
     Attempts to fetch the node that hosts the remote author from DB.
@@ -538,3 +471,64 @@ def send_to_remote_inbox(remote_author_obj, data):
             print(res.content)
     else:
         print(f"Could not send to remote inbox, author '{remote_author_obj.displayName}' is not part of an accepted node")
+
+def fetch_author(author_uuid):
+    '''
+    When we don't have the authors data (e.g. host, id, etc.).
+    Used because front end's Profile.jsx GET request to our backend
+    only includes the author's UUID. 
+    Idea:
+        1. Check if author with that UUID (sometimes not a UUID) exists in our DB
+        2. If it doesn't, loop through the nodes 
+            checking if that author exists on their DB (/authors/<author_id>)
+        3. If the author exists in one of the nodes, 
+            use the response to save the author in our DB (caching, basically)
+        4. If we reach the end of the loop and no author is found, return 404
+        5. Return the authors object
+    '''
+
+    uuid_in_id = Author.objects.filter(id__contains=author_uuid)
+    uuid = Author.objects.filter(uuid=author_uuid)
+    if uuid_in_id.exists():
+        return uuid_in_id.first()
+    elif uuid.exists():
+        return uuid.first()
+
+    nodes = Node.objects.all()
+    for node in nodes:
+        authors_url = f"{node.host}authors/{author_uuid}"
+        res = authenticated_GET(authors_url, node)
+        if res.status_code == 200:
+            create_remote_author(res.json())
+            return Author.objects.get(id__contains=author_uuid)
+
+    raise ValueError("Author was not found")
+
+def check_remote_fetch(author_obj, endpoint):
+    '''Checks if the author is a remote one, if so, fetches to the specified endpoint
+        Example endpoint = "/followers/"
+    '''
+
+    if not is_our_backend(author_obj.host):
+        target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
+        print(target)
+        res = authenticated_GET_host(target, author_obj.host, author_obj.id)
+        if res.status_code == 200:
+            return res.json()
+        else:
+            print(res.text)
+            raise ValueError(f"Could not fetch to {author_obj.id}{endpoint}. {res.status_code}:{res.text}")
+    return None
+
+def build_pagination_query(url, page, size):
+    '''Where url is something like http://www.../posts/ or /comments/'''
+    query = add_end_slash(url)
+
+    if page and not size:
+        query = f"{query}?page={page}"
+    elif page and size:
+        query = f"{query}?page={page}&size={size}"
+    elif not page and size:
+        query = f"{query}?size={size}"
+
+    return query

@@ -10,19 +10,24 @@ import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
-import { authorHostIsOurs, extractAuthorUUID, createNodeObject, emptyNode } from '../utils/utils';
+import { authorHostIsOurs} from '../utils/utils';
 import { CgRemote } from "react-icons/cg";
+import ProfilePicture from '../components/ProfilePicture';
 
 function ProfilePosts(props) {
+  // console.log("PreviousUrl in ProfilePosts is", props.previousUrl);
+  // console.log("NextUrl in ProfilePosts is", props.nextUrl);
+  console.log("ProfilePosts posts", props.postsArray)
   return (
     <div className="posts-container-profile">
-    {
-      typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard 
-        loggedInAuthorsLiked={props.loggedInAuthorsLiked}
-        loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
-        : null
-    }
+      {
+        typeof props.postsArray !== 'undefined' ? 
+          props.postsArray.map((post) => <PostCard 
+          loggedInAuthorsLiked={props.loggedInAuthorsLiked}
+          loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
+          : null
+      }
+      {props.nextUrl && <button className="load-more-posts-button" onClick={() => props.paginationNext()}>Load More Posts</button>}
     </div>
   )
 }
@@ -54,7 +59,7 @@ function ProfileFriends(props) {
 export default function Profile() {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
-  const [postsArray, setPostsArray] = useState(""); 
+  const [postsArray, setPostsArray] = useState([]); 
   const [followersArray, setFollowersArray] = useState(""); 
   const [friendsArray, setFriendsArray] = useState(""); 
   const [loggedInAuthorsFollowers, setLoggedInAuthorsFollowers] = useState([]); 
@@ -64,10 +69,8 @@ export default function Profile() {
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 
-  // node
-  const [authorNode, setAuthorNode] = useState(null);     // the node object of post's author
-  const [authorBaseApiURL, setAuthorBaseAPI] = useState(null);
-
+  const [nextUrl, setNextUrl] = useState(null);
+  
   useEffect(() => {
     const loggedInUserData = async () => {
       await api
@@ -100,56 +103,30 @@ export default function Profile() {
     loggedInUserData();
   }, []);
 
-  useEffect(() => {
-    // first fetch the author
-    const fetchAuthor = async () => {
-      await axios
-      .get(`${baseURL}/authors/${author_id}/`)
-      .then((response) => {
-        setAuthor(response.data);
-        if (!authorHostIsOurs(response.data.host)) {
-          // only fetch to the node if the author is ours
-          fetchNode(response.data);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-    }
-    fetchAuthor();
-  }, [useLocation().state])
-
-
-  const fetchNode = async (author) => {
-    // fetches the node object
-    await api
-    .get(`${baseURL}/node/?host=${author.host}`)
-    .then((response) => {
-      let node = createNodeObject(response, author);
-      setAuthorNode(node);
-      setAuthorBaseAPI(node.host);
-    })
-    .catch((err) => {
-      console.log(err.response.data);
-    })
-  }
-
   // Called after rendering. Fetches data
   useEffect(() => {
-    const fetchData = async (ApiURL, authorId, node) => {
+    const fetchData = async () => {
+      await axios
+        .get(`${baseURL}/authors/${author_id}/`)
+        .then((response) => {
+          setAuthor(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       await api      
-        .get(`${ApiURL}authors/${authorId}/posts/`,
-        {headers: node.headers}
+        .get(`${baseURL}/authors/${author_id}/posts/`
         )
         .then((response) => {
-          setPostsArray(response.data);
+          console.log(response.data.items)
+          setPostsArray(response.data.items);
+          setNextUrl(response.data.next);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
         });
       await api      
-        .get(`${ApiURL}authors/${authorId}/followers/`,
-        {headers: node.headers}
+        .get(`${baseURL}/authors/${author_id}/followers/`
         )
         .then((response) => {
           setFollowersArray(response.data);
@@ -158,41 +135,30 @@ export default function Profile() {
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
         });
-
     };
-      if (!authorHostIsOurs(author.host) && authorBaseApiURL !== null) {
-        console.log("THE AUTHOR IS", author);
-        fetchData(authorBaseApiURL, extractAuthorUUID(author.id), authorNode);
-      } else {
-        // if the author is from our host, fetch from our API, or if something went wrong
-        // trying to fetch the foreign author, then fetch that author from ours as backup.
-        fetchData(baseURL+'/', author_id, emptyNode);
-        // fetch the authors friends only if the author we're viewing is ours.
-        // This is other groups don't have a friends endpoint.
-        api      
-          .get(`${baseURL}/authors/${author_id}/friends/`)
-          .then((response) => {
-            setFriendsArray(response.data);
-          })
-          .catch((error) => {
-            console.log("Failed to get friends of author. " + error);
-          });
-      }
-      
+    fetchData();
+  }, [useLocation().state, dir]);
 
-  }, [author, authorBaseApiURL]);
+
+  var paginationHandler = (url) => {
+    console.log("url is", url);
+    api.get(url)
+    .then((response) => {
+      setNextUrl(response.data.next);
+      setPostsArray([...postsArray, ...response.data.items]);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
 
   return (
     <div className="profileContainer">
       <div className="profileHeader">
         <div className="profilePicWithFollowButton">
-          <div className="profilePicPage">
-            <img id="profilePicPage" src={author.profileImage} alt="profilePic"/>
-          </div>
+          <ProfilePicture profileImage={author.profileImage} />
           <FollowButton 
-            authorViewing={author} 
-            authorNode={!authorHostIsOurs(author.host) ? authorNode : emptyNode} 
-            authorBaseApiURL={!authorHostIsOurs(author.host) ? authorBaseApiURL : baseURL+'/'} 
+            authorViewing={author}
           />
         </div>
 
@@ -221,10 +187,12 @@ export default function Profile() {
       <ProfilePosts 
         loggedInAuthorsLiked={liked} 
         loggedInAuthorsFollowers={loggedInAuthorsFollowers} 
-        loggedInAuthorsFriends={loggedInAuthorsFriends} postsArray={postsArray}/> : <></>}
+        loggedInAuthorsFriends={loggedInAuthorsFriends} nextUrl={nextUrl} paginationNext={() => paginationHandler(nextUrl)} postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
+      
 
+      
     </div>
   );
 }

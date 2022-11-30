@@ -7,7 +7,8 @@ class Node(models.Model):
     # username and password fields should be determined between
     # the two nodes
     username = models.CharField(max_length=200)  
-    password = models.CharField(max_length=200)  
+    password = models.CharField(max_length=200) 
+    team = models.IntegerField(blank=False) 
     
 
     def __str__(self):
