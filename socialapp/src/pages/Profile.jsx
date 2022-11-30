@@ -130,7 +130,15 @@ export default function Profile() {
         )
         .then((response) => {
           setFollowersArray(response.data);
-
+        })
+        .catch((error) => {
+          console.log("Failed to get followers of author. " + error);
+        });
+      await api      
+        .get(`${baseURL}/authors/${author_id}/friends/`
+        )
+        .then((response) => {
+          setFriendsArray(response.data);
         })
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);

@@ -79,7 +79,8 @@ export default function Explore() {
   const [friends, setFriends] = useState([]);
   const [liked, setLiked] = useState([]);
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
-  const [teamSelected, setTeamSelected] = useState("2");
+  const storedTeamSelected = localStorage.getItem("teamSelected");
+  const [teamSelected, setTeamSelected] = useState(() => storedTeamSelected ? storedTeamSelected : "2");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -182,9 +183,9 @@ export default function Explore() {
   }
 
   const handleTeamSelect = (e) => {
-    console.log(e);
     setTeamSelected(e);
     fetchTeamAuthors(e);
+    localStorage.setItem("teamSelected", e);
   }
 
   return (

@@ -6,12 +6,9 @@ import dayjs from "dayjs";
 import axios from "axios";
 
 const AuthLayout = () => {
-    let { user, authTokens, setUser, setAuthTokens, baseURL } = useContext(AuthContext);
+    let { user, authTokens, setUser, setAuthTokens, baseURL, logoutUser } = useContext(AuthContext);
     if (authTokens === null) {
-      setUser(null);
-      localStorage.removeItem("authTokens");
-      localStorage.removeItem("user_id");
-      localStorage.removeItem("loggedInUser");
+      logoutUser();
       return <Navigate to={"/login"} replace />
     }
     const userToken = jwt_decode(authTokens.access);
@@ -43,10 +40,7 @@ const AuthLayout = () => {
         // if the token has expired or doesn't exist, log the user out, otherwise
         // show them the protected pages
         if (isExpired === true || isExpired === null) {
-          setAuthTokens(null);
-          setUser(null);
-          localStorage.removeItem("authTokens");
-          localStorage.removeItem("user_id");
+          logoutUser();
           return <Navigate to={"/login"} replace />;
           
         } else {
