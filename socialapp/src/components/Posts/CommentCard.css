@@ -38,6 +38,7 @@
     box-shadow: none;
     width: 100%;
     flex-wrap: wrap;
+    height: fit-content;
 }
 
 .comment-card .comment-content {
@@ -47,6 +48,10 @@
     white-space: pre-line;
     font-family: 'Readex Pro Light';
     font-size: 0.8rem;
+}
+
+.comment-card .comment-content > * {
+    margin: 0;
 }
 
 .comment-like-icon {

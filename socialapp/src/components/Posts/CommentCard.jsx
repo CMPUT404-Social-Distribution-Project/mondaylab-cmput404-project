@@ -7,6 +7,7 @@ import AuthContext from "../../context/AuthContext";
 import { extractAuthorUUID } from "../../utils/utils";
 import useAxios from "../../utils/useAxios";
 import ProfilePicture from "../ProfilePicture";
+import ReactMarkdown from "react-markdown";
 
 export default function CommentCard(props) {
   const [liked, setLiked] = useState(props.liked);
@@ -58,7 +59,7 @@ export default function CommentCard(props) {
           <ProfilePicture profileImage={props.author.profileImage} />
           <div className="comment-author">{props.author.displayName}</div>
         </div>
-        <div className="comment-content">{props.comment.comment}</div>
+        <ReactMarkdown className="comment-content" children={props.comment.comment} />
       </Card.Body>
       <BsFillHeartFill
             className="comment-like-icon"
