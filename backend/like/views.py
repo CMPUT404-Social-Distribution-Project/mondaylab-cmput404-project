@@ -10,7 +10,7 @@ from like.models import Like
 from comments.models import Comment
 from django.db.models import Q
 from like.serializers import LikeSerializer, LikeAuthorSerializer
-from backend.utils import isAuthorized, is_friends
+from backend.utils import isAuthorized, is_friends, fetch_author, check_remote_fetch
 
 class LikesPostApiView(GenericAPIView):
     """
@@ -26,9 +26,14 @@ class LikesPostApiView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class=LikeSerializer
     def get(self, request, author_id, post_id):
-
         try:
-            
+            author_obj = fetch_author(author_id)
+            res = check_remote_fetch(author_obj, f"/posts/{post_id}/likes")
+            if res != None:
+                if type(res) == type([]):
+                    res = {"type": "likes", "items": res}
+                return response.Response(res, status=status.HTTP_200_OK)
+
             post = Post.objects.get(uuid=post_id) 
             if isAuthorized(request, author_id) or (
                 post.visibility == "FRIENDS" and is_friends(request, author_id)
@@ -86,7 +91,13 @@ class LikesCommentApiView(GenericAPIView):
         # Like db contains rows of like object, each like obj has this field('object') = "...author/{author_id}/posts/{postid}/comments/{commentid}"
         # to get all likes with this comment, check if post_id, comment_id is in the field('object')
         try:
-            author = Author.objects.get(uuid = author_id)
+            author_obj = fetch_author(author_id)
+            res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments/{comment_id}/likes/")
+            if res != None:
+                if type(res) == type([]):
+                    res = {"type": "likes", "items": res}
+                return response.Response(res, status=status.HTTP_200_OK)
+                
             post = Post.objects.get(uuid=post_id)
             comment = Comment.objects.get(uuid=comment_id)
 

@@ -13,7 +13,6 @@ import AuthContext from "../../context/AuthContext";
 import { FaImage, FaLink, FaSearch } from "react-icons/fa";
 import { search2 } from "../../utils/searchUtil";
 import UserCard from "../UserCard.jsx";
-import { extractAuthorUUID, createNodeObject, authorHostIsOurs } from "../../utils/utils"
 
 
 export default function CreatePost(props) {
@@ -114,37 +113,14 @@ export default function CreatePost(props) {
           return;
         }
         const resultPost = response.data;
-        console.log(sendTo, !authorHostIsOurs(sendTo.host));
-        if (!authorHostIsOurs(sendTo.host)) {
-          // author is not ours, send post to inbox of author
-          console.log("YAAAAS BII", sendTo)
-          api
-            .get(`${baseURL}/node/?host=${sendTo.host}`)
-            .then((response) => {
-              let node = createNodeObject(response, sendTo);
-              api
-                .post(`${sendTo.id}/inbox/`, resultPost, {headers: node.headers})
-                .then((response) => {
-                  console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
-                })
-                .catch((error) => {
-                  console.log("Failed to send private post. " + error);
-                })
-            })
-            .catch((err) => {
-              console.log("Failed to fetch node. " + err);
-            })
-        } else {
-          // author is ours
-          api
-            .post(`${sendTo.id}/inbox/`, resultPost)
-            .then((response) => {
-              console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
-            })
-            .catch((error) => {
-              console.log("Failed to send private post. " + error);
-            });
-        }
+        api
+          .post(`${baseURL}/authors/${sendTo.uuid}/inbox/`, resultPost)
+          .then((response) => {
+            console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
+          })
+          .catch((error) => {
+            console.log("Failed to send private post. " + error);
+          });
       }
       props.onHide();
     }

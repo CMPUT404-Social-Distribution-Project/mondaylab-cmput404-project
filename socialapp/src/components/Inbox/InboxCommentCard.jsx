@@ -10,6 +10,8 @@ import "./InboxCommentCard.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import ProfilePicture from "../ProfilePicture";
+import { extractAuthorUUID } from '../../utils/utils';
+
 
 export default function InboxCommentCard(props) {
   // pass in the follow request object in props
@@ -21,7 +23,7 @@ export default function InboxCommentCard(props) {
   const [postsArray, setPostsArray] = useState({});
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${props.comment.author.uuid}/`);
+    navigate(`/authors/${extractAuthorUUID(props.comment.author.id)}/`);
   };
   const postRouteChange = () => {
     var rout = props.comment.id.split("authors/")[1].split("/comments")[0];
