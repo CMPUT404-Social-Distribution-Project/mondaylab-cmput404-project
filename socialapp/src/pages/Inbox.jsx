@@ -157,35 +157,32 @@ export default function Inbox() {
 
   return (
     <div className="inbox-container">
-      <Row xs="auto">
-        <Col>
-          <h1>Inbox</h1>
-        </Col>
-        <Col>
-          <Popup
-            trigger={
-              <div>
-                <BsFillTrashFill
-                  style={{
-                    color: "var(--orange)",
-                    marginTop: "1em",
-                    marginBottom: "1em",
-                    marginRight: "1em",
-                  }}
-                  onClick={clearInbox}
-                />
-              </div>
-            }
-            position="right center"
-            on="hover"
-            closeOnDocumentClick
-            contentStyle={{ padding: "0.5rem", "background-color": "var(--dark-blue)", border: "none", width: "fit-content" }}
-            arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
-          >
-            <span> Clear Inbox </span>
-          </Popup>
-        </Col>
-      </Row>
+      <div className="inbox-title-container">
+        <h1>Inbox</h1>
+        <Popup
+          trigger={
+            <div>
+              <BsFillTrashFill
+                style={{
+                  color: "var(--orange)",
+                  marginTop: "1em",
+                  marginBottom: "1em",
+                  marginRight: "1em",
+                }}
+                onClick={clearInbox}
+              />
+            </div>
+          }
+          position="right center"
+          on="hover"
+          closeOnDocumentClick
+          contentStyle={{ padding: "0.5rem", "background-color": "var(--dark-blue)", border: "none", width: "fit-content" }}
+          arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
+        >
+          <span> Clear Inbox </span>
+        </Popup>
+
+      </div>
 
       <div className="inbox-container">
         <Tab.Container id="left-tabs-example" defaultActiveKey="post">

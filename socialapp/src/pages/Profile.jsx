@@ -15,15 +15,19 @@ import { CgRemote } from "react-icons/cg";
 import ProfilePicture from '../components/ProfilePicture';
 
 function ProfilePosts(props) {
+  // console.log("PreviousUrl in ProfilePosts is", props.previousUrl);
+  // console.log("NextUrl in ProfilePosts is", props.nextUrl);
+  console.log("ProfilePosts posts", props.postsArray)
   return (
     <div className="posts-container-profile">
-    {
-      typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard 
-        loggedInAuthorsLiked={props.loggedInAuthorsLiked}
-        loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
-        : null
-    }
+      {
+        typeof props.postsArray !== 'undefined' ? 
+          props.postsArray.map((post) => <PostCard 
+          loggedInAuthorsLiked={props.loggedInAuthorsLiked}
+          loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
+          : null
+      }
+      {props.nextUrl && <button className="load-more-posts-button" onClick={() => props.paginationNext()}>Load More Posts</button>}
     </div>
   )
 }
@@ -55,7 +59,7 @@ function ProfileFriends(props) {
 export default function Profile() {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
-  const [postsArray, setPostsArray] = useState(""); 
+  const [postsArray, setPostsArray] = useState([]); 
   const [followersArray, setFollowersArray] = useState(""); 
   const [friendsArray, setFriendsArray] = useState(""); 
   const [loggedInAuthorsFollowers, setLoggedInAuthorsFollowers] = useState([]); 
@@ -65,6 +69,8 @@ export default function Profile() {
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
 
+  const [nextUrl, setNextUrl] = useState(null);
+  
   useEffect(() => {
     const loggedInUserData = async () => {
       await api
@@ -112,7 +118,9 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/posts/`
         )
         .then((response) => {
-          setPostsArray(response.data);
+          console.log(response.data.items)
+          setPostsArray(response.data.items);
+          setNextUrl(response.data.next);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
@@ -129,7 +137,20 @@ export default function Profile() {
         });
     };
     fetchData();
-  }, [useLocation().state]);
+  }, [useLocation().state, dir]);
+
+
+  var paginationHandler = (url) => {
+    console.log("url is", url);
+    api.get(url)
+    .then((response) => {
+      setNextUrl(response.data.next);
+      setPostsArray([...postsArray, ...response.data.items]);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
 
   return (
     <div className="profileContainer">
@@ -166,10 +187,12 @@ export default function Profile() {
       <ProfilePosts 
         loggedInAuthorsLiked={liked} 
         loggedInAuthorsFollowers={loggedInAuthorsFollowers} 
-        loggedInAuthorsFriends={loggedInAuthorsFriends} postsArray={postsArray}/> : <></>}
+        loggedInAuthorsFriends={loggedInAuthorsFriends} nextUrl={nextUrl} paginationNext={() => paginationHandler(nextUrl)} postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
+      
 
+      
     </div>
   );
 }

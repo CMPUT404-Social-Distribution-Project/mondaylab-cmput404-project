@@ -145,6 +145,15 @@ span {
     width: auto !important;
 }
 
+.posts-container-profile .load-more-posts-button {
+    width: 40rem;
+    border-radius: 2rem;
+    padding: 0.5rem 0rem;
+    background-color: var(--teal-alt);
+    border: none;
+    margin-top: 1rem;
+}
+
 .followers-container-profile, .friends-container-profile {
     display: flex;
     flex-direction: column;

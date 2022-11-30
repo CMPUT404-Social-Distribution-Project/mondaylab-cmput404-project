@@ -38,9 +38,12 @@ class CommentsApiView(GenericAPIView):
         if request.GET.get("size"):
             size = int(request.GET["size"])
         
-        res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments/?page={page}&size={size}")
+        res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments?page={page}&size={size}")
         if res:
-            return response.Response(res, status=status.HTTP_200_OK)
+            result = res
+            if res.get("items"):
+                result = {"type": "comments", "comments": res["items"]}
+            return response.Response(result, status=status.HTTP_200_OK)
 
         # First try and get the post object
         post_obj = Post.objects.filter(uuid=post_id)

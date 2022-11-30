@@ -12,14 +12,23 @@ class CustomPagination(pagination.PageNumberPagination):
 
     def get_paginated_response(self, data):
         if hasattr(self, 'page') and self.page is not None:
-            return super(CustomPagination, self).get_paginated_response(data)
-        return Response(
-            {
-                "page" : self.page.number,
-                "size" : self.page.paginator.count,
-                "results" : data
-            }
-        )
+            return Response(
+                {
+                    "next": self.get_next_link(),
+                    "previous": self.get_previous_link(),
+                    "page" : self.page.paginator.num_pages,
+                    "size" : self.page.paginator.count,
+                    "results" : data
+                }
+            )
+        else:
+            return Response(
+                {
+                    "page" : 1,
+                    "size" : self.page_size,
+                    "results" : data
+                }
+            )
     
     def paginate_queryset(self, queryset, request, view=None):
         """Checking NotFound exception"""

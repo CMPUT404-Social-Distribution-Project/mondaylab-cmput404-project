@@ -134,10 +134,7 @@ def getNodeAuthors(request):
         return response.Response(res.json(), status=status.HTTP_200_OK)
     else:
         return response.Response(f"Could not retrieve team {team_number}", status=status.HTTP_404_NOT_FOUND)
-    serializer = AuthorSerializer(remote_authors, many=True)
 
-    result = {"type": "authors", "items": serializer.data}
-    return response.Response(result, status=status.HTTP_200_OK)
 
 """
 NOTE, I moved this inside  AcceptConnectionRemote() api
