@@ -13,6 +13,7 @@ import AuthContext from "../../context/AuthContext";
 import { FaImage, FaLink, FaSearch } from "react-icons/fa";
 import { search2 } from "../../utils/searchUtil";
 import UserCard from "../UserCard.jsx";
+import { extractAuthorUUID } from "../../utils/utils";
 
 
 export default function CreatePost(props) {
@@ -114,7 +115,7 @@ export default function CreatePost(props) {
         }
         const resultPost = response.data;
         api
-          .post(`${baseURL}/authors/${sendTo.uuid}/inbox/`, resultPost)
+          .post(`${baseURL}/authors/${extractAuthorUUID(sendTo.id)}/inbox/`, resultPost)
           .then((response) => {
             console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
           })

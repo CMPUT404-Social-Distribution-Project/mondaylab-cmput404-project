@@ -68,17 +68,8 @@ class InboxApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
             
             try:
-                
                 posts_list = list(inbox.posts.all().order_by("published"))
-
-                print()
-                print()
-                print("--- posts_list")
-                print(posts_list)
-                print()
-
                 posts_serializers = self.serializer_class(posts_list, many=True)
-
 
                 result = {
                     'type': 'inbox',
@@ -93,8 +84,6 @@ class InboxApiView(GenericAPIView):
 
 
     def post(self, request, author_id):
-
-        print("in post")
         """
         POST [local, remote]: send a post to the author
         if the type is “post” then add that post to AUTHOR_ID’s inbox
@@ -115,13 +104,12 @@ class InboxApiView(GenericAPIView):
                 )
                 if res.status_code >= 200 and res.status_code < 300:
                     print(f"Success sending data to inbox of remote author {node_author_inbox_url}")
-                    return response.Response("Sent data to inbox of remote author", status=status.HTTP_200_OK)
+                    return response.Response("Sent data to {node_author_inbox_url} inbox of remote author", status=status.HTTP_200_OK)
                 else:
                     print(f"Failed to send data to remote author '{author.displayName}' to {node_author_inbox_url}")
                     print(f"{res.status_code}:{res.text}")
                     return response.Response(f"{res.status_code}: {res.text}. Failed to send data to remote author ' \
                     {author.displayName}' to {node_author_inbox_url}", status=status.HTTP_404_NOT_FOUND)
-
 
             inbox , created= Inbox.objects.get_or_create(author=author)
         except Exception as e:
@@ -235,7 +223,7 @@ class InboxApiView(GenericAPIView):
                     }
 
             except Exception as e:
-                return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
             return response.Response(result, status=status.HTTP_200_OK)
@@ -291,7 +279,7 @@ class InboxApiView(GenericAPIView):
                 }
             except Exception as e:
 
-                return response.Response(str(e), status=status.HTTP_404_NOT_FOUND)
+                return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
 
             return response.Response(result, status=status.HTTP_200_OK)

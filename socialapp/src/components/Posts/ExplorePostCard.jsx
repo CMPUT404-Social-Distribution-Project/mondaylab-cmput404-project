@@ -51,7 +51,7 @@ export default function PostCard(props) {
     }
   });
   const postRouteChange = () => {
-    navigate(`/authors/${post_user_uuid}/posts/${props.post.uuid}`);
+    navigate(`/authors/${post_user_uuid}/posts/${post_id}`);
   };
 
   const sendPostLike = () => {
@@ -95,7 +95,7 @@ export default function PostCard(props) {
 
   const sendPostToAuthorInbox = (author, post) => {
     api
-      .post(`${baseURL}/authors/${author.uuid}/inbox/`, post)
+      .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
       .then((response) => {
         console.log("Success sending to author's inbox", response);
       })
@@ -223,7 +223,7 @@ export default function PostCard(props) {
               <BsFillHeartFill
                 className="like-icon"
                 style={{color: liked ? "var(--orange)": "var(--white-teal)",}}
-                onClick={() => sendPostLike(props.post.uuid)}
+                onClick={() => sendPostLike()}
               />
             </div>
           </Col>
