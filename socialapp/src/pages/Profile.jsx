@@ -114,7 +114,7 @@ export default function Profile() {
         .catch((error) => {
           console.log(error);
         });
-      await api      
+      api      
         .get(`${baseURL}/authors/${author_id}/posts/`
         )
         .then((response) => {
@@ -125,7 +125,7 @@ export default function Profile() {
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
         });
-      await api      
+      api      
         .get(`${baseURL}/authors/${author_id}/followers/`
         )
         .then((response) => {
@@ -134,7 +134,7 @@ export default function Profile() {
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
         });
-      await api      
+      api      
         .get(`${baseURL}/authors/${author_id}/friends/`
         )
         .then((response) => {

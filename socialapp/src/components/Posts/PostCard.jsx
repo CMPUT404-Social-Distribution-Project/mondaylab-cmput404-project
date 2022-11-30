@@ -22,6 +22,7 @@ import {
   isValidHTTPUrl,
 } from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
+import remarkGfm from 'remark-gfm'
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -400,7 +401,7 @@ export default function PostCard(props) {
       </Card.Header>
       <Card.Body>
         <Card.Title>
-          <ReactMarkdown>{props.post.title}</ReactMarkdown>
+          {props.post.title}
         </Card.Title>
         {(props.post.image && (
           <img className="post-image" src={props.post.image} alt="postImage" />
@@ -417,13 +418,14 @@ export default function PostCard(props) {
         <div className="card-text">
           {showContent && (
             <ReactMarkdown
+              children={props.post.content}
+              remarkPlugins={[remarkGfm]}
               components={{
                 img: ({ node, ...props }) => (
                   <img style={{ maxWidth: "100%" }} {...props} />
                 ),
               }}
             >
-              {props.post.content}
             </ReactMarkdown>
           )}
         </div>

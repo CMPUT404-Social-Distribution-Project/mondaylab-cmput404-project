@@ -95,3 +95,12 @@
     --bs-dropdown-link-active-color: var(--dark-blue);
     --bs-dropdown-link-color: var(--white-teal);
 }
+
+.public-posts-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.public-posts-loader {
+    align-self: center;
+}

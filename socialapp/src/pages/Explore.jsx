@@ -15,6 +15,7 @@ import Container from "react-bootstrap/Container";
 import { useLocation } from "react-router-dom";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import PulseLoader from 'react-spinners/PulseLoader';
 
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
@@ -81,21 +82,28 @@ export default function Explore() {
   const user_id = localStorage.getItem("user_id"); // the currently logged in author
   const storedTeamSelected = localStorage.getItem("teamSelected");
   const [teamSelected, setTeamSelected] = useState(() => storedTeamSelected ? storedTeamSelected : "2");
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [remoteAuthorsLoading, setRemoteAuthorsLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
+      setPostsLoading(true);
       api
       .get(`${baseURL}/posts/`)
       .then((response) => {
         setPostsArray(response.data.items);
+        setPostsLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
+      setRemoteAuthorsLoading(true);
       api
         .get(`${baseURL}/node/authors/?team=${teamSelected}`)
         .then((response) => {
           setRemoteAuthors(response.data.items);
+          setRemoteAuthorsLoading(false);
         })
         .catch((error) => {
           console.log(error);
@@ -176,6 +184,7 @@ export default function Explore() {
       .get(`${baseURL}/node/authors/?team=${e}`)
       .then((response) => {
         setRemoteAuthors(response.data.items);
+        setRemoteAuthorsLoading(false);
       })
       .catch((error) => {
         console.log(error);
@@ -183,6 +192,7 @@ export default function Explore() {
   }
 
   const handleTeamSelect = (e) => {
+    setRemoteAuthorsLoading(true);
     setTeamSelected(e);
     fetchTeamAuthors(e);
     localStorage.setItem("teamSelected", e);
@@ -213,7 +223,7 @@ export default function Explore() {
       {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
       <div className="public-posts-and-remote-container">
         <Card style={{ backgroundColor: "var(--darker-blue)" }}>
-          <Card.Body>
+          <Card.Body className="public-posts-container">
             {value !== "" ? (
               displaySearch === true ? (
                 <>
@@ -232,11 +242,12 @@ export default function Explore() {
             ) : (
               <>
                 <h5>Current public posts</h5>
-                <div className="all-posts-container">
+                {postsLoading ? <PulseLoader className="public-posts-loader" color="var(--teal)" /> : <div className="all-posts-container">
                   {postsArray.map((post) => (
                       <ExplorePostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
                   ))}
-                </div>
+                </div>}
+                
               </>
             )}
           </Card.Body>
@@ -248,7 +259,8 @@ export default function Explore() {
               onSelect={handleTeamSelect}
               title={teamSelected}
             />
-            {remoteAuthors.map((author) => <UserCard author={author} key={author.id}/>)}
+            {remoteAuthorsLoading ? <PulseLoader className="remote-authors-loader" color="var(--teal)" /> : 
+            remoteAuthors.map((author) => <UserCard author={author} key={author.id}/>)}
 
           </Card.Body>
         </Card>
