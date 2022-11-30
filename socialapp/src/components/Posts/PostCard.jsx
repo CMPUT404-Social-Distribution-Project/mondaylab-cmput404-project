@@ -146,7 +146,7 @@ export default function PostCard(props) {
 
   const sendPostToAuthorInbox = (author, post) => {
     api
-      .post(`${baseURL}/authors/author.uuid}/inbox/`, post)
+      .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
       .then((response) => {
         console.log("Success sending to author's inbox", response);
       })
@@ -211,7 +211,7 @@ export default function PostCard(props) {
     // otherwise create the comment on our local post, then send comment to inbox of post's author
     api
       .post(
-        `${baseURL}/authors/${props.post.author.uuid}/posts/${post_id}/comments/`,
+        `${baseURL}/authors/${extractAuthorUUID(props.post.author.id)}/posts/${post_id}/comments/`,
         postComment
       )
       .then((response) => {
