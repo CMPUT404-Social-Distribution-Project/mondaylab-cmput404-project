@@ -14,7 +14,7 @@ from .models import Comment
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
-from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend
+from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, is_our_frontend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CommentsApiView(GenericAPIView):
@@ -121,7 +121,6 @@ class CommentsApiView(GenericAPIView):
                 # If foreign post, don't need to update count, let them update it.
                 post_obj = Post.objects.filter(id__contains=post_id)
                 if post_obj.exists() and is_our_backend(post_obj.first().author.host):
-                    print(post_obj.first().author)
                     post_obj = Post.objects.get(uuid=post_id)
                     post_obj.count = post_obj.count + 1         # update count
                     post_obj.save(update_fields=["count"])
