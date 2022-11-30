@@ -78,6 +78,7 @@ def is_friends(request, author_uuid):
     '''
     if request.META.get("HTTP_ORIGIN") is None:
         print("is_friends: Request is missing an Origin header")
+        return False
     
     try:
         # Try to get the author they're viewing
@@ -507,11 +508,27 @@ def check_remote_fetch(author_obj, endpoint):
     '''Checks if the author is a remote one, if so, fetches to the specified endpoint
         Example endpoint = "/followers/"
     '''
+
     if not is_our_backend(author_obj.host):
         target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
+        print(target)
         res = authenticated_GET_host(target, author_obj.host, author_obj.id)
         if res.status_code == 200:
             return res.json()
         else:
+            print(res.text)
             raise ValueError(f"Could not fetch to {author_obj.id}{endpoint}. {res.status_code}:{res.text}")
     return None
+
+def build_pagination_query(url, page, size):
+    '''Where url is something like http://www.../posts/ or /comments/'''
+    query = add_end_slash(url)
+
+    if page and not size:
+        query = f"{query}?page={page}"
+    elif page and size:
+        query = f"{query}?page={page}&size={size}"
+    elif not page and size:
+        query = f"{query}?size={size}"
+
+    return query

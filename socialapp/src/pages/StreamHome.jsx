@@ -10,7 +10,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Popup from "reactjs-popup";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import "./StreamHome.css";
 
 export default function StreamHome() {
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -32,11 +32,7 @@ export default function StreamHome() {
 
   // get next pages looks something like this:
   // "http://127.0.0.1:8000/service/authors/23682607-5a7f-494c-975a-a0a7d711060d/posts/?page=2"
-  const base = baseURL + /authors/ + user_id + /posts/;
   const [nextUrl, setNextUrl] = useState();
-  const [previousUrl, setPreviousURL] = useState();
-
-
   
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +40,6 @@ export default function StreamHome() {
         .get(`${baseURL}/authors/${user_id}/posts/`)
         .then((response) => {
           setNextUrl(response.data.next);
-          setPreviousURL(response.data.previous);
           setPostsArray(response.data.items);
         })
         .catch((error) => {
@@ -56,12 +51,12 @@ export default function StreamHome() {
 
   const paginationHandler = (url) => {
     try{
-      axios.get(url)
-      .then((response) => {
-        setNextUrl(response.data.next);
-        setPreviousURL(response.data.previous);
-        setPostsArray(response.data.items);
-      });
+      api
+        .get(url)
+        .then((response) => {
+          setNextUrl(response.data.next);
+          setPostsArray([...postsArray, ...response.data.items]);
+        });
     }
     catch (error) {
       console.log(error);
@@ -108,56 +103,37 @@ export default function StreamHome() {
      */
 
     <div className="homepage">
-      <Row>
-        <Col md={4}>
-          <h1>My Feed</h1>
-        </Col>
-        <Col md={{ span: 4, offset: 4 }}>
-          <Popup
-            trigger={
-              <button style={{ background: "none", border: "none" }}>
-                <BsGithub
-                  style={{
-                    color: "var(--white-teal)",
-                    marginTop: "1em",
-                    marginBottom: "1em",
-                    marginRight: "1em",
-                  }}
-                  onClick={routeChange}
-                />
-              </button>
-            }
-            on="hover"
-            contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5rem" }}
-            arrowStyle={{ color: "var(--dark-blue)", stroke: "none"}}
-            arrow={true}
-          >
-            <span style={{ fontSize: "0.8rem" }}> Click to see GitHub activities! </span>
-          </Popup>
-        </Col>
-      </Row>
+      <div className="feed-title-container">
+        <h1>My Feed</h1>
+        <Popup
+          trigger={
+            <button style={{ background: "none", border: "none" }}>
+              <BsGithub
+                style={{
+                  color: "var(--white-teal)",
+                }}
+                onClick={routeChange}
+              />
+            </button>
+          }
+          on="hover"
+          contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5rem" }}
+          arrowStyle={{ color: "var(--dark-blue)", stroke: "none"}}
+          arrow={true}
+        >
+          <span style={{ fontSize: "0.8rem" }}> Click to see GitHub activities! </span>
+        </Popup>
+      </div>
       <Container style={{ zIndex: 10 }}>
         <div className="posts">
           {postsArray.map((post) => (
             <PostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
           ))}
         </div>
+        {nextUrl &&
+        <button className="load-more-posts-button" onClick={()=>paginationHandler(nextUrl)}>Load More Posts</button>
+        }  
       </Container>
-
-      <nav className="posts col-md-6">
-        <ul className="pagination justify-content-center">
-          {previousUrl &&
-            <li className="page-item">
-            <button className="page-link" onClick={()=>paginationHandler(previousUrl)}>{'< previous'}</button>
-            </li>
-          }
-          {nextUrl &&
-            <li className="page-item">
-              <button className="page-link" onClick={()=>paginationHandler(nextUrl)}>{'next >'}</button>
-            </li> 
-          }   
-        </ul> 
-      </nav>
     </div>
   );
 }

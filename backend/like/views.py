@@ -28,8 +28,10 @@ class LikesPostApiView(GenericAPIView):
     def get(self, request, author_id, post_id):
         try:
             author_obj = fetch_author(author_id)
-            res = check_remote_fetch(author_obj, f"/posts/{post_id}/likes/")
-            if res:
+            res = check_remote_fetch(author_obj, f"/posts/{post_id}/likes")
+            if res != None:
+                if type(res) == type([]):
+                    res = {"type": "likes", "items": res}
                 return response.Response(res, status=status.HTTP_200_OK)
 
             post = Post.objects.get(uuid=post_id) 
@@ -90,8 +92,10 @@ class LikesCommentApiView(GenericAPIView):
         # to get all likes with this comment, check if post_id, comment_id is in the field('object')
         try:
             author_obj = fetch_author(author_id)
-            res = check_remote_fetch(author_obj, f"/posts/{post_id}/likes/")
-            if res:
+            res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments/{comment_id}/likes/")
+            if res != None:
+                if type(res) == type([]):
+                    res = {"type": "likes", "items": res}
                 return response.Response(res, status=status.HTTP_200_OK)
                 
             post = Post.objects.get(uuid=post_id)

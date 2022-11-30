@@ -12,7 +12,8 @@ from author.serializers import AuthorSerializer, LimitedAuthorSerializer
 from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
-from backend.utils import is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox, is_our_frontend, check_remote_fetch, fetch_author
+from backend.utils import (is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox, 
+is_our_frontend, check_remote_fetch, fetch_author, add_end_slash, build_pagination_query)
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64, requests
@@ -134,15 +135,22 @@ class PostsApiView(GenericAPIView):
         try:
             authorObj = fetch_author(author_id)
 
-            page = 1
-            size = 5
+            page = None
+            size = None
             if request.GET.get("page"):
-                page = request.GET["page"]
+                page = int(request.GET["page"])
             if request.GET.get("size"):
-                size = request.GET["size"]
-            res = check_remote_fetch(authorObj, f"/posts/?page={page}&size={size}")
-            if res:
-                return response.Response(res, status=status.HTTP_200_OK)
+                size = int(request.GET["size"])
+            next = None
+            previous = None
+            posts_url = add_end_slash(request.build_absolute_uri().split('?')[0])
+
+            if not is_our_backend(authorObj.host):
+                remote_posts_res = handle_remote_posts_get(authorObj, page, size, posts_url)
+                if type(remote_posts_res) == str:
+                    return response.Response(f"Error: {remote_posts_res}", status=status.HTTP_404_NOT_FOUND)
+                else:
+                    return response.Response(remote_posts_res, status=status.HTTP_200_OK)
 
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
                 postsQuerySet = Post.objects.filter(author=authorObj).order_by("published").reverse()
@@ -150,10 +158,14 @@ class PostsApiView(GenericAPIView):
                 postsQuerySet = Post.objects.filter(author=authorObj, visibility__in=['PUBLIC','FRIENDS'], unlisted=False).order_by("published").reverse()
             else:
                 postsQuerySet = Post.objects.filter(author=authorObj, visibility='PUBLIC', unlisted=False).order_by("published").reverse()
+
             postsPaginated = self.paginate_queryset(postsQuerySet)
-            links = self.get_paginated_response(postsPaginated).data.get("links")
-            page = self.get_paginated_response(postsPaginated).data.get("page")
-            size = self.get_paginated_response(postsPaginated).data.get("size")
+            paginatedRes = self.get_paginated_response(postsPaginated).data
+            next = paginatedRes.get("next")
+            print(next)
+            previous = paginatedRes.get("previous")
+            page = paginatedRes.get("page")
+            size = paginatedRes.get("size")
 
             
             # Need to set the commentSrc of each post object in the paginated posts
@@ -204,9 +216,8 @@ class PostsApiView(GenericAPIView):
                             postObj.commentSrc.comments.add(comment["uuid"])
 
             postsSerializer = self.serializer_class(postsPaginated, many=True)
-
-            result = {"next": links['next'], "previous": links["previous"], "page": page, "size": size, "type": "posts", "items": postsSerializer.data}
-            
+            print(next)
+            result = {"next": next, "previous": previous, "page": page, "size": size, "type": "posts", "items": postsSerializer.data}
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
             return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
@@ -358,3 +369,35 @@ def get_followers_list(current_author):
 
     return followers_list
 
+def handle_remote_posts_get(authorObj, page, size, posts_url):
+    '''
+    If the author is a remote author, then fetch to their node's
+    API /posts/ endpoint, with pagination. Returns that result if successful.
+    '''
+    next = None
+    previous = None
+    if page and page > 1:
+        # Page > 1, means that there's a previous page, don't need to fetch
+        previous = build_pagination_query(posts_url, page-1, size)
+    try:
+        res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page, size))
+
+    except Exception as e:
+        return e
+    try:
+        if page == None:
+            plusOne = None
+        else:
+            plusOne = page+1
+        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", plusOne, size))
+
+        if next_res and len(next_res["items"]) > 0:
+            # success fetching next page, means that it exists
+            next = build_pagination_query(posts_url, page+1, size)
+    except:
+        # no next page. next already = None
+        pass
+    finally:
+        if res:
+            result = {"next": next, "previous": previous, "page": page, "size": size, "type": "posts", "items": res["items"]}
+            return result

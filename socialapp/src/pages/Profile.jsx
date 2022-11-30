@@ -20,27 +20,14 @@ function ProfilePosts(props) {
   console.log("ProfilePosts posts", props.postsArray)
   return (
     <div className="posts-container-profile">
-    {
-      typeof props.postsArray.items !== 'undefined' ? 
-        props.postsArray.items.map((post) => <PostCard 
-        loggedInAuthorsLiked={props.loggedInAuthorsLiked}
-        loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
-        : null
-    }
-      <nav>
-        <ul className="pagination justify-content-center">
-            { props.prevUrl &&
-            <li className="page-item">
-            <button className="page-link" onClick={() => props.paginationPrev()}>{'<'}</button>
-            </li>
-            }
-            { props.nextUrl && 
-            <li className="page-item">
-              <button className="page-link" onClick={() => props.paginationNext()}>{'>'}</button>
-            </li> 
-            }
-        </ul> 
-      </nav>
+      {
+        typeof props.postsArray !== 'undefined' ? 
+          props.postsArray.map((post) => <PostCard 
+          loggedInAuthorsLiked={props.loggedInAuthorsLiked}
+          loggedInAuthorsFriends={props.loggedInAuthorsFriends} loggedInAuthorsFollowers={props.loggedInAuthorsFollowers} post={post} key={post.id}/>)
+          : null
+      }
+      {props.nextUrl && <button className="load-more-posts-button" onClick={() => props.paginationNext()}>Load More Posts</button>}
     </div>
   )
 }
@@ -72,7 +59,7 @@ function ProfileFriends(props) {
 export default function Profile() {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const [author, setAuthor] = useState("");               // the response object we get (Author object)  
-  const [postsArray, setPostsArray] = useState(""); 
+  const [postsArray, setPostsArray] = useState([]); 
   const [followersArray, setFollowersArray] = useState(""); 
   const [friendsArray, setFriendsArray] = useState(""); 
   const [loggedInAuthorsFollowers, setLoggedInAuthorsFollowers] = useState([]); 
@@ -83,7 +70,6 @@ export default function Profile() {
   const api = useAxios();
 
   const [nextUrl, setNextUrl] = useState(null);
-  const [previousUrl, setPreviousURL] = useState(null);
   
   useEffect(() => {
     const loggedInUserData = async () => {
@@ -132,15 +118,9 @@ export default function Profile() {
         .get(`${baseURL}/authors/${author_id}/posts/`
         )
         .then((response) => {
-          setPostsArray(response.data);
-          console.log('--');
-          console.log(response.data);
-          setPreviousURL(response.data.previous);
+          console.log(response.data.items)
+          setPostsArray(response.data.items);
           setNextUrl(response.data.next);
-          console.log("previousURL IS", response.data.previous);
-          console.log("nextURL IS",response.data.next);
-          console.log("THE ACTUAL PREVURL IS", previousUrl)
-          console.log('...');
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
@@ -159,29 +139,18 @@ export default function Profile() {
     fetchData();
   }, [useLocation().state, dir]);
 
-  useEffect(() => {
-    console.log("URLs changed", nextUrl, previousUrl);
-  }, [nextUrl, previousUrl])
 
   var paginationHandler = (url) => {
     console.log("url is", url);
-    try{
-      api.get(url)
-      .then((response) => {
-        setNextUrl(response.data.next);
-        setPreviousURL(response.data.previous);
-        setPostsArray(response.data);
-      })
-      .catch((error) => {
-        console.log(error.response.data);
-        
-      });
-    }
-    catch (error) {
-      console.log(error.response.data);
-    }
+    api.get(url)
+    .then((response) => {
+      setNextUrl(response.data.next);
+      setPostsArray([...postsArray, ...response.data.items]);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   }
-
 
   return (
     <div className="profileContainer">
@@ -218,8 +187,7 @@ export default function Profile() {
       <ProfilePosts 
         loggedInAuthorsLiked={liked} 
         loggedInAuthorsFollowers={loggedInAuthorsFollowers} 
-        loggedInAuthorsFriends={loggedInAuthorsFriends} prevUrl = {previousUrl} nextUrl={nextUrl}
-      paginationPrev={() => paginationHandler(previousUrl)} paginationNext={() => paginationHandler(nextUrl)} postsArray={postsArray}/> : <></>}
+        loggedInAuthorsFriends={loggedInAuthorsFriends} nextUrl={nextUrl} paginationNext={() => paginationHandler(nextUrl)} postsArray={postsArray}/> : <></>}
       {dir === 'followers' ? <ProfileFollowers followersArray={followersArray}/> : <></>}
       {dir === 'friends' ? <ProfileFriends friendsArray={friendsArray}/> : <></>}
       
