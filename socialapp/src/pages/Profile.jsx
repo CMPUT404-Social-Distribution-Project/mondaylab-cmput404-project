@@ -13,11 +13,12 @@ import ProfileTabs from "../components/Profile/ProfileTabs";
 import { authorHostIsOurs} from '../utils/utils';
 import { CgRemote } from "react-icons/cg";
 import ProfilePicture from '../components/ProfilePicture';
+import PulseLoader from "react-spinners/PulseLoader";
 
 function ProfilePosts(props) {
-  // console.log("PreviousUrl in ProfilePosts is", props.previousUrl);
-  // console.log("NextUrl in ProfilePosts is", props.nextUrl);
-  console.log("ProfilePosts posts", props.postsArray)
+  if (props.postsLoading) {
+    return <PulseLoader color="var(--teal)" className='profile-posts-loader' />
+  }
   return (
     <div className="posts-container-profile">
       {
@@ -68,8 +69,8 @@ export default function Profile() {
   const { baseURL } = useContext(AuthContext);      // our api url http://127.0.0.1/service
   const { author_id, dir } = useParams();                       // gets the author id in the url
   const api = useAxios();
-
   const [nextUrl, setNextUrl] = useState(null);
+  const [postsLoading, setPostsLoading] = useState(false);
   
   useEffect(() => {
     const loggedInUserData = async () => {
@@ -114,6 +115,7 @@ export default function Profile() {
         .catch((error) => {
           console.log(error);
         });
+      setPostsLoading(true);
       api      
         .get(`${baseURL}/authors/${author_id}/posts/`
         )
@@ -121,6 +123,7 @@ export default function Profile() {
           console.log(response.data.items)
           setPostsArray(response.data.items);
           setNextUrl(response.data.next);
+          setPostsLoading(false);
         })
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
@@ -191,8 +194,9 @@ export default function Profile() {
         </div>
       </div>
       <ProfileTabs dir={dir} author_id={author_id}/>
-      {dir === 'posts' || dir === undefined ? 
+      {(dir === 'posts') || dir === undefined ? 
       <ProfilePosts 
+        postsLoading={postsLoading}
         loggedInAuthorsLiked={liked} 
         loggedInAuthorsFollowers={loggedInAuthorsFollowers} 
         loggedInAuthorsFriends={loggedInAuthorsFriends} nextUrl={nextUrl} paginationNext={() => paginationHandler(nextUrl)} postsArray={postsArray}/> : <></>}

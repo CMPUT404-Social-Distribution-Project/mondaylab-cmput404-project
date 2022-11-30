@@ -253,7 +253,7 @@ export default function Explore() {
           </Card.Body>
         </Card>
         <Card className="remote-authors-container" style={{ backgroundColor: "var(--darker-blue)" }}>
-          <Card.Body>
+          <Card.Body className="remote-authors-content">
             <h5>Remote Authors</h5>
             <TeamSelect
               onSelect={handleTeamSelect}
