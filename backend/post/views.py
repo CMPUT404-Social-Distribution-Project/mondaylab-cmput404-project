@@ -36,16 +36,17 @@ class PostApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = fetch_author(author_id)
+
             res = check_remote_fetch(authorObj, f"/posts/{post_id}")
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
 
             if isAuthorized(request, author_id):            # if authorized, then just get all posts regardless of visibility
-                postObj = Post.objects.get(uuid = post_id, author=authorObj)
+                postObj = Post.objects.get(uuid = post_id)
             elif is_friends(request, author_id):
-                postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility__in=['PUBLIC','FRIENDS'],)
+                postObj = Post.objects.get(uuid = post_id, visibility__in=['PUBLIC','FRIENDS'],)
             else:
-                postObj = Post.objects.get(uuid = post_id, author=authorObj, visibility='PUBLIC')
+                postObj = Post.objects.get(uuid = post_id, visibility='PUBLIC')
                 
             return response.Response(self.serializer_class(postObj).data, status=status.HTTP_200_OK)
         except Exception as e:
