@@ -4,16 +4,19 @@ import "./pages.css";
 import AuthContext from "../context/AuthContext";
 import axios from "axios";
 import "./Profile.css";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import PostCard from "../components/Posts/PostCard";
 import UserCard from "../components/UserCard";
 import EditProfileButton from "../components/Profile/EditProfileButton";
 import FollowButton from "../components/Profile/FollowButton";
 import ProfileTabs from "../components/Profile/ProfileTabs";
-import { authorHostIsOurs } from "../utils/utils";
+import { authorHostIsOurs, extractAuthorUUID } from "../utils/utils";
 import { CgRemote } from "react-icons/cg";
 import ProfilePicture from "../components/ProfilePicture";
 import PulseLoader from "react-spinners/PulseLoader";
+import { confirmAlert } from "react-confirm-alert";
+import { toast } from 'react-toastify';
+
 
 function ProfilePosts(props) {
   return (
@@ -47,7 +50,11 @@ function ProfileFollowers(props) {
     <div className="followers-container-profile">
       {typeof props.followersArray.items !== "undefined"
         ? props.followersArray.items.map((follower, i) => (
+          <div className="follower-card-and-remove">
             <UserCard author={follower} key={i} />
+            {props.authorViewingIsLoggedInAuthor ? 
+            <button className="remove-follower-button" onClick={() => props.removeFollower(extractAuthorUUID(follower.id))}>Remove Follower</button> : null}
+          </div>  
           ))
         : null}
     </div>
@@ -80,6 +87,11 @@ export default function Profile() {
   const api = useAxios();
   const [nextUrl, setNextUrl] = useState(null);
   const [postsLoading, setPostsLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const refreshState = () => {
+    navigate(`${location.pathname}`, { state: { refresh: true } });
+  };
 
   useEffect(() => {
     const loggedInUserData = async () => {
@@ -169,6 +181,35 @@ export default function Profile() {
       });
   };
 
+  const removeFollower = (followerUUID) => {
+    api
+    .delete(`${baseURL}/authors/${author_id}/followers/${followerUUID}`)
+    .then((response) => {
+      refreshState();
+      toast.success("Removed follower successfully")
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
+
+  const confirmRemoveFollower = (followerUUID) => {
+    confirmAlert({
+      title: "Remove follower?",
+      buttons: [
+        {
+          label: "Yes",
+          className: "yes-button",
+          onClick: () => removeFollower(followerUUID),
+        },
+        {
+          className: "no-button",
+          label: "No",
+        },
+      ],
+    });
+  }
+
   return (
     <div className="profileContainer">
       <div className="profileHeader">
@@ -225,7 +266,7 @@ export default function Profile() {
         <></>
       )}
       {dir === "followers" ? (
-        <ProfileFollowers followersArray={followersArray} />
+        <ProfileFollowers removeFollower={(followerUUID)=>confirmRemoveFollower(followerUUID)} authorViewingIsLoggedInAuthor={loggedInUser.uuid === author_id} followersArray={followersArray} />
       ) : (
         <></>
       )}

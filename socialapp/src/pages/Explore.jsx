@@ -16,6 +16,7 @@ import { useLocation } from "react-router-dom";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import PulseLoader from 'react-spinners/PulseLoader';
+import { toast } from 'react-toastify';
 
 function RenderAuthors(props) {
   // given the list of authors from the query, creates the user cards
@@ -97,7 +98,8 @@ export default function Explore() {
       })
       .catch((error) => {
         setPostsLoading(false);
-        console.log(error);
+        toast.error("Failed to fetch all public posts.");
+        console.log("Failed to fetch all public posts.", error);
       });
       setRemoteAuthorsLoading(true);
       api
@@ -108,7 +110,8 @@ export default function Explore() {
         })
         .catch((error) => {
           setRemoteAuthorsLoading(false);
-          console.log(error);
+          toast.error("Failed to fetch selected team's remote authors.");
+          console.log("Failed to fetch selected team's remote authors.", error);
         });
       await api
         .get(`${baseURL}/authors/${user_id}/followers/`)

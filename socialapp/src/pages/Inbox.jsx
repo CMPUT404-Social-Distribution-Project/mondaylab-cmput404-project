@@ -13,10 +13,10 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 import Popup from "reactjs-popup";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Toast from "react-bootstrap/Toast";
 import Nav from "react-bootstrap/Nav";
 import { useLocation } from "react-router-dom";
 import "./Inbox.css";
+import { toast } from 'react-toastify';
 
 export default function Inbox() {
   const [inboxItems, setInboxItems] = useState([]);
@@ -34,7 +34,6 @@ export default function Inbox() {
   const [friends, setFriends] = useState([]);
   const [liked, setLiked] = useState([]);
   const api = useAxios();
-  const [show, setShow] = useState(false);
 
   useEffect(() => {
     const fetchLoggedInAuthorData = async () => {
@@ -139,17 +138,17 @@ export default function Inbox() {
   const deleteInbox = () => {
     api
       .delete(`${baseURL}/authors/${user_id}/inbox/`)
-      .then(
-        (response) => setShow(true),
-        setPosts([]),
-        setComments([]),
-        setLikes([]),
-        setFollowRequests([]),
-        setPostNum(0),
-        setLikeNum(0),
-        setCommentNum(0),
-        setFollowNum(0),
-      )
+      .then((response) => {
+        toast.success("Inbox cleared!");
+        setPosts([]);
+        setComments([]);
+        setLikes([]);
+        setFollowRequests([]);
+        setPostNum(0);
+        setLikeNum(0);
+        setCommentNum(0);
+        setFollowNum(0);
+      })
       .catch((error) => {
         console.log(error);
       });
@@ -265,13 +264,6 @@ export default function Inbox() {
           </Row>
         </Tab.Container>
       </div>
-      <Toast onClose={() => setShow(false)} show={show} delay={1500} autohide>
-        <Toast.Header>
-          <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
-          <strong className="me-auto">Bootstrap</strong>
-        </Toast.Header>
-        <Toast.Body>Cleared inbox successfully</Toast.Body>
-      </Toast>
     </div>
   );
 }
