@@ -36,8 +36,12 @@ class PostApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = fetch_author(author_id)
+            if type(authorObj) == str:
+                raise ValueError(authorObj)
 
             res = check_remote_fetch(authorObj, f"/posts/{post_id}")
+            if type(res) == str:
+                raise ValueError(res)
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
 
@@ -135,6 +139,8 @@ class PostsApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = fetch_author(author_id)
+            if type(authorObj) == str:
+                raise ValueError(authorObj)
 
             page = None
             size = None
@@ -428,11 +434,15 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         previous = build_pagination_query(posts_url, page-1, size)
     try:
         res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page, size))
+        if type(res) == str:
+            raise ValueError(res)
 
     except Exception as e:
         return e
     try:
         next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page+1, size))
+        if type(next_res) == str:
+            raise ValueError(next_res)
 
         if next_res and len(next_res["items"]) > 0:
             # success fetching next page, means that it exists
