@@ -106,7 +106,7 @@ class InboxApiView(GenericAPIView):
                 )
                 if res.status_code >= 200 and res.status_code < 300:
                     print(f"Success sending data to inbox of remote author {node_author_inbox_url}")
-                    return response.Response("Sent data to {node_author_inbox_url} inbox of remote author", status=status.HTTP_200_OK)
+                    return response.Response(f"Sent data to {node_author_inbox_url} inbox of remote author", status=status.HTTP_200_OK)
                 else:
                     print(f"Failed to send data to remote author '{author.displayName}' to {node_author_inbox_url}")
                     print(f"{res.status_code}:{res.text}")
