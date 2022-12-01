@@ -5,7 +5,6 @@ import {
   Form,
   CloseButton,
   Card,
-  Container,
 } from "react-bootstrap";
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
@@ -434,7 +433,7 @@ export default function CreatePost(props) {
                   as="textarea"
                   className="body"
                   type="content"
-                  placeholder="Write you Post..."
+                  placeholder="Write your Post..."
                   onChange={(e) => {
                     setPost({
                       ...post,

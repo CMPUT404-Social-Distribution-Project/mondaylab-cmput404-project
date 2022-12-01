@@ -77,6 +77,7 @@
     background-color: var(--dark-blue);
     color: var(--teal);
     --bs-btn-border-radius: 2rem;
+    margin-top: 0.3rem;
 }
 
 .remote-authors-container .dropdown-toggle::after {
@@ -95,3 +96,23 @@
     --bs-dropdown-link-active-color: var(--dark-blue);
     --bs-dropdown-link-color: var(--white-teal);
 }
+
+.public-posts-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.public-posts-loader {
+    align-self: center;
+}
+
+.remote-authors-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.remote-authors-loader {
+    margin-top: 2rem;
+    align-self: center;
+}
+

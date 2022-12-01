@@ -14,7 +14,7 @@ from .models import Comment
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
-from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, is_our_frontend
+from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, add_end_slash, build_pagination_query
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CommentsApiView(GenericAPIView):
@@ -30,20 +30,24 @@ class CommentsApiView(GenericAPIView):
     serialize.save(id =author_id+'/'+'posts/'+str(uuid4())  )
     """
     def get(self, request, author_id, post_id):
-        size = 5
-        page = 1
         author_obj = fetch_author(author_id)
+        page = None
+        size = None
         if request.GET.get("page"):
             page = int(request.GET["page"])
         if request.GET.get("size"):
             size = int(request.GET["size"])
-        
-        res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments?page={page}&size={size}")
-        if res:
-            result = res
-            if res.get("items"):
-                result = {"type": "comments", "comments": res["items"]}
-            return response.Response(result, status=status.HTTP_200_OK)
+        next = None
+        previous = None
+        comments_url = add_end_slash(request.build_absolute_uri().split('?')[0])        # removes query params to get url
+        post_url = f"/posts/{post_id}/comments"
+
+        if not is_our_backend(author_obj.host):
+            remote_comments_res = handle_remote_comments_get(author_obj, page, size, comments_url, post_url)
+            if type(remote_comments_res) == str:
+                return response.Response(f"Error: {remote_comments_res}", status=status.HTTP_404_NOT_FOUND)
+            else:
+                return response.Response(remote_comments_res, status=status.HTTP_200_OK)
 
         # First try and get the post object
         post_obj = Post.objects.filter(uuid=post_id)
@@ -57,26 +61,17 @@ class CommentsApiView(GenericAPIView):
              status=status.HTTP_401_UNAUTHORIZED)
         else:
             try: 
-                """
-                We get all the comments with its id field contain post_id
-                
-                @post_id VARCHAR(50) = post_id
-                
-                Query:
-                SELECT * from comments_comment as commentTable
-                WHERE commentTable.id LIKE "%"+ @post_id + "%"
-                ORDER_BY commentTable.published
-                """
-                
                 # older comments first/top
                 commentsQuerySet = Comment.objects.filter(id__contains = post_id).order_by("published")
                 commentsPaginateQuerySet = self.paginate_queryset(commentsQuerySet)
                 commentsSerializer = CommentsSerializer(commentsPaginateQuerySet, many=True)
                 comments = commentsSerializer.data
-                # commentsPaginationResult = self.get_paginated_response(commentsSerializer.data)
-                # comments = commentsPaginationResult.data.get("results")
-                # page = commentsPaginationResult.data.get("page")
-                # size = commentsPaginationResult.data.get("size")
+                commentsPaginationResult = self.get_paginated_response(commentsSerializer.data).data
+                comments = commentsPaginationResult.get("results")
+                page = commentsPaginationResult.get("page")
+                size = commentsPaginationResult.get("size")
+                next = commentsPaginationResult.get("next")
+                previous = commentsPaginationResult.get("previous")
 
                 if request.GET.get("size") != None:
                     size = int(request.GET["size"])
@@ -84,6 +79,8 @@ class CommentsApiView(GenericAPIView):
                     "type": "comments",
                     "page": page,
                     "size": size,
+                    "next": next,
+                    "previous": previous,
                     "post": post_obj.id,
                     "id": post_obj.id + "/comments",
                     'comments': comments
@@ -157,8 +154,47 @@ class CommentApiView(GenericAPIView):
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
 
-def get_author_id(request):
-    # splits on authors/ then grabs the uuid next to it
-    abs_uri=request.build_absolute_uri()
-    author_id = abs_uri.split('authors/')[1].split('/')[0]
-    return author_id
+def handle_remote_comments_get(authorObj, page, size, comments_url, post_url):
+    '''
+    If the author is a remote author, then fetch to their node's
+    API /posts/ endpoint, with pagination. Returns that result if successful.
+    '''
+    next = None
+    previous = None
+    if page == None:
+        page = 1
+    if page > 1:
+        # Page > 1, means that there's a previous page, don't need to fetch
+        previous = build_pagination_query(comments_url, page-1, size)
+    try:
+        res = check_remote_fetch(authorObj, build_pagination_query(post_url, page, size))
+
+    except Exception as e:
+        return e
+    try:
+        next_res = check_remote_fetch(authorObj, build_pagination_query(post_url, page+1, size))
+
+        if next_res:
+            if (next_res.get("items") != None and len(next_res["items"]) > 0) or \
+             (next_res.get("comments") != None and len(next_res["comments"]) > 0):
+                # success fetching next page, means that it exists
+                next = build_pagination_query(comments_url, page+1, size)
+
+    except Exception as e:
+        # no next page. next already = None
+        pass
+    finally:
+        if res:
+            if res.get("items") != None:
+                res["comments"] = res["items"]
+            result = {
+                "next": next, 
+                "previous": previous, 
+                "page": page, 
+                "size": size, 
+                "type": "comments", 
+                "post": authorObj.id + post_url.split("/comments")[0],
+                "id": authorObj.id + post_url,
+                "comments": res["comments"]
+            }
+            return result

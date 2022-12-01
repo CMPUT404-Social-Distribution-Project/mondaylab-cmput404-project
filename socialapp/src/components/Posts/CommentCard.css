@@ -25,8 +25,8 @@
     --bs-card-border-width: 1px;
     --bs-card-border-color: var(--slightly-darker-blue);
     --bs-card-border-radius: 11px;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 10fr 1fr;
     align-items: center;
 }
 
@@ -38,6 +38,7 @@
     box-shadow: none;
     width: 100%;
     flex-wrap: wrap;
+    height: fit-content;
 }
 
 .comment-card .comment-content {
@@ -47,6 +48,10 @@
     white-space: pre-line;
     font-family: 'Readex Pro Light';
     font-size: 0.8rem;
+}
+
+.comment-card .comment-content > * {
+    margin: 0;
 }
 
 .comment-like-icon {

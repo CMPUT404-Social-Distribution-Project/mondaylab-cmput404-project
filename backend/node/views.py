@@ -129,7 +129,7 @@ def getNodeAuthors(request):
     # remote_authors = Author.objects.exclude(host__in=our_hosts)
     team_number = int(request.GET["team"])
     node_obj = Node.objects.get(team=team_number)
-    res = requests.get(f"{node_obj.host}authors/")
+    res = requests.get(f"{node_obj.host}authors/?size=30")
     if res.status_code >= 200:
         return response.Response(res.json(), status=status.HTTP_200_OK)
     else:

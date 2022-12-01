@@ -1,5 +1,3 @@
-
-
 from post.models import Post
 from author.models import Author
 from comments.models import Comment, CommentSrc
@@ -19,7 +17,9 @@ from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64, requests
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
-from node.utils import our_hosts
+from node.utils import our_hosts, authenticated_GET
+from node.models import Node
+from operator import itemgetter
 
 class PostApiView(GenericAPIView):
     """
@@ -217,7 +217,7 @@ class PostsApiView(GenericAPIView):
                             postObj.commentSrc.comments.add(comment["uuid"])
 
             postsSerializer = self.serializer_class(postsPaginated, many=True)
-            print(next)
+
             result = {"next": next, "previous": previous, "page": page, "size": size, "type": "posts", "items": postsSerializer.data}
             return response.Response(result, status=status.HTTP_200_OK)
         except Exception as e:
@@ -303,16 +303,51 @@ class AllPostsApiView(GenericAPIView):
         Gets all public posts.
         '''
         try:
-            if request.GET.get("HTTP_ORIGIN") != None and is_our_frontend(request.GET.get("HTTP_ORIGIN")):
+
+            if request.META.get("HTTP_ORIGIN") != None and is_our_frontend(request.META.get("HTTP_ORIGIN")):
                 # Get all posts, including remote ones
-                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False).order_by('-published')
+                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts).order_by('-published')
+                post_serializer = PostSerializer(posts_list, many=True)
+                posts_list = post_serializer.data
+
+                # Get all the nodes posts
+                res = []
+                for node in Node.objects.all():
+                    if node.team == 16:
+                        # team 16 has /posts/ endpoint luckily. 
+                        res = authenticated_GET(f"{node.host}posts/", node)
+                        if res.status_code == 200:
+                            remote_posts = res.json().get("items")
+                            posts_list.extend(remote_posts)
+                    else:
+                        auth_res = authenticated_GET(f"{node.host}authors/", node)
+                        if auth_res.status_code == 200:
+                            remote_authors = auth_res.json().get("items")
+                            # Got remote authors, now for each author fetch their public posts
+                            for remote_author in remote_authors:
+                                posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
+                                if posts_res.status_code == 200:
+                                    remote_posts = posts_res.json().get("items")
+                                    posts_list.extend(remote_posts)
+
+                result = {
+                    "type":"posts",
+                    "items": sorted(posts_list, key=itemgetter('published'), reverse=True)
+                }
+                return response.Response(result, status=status.HTTP_200_OK)
+                
             else:
                 # Remote is requesting our posts, only include posts from our host
-                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts)
+                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts).order_by('-published')
 
             posts_paginated = self.paginate_queryset(posts_list)
             post_serializer = PostSerializer(posts_paginated, many=True)
+            paginated_results = self.get_paginated_response(posts_paginated).data
+            next = paginated_results.get("next")
+            previous = paginated_results.get("previous")
             result = {
+                "next": next,
+                "previous": previous,
                 "type":"posts",
                 "items": post_serializer.data
             }
@@ -377,7 +412,9 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
     '''
     next = None
     previous = None
-    if page and page > 1:
+    if page == None:
+        page = 1
+    if page > 1:
         # Page > 1, means that there's a previous page, don't need to fetch
         previous = build_pagination_query(posts_url, page-1, size)
     try:
@@ -386,11 +423,7 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
     except Exception as e:
         return e
     try:
-        if page == None:
-            plusOne = None
-        else:
-            plusOne = page+1
-        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", plusOne, size))
+        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page+1, size))
 
         if next_res and len(next_res["items"]) > 0:
             # success fetching next page, means that it exists
@@ -400,5 +433,12 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         pass
     finally:
         if res:
-            result = {"next": next, "previous": previous, "page": page, "size": size, "type": "posts", "items": res["items"]}
+            result = {
+                "next": next, 
+                "previous": previous, 
+                "page": page, 
+                "size": size, 
+                "type": "posts", 
+                "items": res["items"]
+            }
             return result
