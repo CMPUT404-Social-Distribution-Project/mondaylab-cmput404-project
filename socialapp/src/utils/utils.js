@@ -62,3 +62,7 @@ export function isValidHTTPUrl(string) {
 }
 
 export const emptyNode = {headers: {}};
+
+export function urlContainsOurHost(url) {
+    return url.includes("localhost") || url.includes("cs404-project.heroku.app.com");
+}

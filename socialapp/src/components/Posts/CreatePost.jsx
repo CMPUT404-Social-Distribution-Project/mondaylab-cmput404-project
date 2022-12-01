@@ -54,11 +54,12 @@ export default function CreatePost(props) {
 
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
-
+    
     // only set the visibility for imagePost if there is an image
     if (imagePost) {
-      setImagePost({ ...imagePost, visiblity: option });
+      setImagePost({ ...imagePost, visibility: option });
     }
+
     if (option === "PUBLIC") {
       setEveActive(true);
       setFriActive(false);
@@ -212,7 +213,7 @@ export default function CreatePost(props) {
           contentType: file.type + ";base64",
           content: reader.result,
           categories: "",
-          visibility: "PUBLIC",
+          visibility: post.visibility,
           unlisted: true,
         });
       };
