@@ -313,22 +313,31 @@ class AllPostsApiView(GenericAPIView):
                 # Get all the nodes posts
                 res = []
                 for node in Node.objects.all():
-                    if node.team == 16:
-                        # team 16 has /posts/ endpoint luckily. 
-                        res = authenticated_GET(f"{node.host}posts/", node)
-                        if res.status_code == 200:
-                            remote_posts = res.json().get("items")
-                            posts_list.extend(remote_posts)
-                    else:
-                        auth_res = authenticated_GET(f"{node.host}authors/", node)
-                        if auth_res.status_code == 200:
-                            remote_authors = auth_res.json().get("items")
-                            # Got remote authors, now for each author fetch their public posts
-                            for remote_author in remote_authors:
-                                posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
-                                if posts_res.status_code == 200:
-                                    remote_posts = posts_res.json().get("items")
-                                    posts_list.extend(remote_posts)
+                    try:
+                        if node.team == 16:
+                            # team 16 has /posts/ endpoint luckily. 
+                            res = authenticated_GET(f"{node.host}posts/", node)
+                            if res.status_code == 200:
+                                remote_posts = res.json().get("items")
+                                posts_list.extend(remote_posts)
+                        else:
+                            auth_res = authenticated_GET(f"{node.host}authors/", node)
+                            if auth_res.status_code == 200:
+                                remote_authors = auth_res.json().get("items")
+                                # Got remote authors, now for each author fetch their public posts
+                                for remote_author in remote_authors:
+                                    try:
+                                        if "localhost" not in remote_author.get("host"):
+                                            posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
+                                            if posts_res.status_code == 200:
+                                                remote_posts = posts_res.json().get("items")
+                                                posts_list.extend(remote_posts)
+                                    except Exception as e:
+                                        print(f"Something went wrong trying to retrieve author {remote_author.get('displayName')}:{remote_author.get('host')} posts.")
+                                        continue
+                    except Exception as e:
+                        print(f"Something went wrong trying to fetch to node {node.host}. {e}")
+                        continue
 
                 result = {
                     "type":"posts",
