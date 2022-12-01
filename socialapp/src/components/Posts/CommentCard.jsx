@@ -17,13 +17,14 @@ export default function CommentCard(props) {
 
   const navigate = useNavigate();
   const routeChange = () => {
-    navigate(`/authors/${extractAuthorUUID(props.author.id)}/`, { state: { refresh: true } });
+    navigate(`/authors/${extractAuthorUUID(props.author.id)}/`, {
+      state: { refresh: true },
+    });
   };
 
   useEffect(() => {
     setLiked(props.liked);
-  }, [props.liked])
-
+  }, [props.liked]);
 
   const sendLike = () => {
     const postLike = {
@@ -33,18 +34,24 @@ export default function CommentCard(props) {
       object: props.comment.id,
     };
     api
-      .post(`${baseURL}/authors/${extractAuthorUUID(props.author.id)}/inbox/`, postLike)
+      .post(
+        `${baseURL}/authors/${extractAuthorUUID(props.author.id)}/inbox/`,
+        postLike
+      )
       .then((response) => {
         setLiked(true);
 
         // Need this for checking if author liked remote post or not.
         // Since when sending a like object to remote host's inbox,
-        // the like object is created in their DB but not ours. So 
+        // the like object is created in their DB but not ours. So
         // create a like object in ours as well.
         api
           .post(`${baseURL}/authors/${loggedInUser.uuid}/liked`, postLike)
           .catch((error) => {
-            console.log("Failed to create backup like object", error.response.data);
+            console.log(
+              "Failed to create backup like object",
+              error.response.data
+            );
           });
       })
       .catch((error) => {
@@ -59,16 +66,23 @@ export default function CommentCard(props) {
           <ProfilePicture profileImage={props.author.profileImage} />
           <div className="comment-author">{props.author.displayName}</div>
         </div>
-        <ReactMarkdown className="comment-content" children={props.comment.comment} />
+        <ReactMarkdown
+          className="comment-content"
+          children={props.comment.comment}
+          components={{
+            img: ({ node, ...props }) => (
+              <img style={{ maxWidth: "50%", maxHeight: "20rem" }} {...props} />
+            ),
+          }}
+        />
       </Card.Body>
       <BsFillHeartFill
-            className="comment-like-icon"
-            style={{
-              color:
-                liked ? "var(--orange)" : "var(--white-teal)",
-            }}
-            onClick={() => sendLike()}
-          />
+        className="comment-like-icon"
+        style={{
+          color: liked ? "var(--orange)" : "var(--white-teal)",
+        }}
+        onClick={() => sendLike()}
+      />
     </Card>
   );
 }
