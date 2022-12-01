@@ -177,3 +177,30 @@ span {
     margin-top: 2rem;
     align-self: center;
 }
+
+.remove-follower-button {
+    width: 4rem;
+    margin-left: 0.5em;
+    border-radius: 2rem;
+    border: none;
+    background-color: var(--dark-blue);
+    outline: 1px solid var(--teal);
+    font-size: 0.6rem;
+    color: var(--teal);
+    line-height: 0.8rem;
+    height: 100%;
+    padding: 0.5rem 0rem;
+}
+
+.follower-card-and-remove {
+    max-width: ;
+    display: flex;
+    align-items: center;
+}
+
+.followers-container-profile .userCard {
+    max-width: 25rem;
+    width: 40vw;
+    min-width: 15rem;
+    z-index: 1;
+}
