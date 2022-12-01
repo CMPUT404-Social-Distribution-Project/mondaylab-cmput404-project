@@ -93,6 +93,8 @@ class InboxApiView(GenericAPIView):
         """
         try:
             author = fetch_author(author_id)
+            if type(author) == str:
+                raise ValueError(author)
             if not is_our_backend(author.host):
                 # The author is not from our backend, try and send the data to their inbox instead
                 node_obj = Node.objects.get(host__contains=author.host)
@@ -158,7 +160,8 @@ class InboxApiView(GenericAPIView):
         elif request.data['type'].lower() == "post":
             try:
                 request_post_data = validate_remote_post(request.data)
-                print(request_post_data)
+                if type(request_post_data) == str:
+                    raise ValueError(request_post_data)
                 request_post_author = get_or_create_author(request_post_data["author"])
                 
                 if request_post_author == None:

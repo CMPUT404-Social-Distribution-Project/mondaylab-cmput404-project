@@ -253,9 +253,9 @@ def validate_remote_post(post):
 
     for field in required_fields:
         if remote_post.get(field) == None:
-            raise ValueError(f'ValidatePost: Missing required field "{field}".')
+            return f'ValidatePost: Missing required field "{field}".'
     if (remote_post.get("type").lower() != "post"):
-        raise ValueError(f'ValidatePost: Incorrect type, {remote_post.get("type")}')
+        return f'ValidatePost: Incorrect type, {remote_post.get("type")}'
 
     if (remote_post.get("image") is None):
         # no image field so we make it empty
@@ -505,7 +505,7 @@ def fetch_author(author_uuid):
             create_remote_author(res.json())
             return Author.objects.get(id__contains=author_uuid)
 
-    raise ValueError("Author was not found")
+    return "Author was not found"
 
 def check_remote_fetch(author_obj, endpoint):
     '''Checks if the author is a remote one, if so, fetches to the specified endpoint
@@ -518,7 +518,7 @@ def check_remote_fetch(author_obj, endpoint):
         if res.status_code == 200:
             return res.json()
         else:
-            raise ValueError(f"Could not fetch to {author_obj.id}{endpoint}. {res.status_code}:{res.text}")
+            return f"Could not fetch to {author_obj.id}{endpoint}. {res.status_code}:{res.text}"
     return None
 
 def build_pagination_query(url, page, size):

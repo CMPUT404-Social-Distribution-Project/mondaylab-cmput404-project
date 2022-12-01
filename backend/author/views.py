@@ -74,7 +74,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
         try:
             author_obj = fetch_author(pk)
+            if type(author_obj) == str:
+                raise ValueError(author_obj)
             res = check_remote_fetch(author_obj, "")
+            if type(res) == str:
+                raise ValueError(res)
             if res:
                 Response(res, status=status.HTTP_200_OK)
             serializer = self.serializer_class(author_obj)
