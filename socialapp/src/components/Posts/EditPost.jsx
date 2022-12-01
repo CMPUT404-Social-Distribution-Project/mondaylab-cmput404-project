@@ -4,11 +4,15 @@ import {
   Button,
   Form,
   CloseButton,
+  Card
 } from "react-bootstrap";
 import useAxios from "../../utils/useAxios";
 import "./CreatePost.css";
 import AuthContext from "../../context/AuthContext";
-import { FaImage, FaLink } from "react-icons/fa";
+import { FaImage, FaLink, FaSearch } from "react-icons/fa";
+import { search2 } from "../../utils/searchUtil";
+import UserCard from "../UserCard.jsx";
+import { extractAuthorUUID } from "../../utils/utils";
 
 export default function EditPost(props) {
   const [showURI, setShowURI] = useState(false);
@@ -35,6 +39,11 @@ export default function EditPost(props) {
   const [showLinkForm, setShowLinkForm] = useState(() =>
     props.post.image ? true : false
   );
+  const [sendTo, setSendTo] = useState(null);
+  const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [authors, setAuthors] = useState(null);
+  const [value, setValue] = useState("");
 
 
   /**
@@ -90,62 +99,68 @@ export default function EditPost(props) {
    *
    */
 
-  const sendPost = async () => {
+   const sendPost = async (response) => {
+    if (post.unlisted) {
+      setURI(
+        `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
+      );
+      setShowURI(true);
+      props.onHide();
+    } else {
+      if (post.visibility === "PRIVATE") {
+        if (sendTo === null) {
+          alert("Select an author to send to!");
+          return;
+        }
+        const resultPost = response.data;
+        api
+          .post(`${baseURL}/authors/${extractAuthorUUID(sendTo.id)}/inbox/`, resultPost)
+          .then((response) => {
+            console.log(`Success sending private post to inbox of ${sendTo.displayName}`);
+          })
+          .catch((error) => {
+            console.log("Failed to send private post. " + error);
+          });
+      }
+      props.onHide();
+    }
+  }
+
+  const handleSubmitPost = async () => {
     // No image
     if (!imagePost) {
-      api
-        .post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, post)
-        .then((response) => {
-          if (post.unlisted) {
-            setURI(
-              `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
-            );
-            setShowURI(true);
-          } else {
-            props.onHide();
-          }
-        })
-        .catch((error) => {
-          alert(
-            `Something went wrong posting! \n Error: ${error.response.data}`
-          );
-          console.log(error);
-        });
+        await api
+          .post(`${baseURL}/authors/${user_id}/posts/`, post)
+          .then((response) => {
+            sendPost(response);
+            })
+          .catch((error) => {
+            alert(`Something went wrong posting! \n Error: ${error.response.data}`);
+            console.log(error);
+          });
     } else {
-      // there is an image, then we create an unlisted image post
-      await api
-        .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
-        .then((response) => {
-          // image post created successfully, now link the post with the image post
-
-          // set the image field
-          const new_post = {
-            ...post,
-            image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
-          };
-
-          return api.post(
-            `${baseURL}/authors/${user_id}/posts/${props.post.uuid}`,
-            new_post
-          );
-        })
-        .then((response) => {
-          if (post.unlisted) {
-            setURI(
-              `${window.location.protocol}//${window.location.host}/authors/${user_id}/posts/${response.data.uuid}`
+        // there is an image, then we create an unlisted image post
+        await api
+          .post(`${baseURL}/authors/${user_id}/posts/`, imagePost)
+          .then((response) => {
+            // image post created successfully, now link the post with the image post
+            // set the image field
+            const new_post = {
+              ...post,
+              image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
+            };
+            return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
+          })
+          .then((response) => {
+            sendPost(response);
+          })
+          .catch((error) => {
+            alert(
+              `Something went wrong posting the image post! \n Error: ${error.response.data}`
             );
-            setShowURI(true);
-          } else {
-            props.onHide();
-          }
-        })
-        .catch((error) => {
-          alert(
-            `Something went wrong posting the image post! \n Error: ${error.response.data}`
-          );
-          console.log(error.response);
-        });
-    }
+            console.log(error.response);
+          });
+      }
   };
 
   // check if the post is the same; if so don't send.
@@ -153,12 +168,13 @@ export default function EditPost(props) {
     if (propsPost === post) {
       props.onHide();
     } else {
-      sendPost();
+      handleSubmitPost();
     }
   };
 
   const [file, setFile] = useState();
-  const [imagePreview, setImagePreview] = useState(props.post.image);
+  console.log("Editpost", props.post.image)
+  const [imagePreview, setImagePreview] = useState(() => props.post.image === null ? "" : props.post.image);
   const [base64, setBase64] = useState("");
   const [name, setFileName] = useState();
   const [size, setSize] = useState();
@@ -215,7 +231,7 @@ export default function EditPost(props) {
 
   const removeImage = () => {
     setFile("");
-    setImagePreview(null);
+    setImagePreview("");
     setBase64("");
     setFileName("");
     setSize("");
@@ -234,6 +250,66 @@ export default function EditPost(props) {
     delete post.image;
     setPost(post);
     setImagePost(null);
+  }
+
+  const search = async (val) => {
+    setLoading(true);
+    const res = await search2(
+      `${baseURL}/authors?search=${val}&size=3`
+    );
+    setAuthors(res);
+
+    setLoading(false);
+  };
+
+  const onChangeHandler = async (e) => {
+    search(e.target.value);
+    setValue(e.target.value);
+  };
+
+  const privatePost = (author) => {
+    setSendTo(author);
+    setValue(author);
+    setSelectedAuthor(author);
+    setAuthors();
+  }
+
+  function RenderAuthors(props) {
+    // given the list of authors from the query, creates the user cards
+    if (props.authors) {
+      return (
+        <div className="private-search-authors">
+          { props.authors.items !== "undefined" ? (
+            props.authors.items.length !== 0 ? (
+              props.authors.items.map((author) =>
+                <div>
+                  <Card onClick={() => {privatePost(author)}} className="userCard">
+                    <Card.Body>
+                      <Card.Title>
+                        <div className="profilePicCard">
+                          <img
+                            id="profilePicCard"
+                            src={author.profileImage}
+                            alt="profilePic"
+                          />
+                        </div>
+                        <div className="text">{author.displayName}</div>
+                      </Card.Title>
+                    </Card.Body>
+                  </Card>
+                </div>)
+            ) : (
+              <Card style={{ backgroundColor: "var(--darker-blue)", width: "50%", paddingTop: "1%" }}>
+                <h5 className="no-author">
+                  No match result for authors!
+                </h5>
+              </Card>
+            )
+          ) : null}
+        </div>
+      );
+    }
+    return <></>;
   }
 
   return (
@@ -324,6 +400,28 @@ export default function EditPost(props) {
                 />
               </div>
             </Modal.Header>
+            {(() => {
+                  if (post.visibility === "PRIVATE") {
+                    return (
+                      <div className="private-search-container">
+                        <FaSearch style={{
+                        color: "#BFEFE9",
+                        height: "1em",
+                        width: "1em",
+                        margin: "0.5em",
+                        zIndex: "3px", }} className="FaSearch" />
+                        <input
+                          className="private-search-input"
+                          value={value.displayName}
+                          onChange={(e) => onChangeHandler(e)}
+                          placeholder="Search for an author"
+                        />
+                        {value !== "" ? <RenderAuthors authors={authors} /> : null}
+                        {selectedAuthor && <UserCard author={selectedAuthor} />}
+                      </div>
+                    )
+                  }
+                })()}
             <Modal.Body>
               <Form.Group className="title">
                 <Form.Control
@@ -354,9 +452,6 @@ export default function EditPost(props) {
                     });
                   }}
                 />
-                <Form.Control.Feedback type="invalid">
-                  Please choose a walk type.
-                </Form.Control.Feedback>
               </Form.Group>
               {showLinkForm && <Form.Group className="link-form">
                 <Form.Control
@@ -375,7 +470,7 @@ export default function EditPost(props) {
                 />
               </Form.Group>}
             </Modal.Body>
-            {imagePreview === null ? (
+            {imagePreview === "" ? (
               <></>
             ) : (
               <img
@@ -400,12 +495,12 @@ export default function EditPost(props) {
                     style={{ display: "none" }}
                   />
                 </form>
-                {imagePreview === null ? (
-                  <></>
-                ) : (
+                {imagePost ? (
                   <Button className="remove-image" onClick={removeImage}>
                     Remove Image
                   </Button>
+                ) : (
+                  <></>
                 )}
                 <FaLink className="link-icon" onClick={() => linkClickHandler()}/>
               </div>

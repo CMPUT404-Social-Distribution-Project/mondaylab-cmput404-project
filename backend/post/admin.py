@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import Post
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['title_display', 'published', 'author',]
+    list_display = ['title_display', 'uuid' ,'published', 'author', 'id']
+    search_fields = ('uuid', 'id')
 
     @admin.display(description="Title")
     def title_display(self, obj):

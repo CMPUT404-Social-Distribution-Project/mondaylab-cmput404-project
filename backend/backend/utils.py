@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from node.utils import authenticated_GET, authenticated_POST, authenticated_GET_host
 from uuid import uuid4
 
-our_frontends = ["http://localhost:3000", "https://superlative-gelato-dcf1b6.netlify.app"]
+our_frontends = ["http://localhost:3000"]
 our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
@@ -181,8 +181,10 @@ def remote_author_exists(ID):
     # ID could be a UUID/the id that is extracted from the URL.
     # Use that to check if it is in the id field
     contains = Author.objects.filter(id__contains=ID)
-    uuid = Author.objects.filter(uuid=ID)
-    return obj.exists() or contains.exists() or uuid.exists()
+    if (isUUID(ID)):
+        uuid = Author.objects.filter(uuid=ID)
+        return uuid.exists()
+    return obj.exists() or contains.exists()
 
 def remote_post_exists(post_id):
     obj = Post.objects.filter(id=post_id)
@@ -211,6 +213,7 @@ def is_URL(string):
 
 def create_remote_author(remote_author):
     '''remote_author is a dict (JSON)'''
+
     remote_author_uuid = get_author_uuid_from_id(remote_author["id"])
     if not isUUID(remote_author_uuid):
         remote_author_uuid = uuid4()
@@ -511,17 +514,18 @@ def check_remote_fetch(author_obj, endpoint):
 
     if not is_our_backend(author_obj.host):
         target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
-        print(target)
         res = authenticated_GET_host(target, author_obj.host, author_obj.id)
         if res.status_code == 200:
             return res.json()
         else:
-            print(res.text)
             raise ValueError(f"Could not fetch to {author_obj.id}{endpoint}. {res.status_code}:{res.text}")
     return None
 
 def build_pagination_query(url, page, size):
-    '''Where url is something like http://www.../posts/ or /comments/'''
+    '''
+    Where url is something like http://www.../posts/ or /comments/
+    adds pagination query parameters to the end depending on if page or size exists
+    '''
     query = add_end_slash(url)
 
     if page and not size:
