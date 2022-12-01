@@ -1,3 +1,4 @@
+const our_backend = "https://cs404-project.herokuapp.com/";
 
 export function extractAuthorUUID(id) {
     // Given the author's id field, splits the id to extract the UUID
@@ -22,7 +23,7 @@ export function extractPostUUID(id) {
 export function authorHostIsOurs(host) {
     // Checks if the given host field of the author is our host
     // TODO: uncomment out last line once we connect with other nodes
-    return "https://cs404-project.herokuapp.com/".includes(host)
+    return our_backend.includes(host)
 }
 
 export function b64EncodeCredentials(username, password) {
@@ -62,5 +63,5 @@ export function isValidHTTPUrl(string) {
 export const emptyNode = {headers: {}};
 
 export function urlContainsOurHost(url) {
-    return url.includes("localhost") || url.includes("cs404-project.heroku.app.com");
+    return url.includes(our_backend);
 }
