@@ -172,3 +172,8 @@ span {
     padding: 0.4em 1em;
     border-radius: 2rem;
 }
+
+.profile-posts-loader {
+    margin-top: 2rem;
+    align-self: center;
+}

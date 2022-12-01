@@ -207,8 +207,6 @@ class InboxApiView(GenericAPIView):
                     # summary changes depending on the type it's liked on
                     actor_name = actor_object.displayName
                     summary = f"{actor_name} likes your {like_type}"
-                    
-
                     like = Like.objects.filter(author = actor_object,object = likes_serializer.validated_data["object"]).first()
 
                     if like == None:
@@ -248,8 +246,8 @@ class InboxApiView(GenericAPIView):
                         create_remote_comment(request.data)
                         
                         comment = Comment.objects.get(id=request.data["id"])
-                        # post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
-                        # post_obj.update(count=post_obj.first().count + 1)
+                        post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
+                        post_obj.update(count=post_obj.first().count + 1)
 
                 else:
                     # Otherwise, no id field, then assume comment needs to be created
@@ -258,7 +256,6 @@ class InboxApiView(GenericAPIView):
                         return response.Response("Post object does not exist", status=status.HTTP_400_BAD_REQUEST)
                     
                     # clean up request data to be serialized
-                    # request.data["author"] = comment_author_obj
 
                     comment_uuid = uuid4()
                     request.data["id"] = add_end_slash(request.data["object"]) + 'comments/' + comment_uuid.hex
@@ -268,7 +265,7 @@ class InboxApiView(GenericAPIView):
                     comment = Comment.objects.get(id=request.data["id"])
                 
                     # update count
-                    post_obj = Post.objects.filter(id=comment.id.split('/comments/')[0])
+                    post_obj = Post.objects.filter(id=request.data["object"])
                     post_obj.update(count=post_obj.first().count + 1)
                     
                 inbox.comments.add(comment)

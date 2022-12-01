@@ -56,7 +56,7 @@
 
 .post-card .comments-text {
     color: var(--teal);
-    margin-left: 1em;
+    margin-top: 0.5em;
     padding-bottom: 2em;
 }
 
@@ -127,11 +127,6 @@
 .options .dropdown-menu .delete-post {
     --bs-dropdown-link-hover-color: var(--orange);
 }
-
-/* .options .dropdown-menu a {
-    color: var(--white-teal);
-
-} */
 
 .options .dropdown-item {
     padding: 0.8em var(--bs-dropdown-item-padding-x);
@@ -230,4 +225,22 @@
 .post-card .like-comment-container > .share-icon:active {
     color: var(--orange) !important;
     transform: rotate(10deg);
+}
+
+.post-card .comments {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.post-card .load-more-comments-button {
+    width: 85%;
+    border-radius: 2rem;
+    padding: 0.4rem 0rem;
+    background-color: var(--slightly-darker-blue);
+    outline: 1px solid var(--light-dark-blue);
+    color: var(--teal);
+    border: none;
+    margin-top: 1rem;
+    font-size: 0.8rem;
 }

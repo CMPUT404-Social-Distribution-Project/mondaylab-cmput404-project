@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './custom_dark.scss';
 import reportWebVitals from './reportWebVitals';
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import StreamHome from './pages/StreamHome';
 import Inbox from './pages/Inbox';
 import Explore from './pages/Explore';
@@ -13,7 +13,6 @@ import Main from "./Main";
 import Login from "./pages/authentication/Login";
 import Register from "./pages/authentication/Register"
 import AuthLayout from "./utils/AuthLayout";
-import CreatePost from './components/Posts/CreatePost';
 import Post from "./pages/Post";
 import GithubPage from "./pages/GithubPage"
 import Page404 from "./pages/Page404";
@@ -25,6 +24,7 @@ root.render(
         <Routes>
           <Route element={<AuthLayout />}>
             <Route path="/" element={<Main />}>
+              <Route path="/" element={<Navigate to='stream' replace/>} />
               <Route path='stream' element={<StreamHome/>} />
               <Route path='stream/github' element={<GithubPage/>} />
               <Route path='inbox' element={<Inbox/>} />
