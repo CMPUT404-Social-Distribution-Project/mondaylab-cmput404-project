@@ -15,6 +15,8 @@ import { CgRemote } from "react-icons/cg";
 import ProfilePicture from "../components/ProfilePicture";
 import PulseLoader from "react-spinners/PulseLoader";
 import { confirmAlert } from "react-confirm-alert";
+import { toast } from 'react-toastify';
+
 
 function ProfilePosts(props) {
   return (
@@ -184,6 +186,7 @@ export default function Profile() {
     .delete(`${baseURL}/authors/${author_id}/followers/${followerUUID}`)
     .then((response) => {
       refreshState();
+      toast.success("Removed follower successfully")
     })
     .catch((error) => {
       console.log(error);

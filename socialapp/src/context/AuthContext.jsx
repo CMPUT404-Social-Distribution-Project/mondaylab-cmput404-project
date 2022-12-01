@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AuthContext = createContext();
 
@@ -43,7 +45,8 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("loggedInUser", JSON.stringify(data.user));
         setLoginLoading(false);
       } else {
-        alert("ERROR: " + data);
+        toast.error(data.detail ? data.detail : data);
+        console.log(data);
         setLoginLoading(null);
       }
     });
@@ -66,7 +69,7 @@ export const AuthProvider = ({ children }) => {
       navigate("/login");
     } else {
       response.json().then(function (value) {
-        alert("ERROR: " + value);
+        toast.error(value.detail);
       });
     }
   };
@@ -112,6 +115,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={contextData}>
+      <ToastContainer position="bottom-center" theme="colored" />
       {loading ? null : children}
     </AuthContext.Provider>
   );
