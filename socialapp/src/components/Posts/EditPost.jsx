@@ -57,7 +57,7 @@ export default function EditPost(props) {
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
     if (imagePost) {
-      setImagePost({ ...imagePost, visiblity: option });
+      setImagePost({ ...imagePost, visibility: option });
     }
     if (option === "PUBLIC") {
       setEveActive(true);
@@ -221,7 +221,7 @@ export default function EditPost(props) {
           contentType: file.type + ";base64",
           content: reader.result,
           categories: "",
-          visibility: "PUBLIC",
+          visibility: post.visibility,
           unlisted: true,
         });
       };

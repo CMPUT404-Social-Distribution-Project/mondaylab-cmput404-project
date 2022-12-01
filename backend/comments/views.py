@@ -14,7 +14,7 @@ from .models import Comment
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
-from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, add_end_slash, build_pagination_query
+from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, remove_end_slash, build_pagination_query
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CommentsApiView(GenericAPIView):
@@ -41,11 +41,12 @@ class CommentsApiView(GenericAPIView):
             size = int(request.GET["size"])
         next = None
         previous = None
-        comments_url = add_end_slash(request.build_absolute_uri().split('?')[0])        # removes query params to get url
+        comments_url = remove_end_slash(request.build_absolute_uri().split('?')[0])        # removes query params to get url
         post_url = f"/posts/{post_id}/comments"
 
         if not is_our_backend(author_obj.host):
             remote_comments_res = handle_remote_comments_get(author_obj, page, size, comments_url, post_url)
+
             if type(remote_comments_res) == str:
                 return response.Response(f"Error: {remote_comments_res}", status=status.HTTP_404_NOT_FOUND)
             else:
@@ -175,7 +176,7 @@ def handle_remote_comments_get(authorObj, page, size, comments_url, post_url):
     try:
         res = check_remote_fetch(authorObj, build_pagination_query(post_url, page, size))
         if type(res) == str:
-            raise ValueError(res)
+            return res
 
     except Exception as e:
         return e
