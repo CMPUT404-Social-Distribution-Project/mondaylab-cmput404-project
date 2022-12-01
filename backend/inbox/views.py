@@ -20,7 +20,7 @@ from uuid import uuid4
 from datetime import datetime, timezone
 from node.models import Node
 from node.utils import authenticated_POST
-
+from rest_framework.parsers import JSONParser
 from backend.pagination import CustomPagination
 
 class AuthenticateGET(BasePermission):
@@ -48,7 +48,7 @@ class InboxApiView(GenericAPIView):
     permission_classes = [AuthenticateGET]
     serializer_class = PostSerializer
     http_method_names=['get', 'post', 'delete']
-
+    parser_classes=(JSONParser,)
     pagination_class = CustomPagination
     
     def get(self, request, author_id):
