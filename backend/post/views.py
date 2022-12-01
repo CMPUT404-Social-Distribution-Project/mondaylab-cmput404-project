@@ -412,7 +412,9 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
     '''
     next = None
     previous = None
-    if page and page > 1:
+    if page == None:
+        page = 1
+    if page > 1:
         # Page > 1, means that there's a previous page, don't need to fetch
         previous = build_pagination_query(posts_url, page-1, size)
     try:
@@ -421,11 +423,7 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
     except Exception as e:
         return e
     try:
-        if page == None:
-            plusOne = None
-        else:
-            plusOne = page+1
-        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", plusOne, size))
+        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page+1, size))
 
         if next_res and len(next_res["items"]) > 0:
             # success fetching next page, means that it exists
@@ -435,5 +433,12 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         pass
     finally:
         if res:
-            result = {"next": next, "previous": previous, "page": page, "size": size, "type": "posts", "items": res["items"]}
+            result = {
+                "next": next, 
+                "previous": previous, 
+                "page": page, 
+                "size": size, 
+                "type": "posts", 
+                "items": res["items"]
+            }
             return result

@@ -22,14 +22,15 @@ import {
   isValidHTTPUrl,
 } from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
-import remarkGfm from 'remark-gfm'
+import remarkGfm from "remark-gfm";
+import PulseLoader from "react-spinners/PulseLoader";
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
   const post_user_uuid = extractAuthorUUID(props.post.author.id);
   const post_id = extractPostUUID(props.post.id);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
-
+  const [nextUrl, setNextUrl] = useState();
   const [postComment, setPostComment] = useState({
     comment: "",
     type: "comment",
@@ -41,13 +42,11 @@ export default function PostCard(props) {
   const [showEditPost, setShowEditPost] = useState(false);
   const api = useAxios();
   const [likeCount, setLikeCount] = useState(null);
-  const [CommentCount, setCommentCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(props.post.count);
   const [liked, setLiked] = useState(false);
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
-  const [loggedInAuthorsLiked, setFriends] = useState(
-    props.loggedInAuthorsLiked
-  );
+  const [loadingComments, setLoadingComments] = useState(false);
 
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
@@ -132,9 +131,12 @@ export default function PostCard(props) {
         .then((response) => {
           let commentArray = response.data.comments;
           if (typeof commentArray !== "undefined") {
-            setCommentCount(commentArray.length);
+            setNextUrl(response.data.next);
             if (commentArray.length !== 0) {
               setComments(commentArray);
+              if (commentCount < commentArray.length) {
+                setCommentCount(commentArray.length);
+              }
             }
           }
         })
@@ -252,6 +254,26 @@ export default function PostCard(props) {
         alert(`Something went wrong posting! \n Error: ${error}`);
         console.log(error);
       });
+  };
+
+  const paginationHandler = (url) => {
+    setLoadingComments(true);
+    api
+    .get(url)
+    .then((response) => {
+      setNextUrl(response.data.next);
+      var temp = [...comments, ...response.data.comments]
+      setComments(temp);
+      if (commentCount < temp.length) {
+        setCommentCount(temp.length);
+      }
+      setLoadingComments(false);
+    })
+    .catch((error) => {
+      setLoadingComments(false);
+      console.log("pagination", error);
+    })
+
   };
 
   // only render options if the user viewing it is the author of it
@@ -400,9 +422,7 @@ export default function PostCard(props) {
         )}
       </Card.Header>
       <Card.Body>
-        <Card.Title>
-          {props.post.title}
-        </Card.Title>
+        <Card.Title>{props.post.title}</Card.Title>
         {(props.post.image && (
           <img className="post-image" src={props.post.image} alt="postImage" />
         )) ||
@@ -425,8 +445,7 @@ export default function PostCard(props) {
                   <img style={{ maxWidth: "100%" }} {...props} />
                 ),
               }}
-            >
-            </ReactMarkdown>
+            ></ReactMarkdown>
           )}
         </div>
         <hr />
@@ -446,12 +465,12 @@ export default function PostCard(props) {
           <BsFillChatFill
             className="comment-icon"
             style={{
-              color: CommentCount !== 0 ? "var(--teal)" : "var(--white-teal)",
+              color: commentCount !== 0 ? "var(--teal)" : "var(--white-teal)",
               marginLeft: "30px",
             }}
             onClick={() => openComments(!open)}
           />
-          {comments.length}
+          {commentCount}
 
           <MdShare
             className="share-icon"
@@ -481,6 +500,15 @@ export default function PostCard(props) {
                       }}
                     />
                   ))
+                )}
+                {loadingComments && <PulseLoader className="comments-loader" color="var(--teal)"/>}
+                {nextUrl && (
+                  <button
+                    className="load-more-comments-button"
+                    onClick={() => paginationHandler(nextUrl)}
+                  >
+                    Load More Comments
+                  </button>
                 )}
               </div>
             </div>

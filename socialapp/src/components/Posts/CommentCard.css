@@ -25,8 +25,8 @@
     --bs-card-border-width: 1px;
     --bs-card-border-color: var(--slightly-darker-blue);
     --bs-card-border-radius: 11px;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 10fr 1fr;
     align-items: center;
 }
 

@@ -96,6 +96,7 @@ export default function Explore() {
         setPostsLoading(false);
       })
       .catch((error) => {
+        setPostsLoading(false);
         console.log(error);
       });
       setRemoteAuthorsLoading(true);
@@ -106,6 +107,7 @@ export default function Explore() {
           setRemoteAuthorsLoading(false);
         })
         .catch((error) => {
+          setRemoteAuthorsLoading(false);
           console.log(error);
         });
       await api
@@ -180,6 +182,7 @@ export default function Explore() {
   };
 
   const fetchTeamAuthors = (e) => {
+    setRemoteAuthorsLoading(true);
     api
       .get(`${baseURL}/node/authors/?team=${e}`)
       .then((response) => {
@@ -187,12 +190,12 @@ export default function Explore() {
         setRemoteAuthorsLoading(false);
       })
       .catch((error) => {
+        setRemoteAuthorsLoading(false);
         console.log(error);
       });
   }
 
   const handleTeamSelect = (e) => {
-    setRemoteAuthorsLoading(true);
     setTeamSelected(e);
     fetchTeamAuthors(e);
     localStorage.setItem("teamSelected", e);

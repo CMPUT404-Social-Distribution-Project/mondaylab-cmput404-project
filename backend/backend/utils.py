@@ -522,7 +522,10 @@ def check_remote_fetch(author_obj, endpoint):
     return None
 
 def build_pagination_query(url, page, size):
-    '''Where url is something like http://www.../posts/ or /comments/'''
+    '''
+    Where url is something like http://www.../posts/ or /comments/
+    adds pagination query parameters to the end depending on if page or size exists
+    '''
     query = add_end_slash(url)
 
     if page and not size:
