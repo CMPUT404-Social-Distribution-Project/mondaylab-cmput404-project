@@ -12,7 +12,7 @@ def authenticated_GET(url, node):
     Given the url to send to the specified node,
     sends a GET request to that url with HTTP Basic Auth
     '''
-    res = requests.get(url, auth=(node.username, node.password))
+    res = requests.get(url, auth=(node.username, node.password), timeout=5)
     return res
 
 def authenticated_GET_host(endpoint, host, author_url=None):

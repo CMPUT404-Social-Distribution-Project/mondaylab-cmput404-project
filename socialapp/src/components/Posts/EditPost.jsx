@@ -130,7 +130,7 @@ export default function EditPost(props) {
     // No image
     if (!imagePost) {
         await api
-          .post(`${baseURL}/authors/${user_id}/posts/`, post)
+          .post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, post)
           .then((response) => {
             sendPost(response);
             })
@@ -149,7 +149,7 @@ export default function EditPost(props) {
               ...post,
               image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
             };
-            return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
+            return api.post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, new_post);
           })
           .then((response) => {
             sendPost(response);
