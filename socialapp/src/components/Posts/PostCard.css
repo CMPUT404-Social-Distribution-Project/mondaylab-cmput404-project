@@ -244,3 +244,28 @@
     margin-top: 1rem;
     font-size: 0.8rem;
 }
+
+.post-card .card-body p, ul, li, h1, h2, h3, h4, h5, blockquote, table, pre, a {
+    margin: 0;
+}
+
+.post-card .card-body blockquote {
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
+    padding-left: 1rem;
+}
+
+.post-card .card-body pre {
+    background-color: var(--slightly-darker-blue);
+    border-radius: 11px;
+    padding: 0.5rem;
+}
+
+.post-card .card-body a {
+    color: var(--orange);
+}
+
+.post-card .card-body ul {
+    display: flex;
+    flex-direction: column;
+}

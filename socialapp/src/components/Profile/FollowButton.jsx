@@ -10,7 +10,7 @@ export default function FollowButton(props) {
   const [isNotCurrentUser, setIsNotCurrentUser] = useState(true);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
   const api = useAxios(); // use this to add authorization header
-  const currentAuthor = JSON.parse(localStorage.getItem("authTokens")).user; // the currently logged in author as an object
+  const currentAuthor = JSON.parse(localStorage.getItem("loggedInUser")); // the currently logged in author as an object
   const { author_id } = useParams();
   // Check if the currently logged in user is following the author they're viewing
   // set the follow state
