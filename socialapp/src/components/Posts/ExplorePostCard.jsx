@@ -16,8 +16,15 @@ import "reactjs-popup/dist/index.css";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { confirmAlert } from "react-confirm-alert";
-import { authorHostIsOurs, extractAuthorUUID, extractPostUUID} from "../../utils/utils";
+import {
+  authorHostIsOurs,
+  isValidHTTPUrl,
+  urlContainsOurHost,
+  extractAuthorUUID,
+  extractPostUUID,
+} from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
+import { Buffer } from 'buffer';
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -32,7 +39,8 @@ export default function PostCard(props) {
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
   const [friends, setFriends] = useState(props.loggedInAuthorsFriends);
   const loggedInAuthorsLiked = props.loggedInAuthorsLiked;
-  
+  const [postImage, setPostImage] = useState(props.post.image);
+
   const navigate = useNavigate();
   const routeChange = () => {
     navigate(`/authors/${post_user_uuid}/`, { state: { refresh: true } });
@@ -68,12 +76,15 @@ export default function PostCard(props) {
 
         // Need this for checking if author liked remote post or not.
         // Since when sending a like object to remote host's inbox,
-        // the like object is created in their DB but not ours. So 
+        // the like object is created in their DB but not ours. So
         // create a like object in ours as well.
         api
           .post(`${baseURL}/authors/${loggedInUser.uuid}/liked`, postLike)
           .catch((error) => {
-            console.log("Failed to create backup like object", error.response.data);
+            console.log(
+              "Failed to create backup like object",
+              error.response.data
+            );
           });
       })
       .catch((error) => {
@@ -83,7 +94,7 @@ export default function PostCard(props) {
 
   useEffect(() => {
     // check if post is liked by logged in author
-    if (loggedInAuthorsLiked && typeof(loggedInAuthorsLiked) !== 'undefined') {
+    if (loggedInAuthorsLiked && typeof loggedInAuthorsLiked !== "undefined") {
       for (let data of loggedInAuthorsLiked) {
         if (data.object === props.post.id) {
           setLiked(true);
@@ -91,7 +102,27 @@ export default function PostCard(props) {
         }
       }
     }
-  }, [loggedInAuthorsLiked])
+  }, [loggedInAuthorsLiked]);
+
+  useEffect(() => {
+    const fetchImage = async () => {
+      await api
+        .get(`${props.post.image}`, { responseType: "arraybuffer" })
+        .then((res) => {
+          const data = `data:${
+            res.headers["content-type"]
+          };base64,${Buffer.from(res.data, "binary").toString("base64")}`;
+          setPostImage(data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
+
+    if (props.post.image && urlContainsOurHost(props.post.image)) {
+      fetchImage();
+    }
+  });
 
   const sendPostToAuthorInbox = (author, post) => {
     api
@@ -102,15 +133,15 @@ export default function PostCard(props) {
       .catch((error) => {
         console.log("Failed to send post to inbox of author", error.response);
       });
-  }
+  };
 
   const sharePost = (post) => {
     if (post.visibility === "PUBLIC" || post.visibility === "FRIENDS") {
       for (let index = 0; index < followers.length; index++) {
         const follower = followers[index];
         sendPostToAuthorInbox(follower, post);
-      };
-    };
+      }
+    }
   };
 
   const confirmDelete = (uuid) => {
@@ -145,39 +176,39 @@ export default function PostCard(props) {
 
   // only render options if the user viewing it is the author of it
   function PostOptions() {
-      return (
-        <div className="options">
-          <Dropdown>
-            <Dropdown.Toggle id="dropdown-basic">
-              <BiDotsVerticalRounded />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => sharePost(props.post)}>
-                <MdShare /> Share Post
-              </Dropdown.Item>
+    return (
+      <div className="options">
+        <Dropdown>
+          <Dropdown.Toggle id="dropdown-basic">
+            <BiDotsVerticalRounded />
+          </Dropdown.Toggle>
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => sharePost(props.post)}>
+              <MdShare /> Share Post
+            </Dropdown.Item>
 
-              {(() => {
-                if (loggedInUser.uuid === post_user_uuid) {
-                    return (
-                      <div>
-                      <Dropdown.Item onClick={() => setShowEditPost(true)}>
-                        <MdModeEdit /> Edit Post
-                      </Dropdown.Item>
+            {(() => {
+              if (loggedInUser.uuid === post_user_uuid) {
+                return (
+                  <div>
+                    <Dropdown.Item onClick={() => setShowEditPost(true)}>
+                      <MdModeEdit /> Edit Post
+                    </Dropdown.Item>
 
-                      <Dropdown.Item
-                        className="delete-post"
-                        onClick={() => confirmDelete(props.post.uuid)}
-                      >
-                        <MdDelete /> Delete Post
-                      </Dropdown.Item>
-                      </div>
-                    )
+                    <Dropdown.Item
+                      className="delete-post"
+                      onClick={() => confirmDelete(props.post.uuid)}
+                    >
+                      <MdDelete /> Delete Post
+                    </Dropdown.Item>
+                  </div>
+                );
               }
-              })()}
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-      );
+            })()}
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+    );
   }
 
   return (
@@ -204,15 +235,34 @@ export default function PostCard(props) {
           <ReactMarkdown>{props.post.title}</ReactMarkdown>
         </Card.Title>
         <Card.Text>
-          {props.post.image ? (
+          {(postImage && (
             <img
               className="post-image"
-              src={props.post.image}
+              src={postImage}
               alt="postImage"
-              style={{ height: "100%", width: "100%", objectfit: "contain" }}
+              style={{ maxWidth: "100%", maxHeight: "100%" }}
             />
-          ) : showContent ? (
-            <ReactMarkdown>{props.post.content}</ReactMarkdown>
+          )) ||
+            (!authorHostIsOurs(props.post.author.host) &&
+              props.post.contentType.startsWith("image") &&
+              isValidHTTPUrl(props.post.content) && (
+                <img
+                  className="post-image"
+                  src={props.post.content}
+                  alt="postImage"
+                  style={{ maxWidth: "100%", maxHeight: "100%" }}
+                />
+              ))}
+          {!postImage && showContent ? (
+            <ReactMarkdown
+              components={{
+                img: ({ node, ...props }) => (
+                  <img style={{ maxWidth: "100%" }} {...props} />
+                ),
+              }}
+            >
+              {props.post.content}
+            </ReactMarkdown>
           ) : null}
         </Card.Text>
 
@@ -222,7 +272,7 @@ export default function PostCard(props) {
             <div>
               <BsFillHeartFill
                 className="like-icon"
-                style={{color: liked ? "var(--orange)": "var(--white-teal)",}}
+                style={{ color: liked ? "var(--orange)" : "var(--white-teal)" }}
                 onClick={() => sendPostLike()}
               />
             </div>
@@ -252,10 +302,15 @@ export default function PostCard(props) {
               mouseLeaveDelay={300}
               mouseEnterDelay={0}
               arrow={true}
-              contentStyle={{ backgroundColor: "var(--dark-blue)", border: "none", width: "fit-content", padding: "0.5em" }}
+              contentStyle={{
+                backgroundColor: "var(--dark-blue)",
+                border: "none",
+                width: "fit-content",
+                padding: "0.5em",
+              }}
               arrowStyle={{ color: "var(--dark-blue)", stroke: "none" }}
             >
-              <span style={{ fontSize: "0.8rem"}}> View Post </span>
+              <span style={{ fontSize: "0.8rem" }}> View Post </span>
             </Popup>
           </Col>
         </Row>

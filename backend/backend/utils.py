@@ -526,7 +526,8 @@ def build_pagination_query(url, page, size):
     Where url is something like http://www.../posts/ or /comments/
     adds pagination query parameters to the end depending on if page or size exists
     '''
-    query = add_end_slash(url)
+    # query = add_end_slash(url)
+    query = url
 
     if page and not size:
         query = f"{query}?page={page}"
