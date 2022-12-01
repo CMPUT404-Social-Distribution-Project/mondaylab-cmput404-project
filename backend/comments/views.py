@@ -14,7 +14,7 @@ from .models import Comment
 from backend.utils import isUUID
 from datetime import datetime, timezone
 from backend.pagination import CustomPagination
-from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, add_end_slash, build_pagination_query
+from backend.utils import isAuthorized, check_remote_fetch, fetch_author, is_our_backend, remove_end_slash, build_pagination_query
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CommentsApiView(GenericAPIView):
@@ -31,6 +31,8 @@ class CommentsApiView(GenericAPIView):
     """
     def get(self, request, author_id, post_id):
         author_obj = fetch_author(author_id)
+        if type(author_obj) == str:
+            return response.Response(f"Error: {author_obj}", status=status.HTTP_404_NOT_FOUND)
         page = None
         size = None
         if request.GET.get("page"):
@@ -39,11 +41,12 @@ class CommentsApiView(GenericAPIView):
             size = int(request.GET["size"])
         next = None
         previous = None
-        comments_url = add_end_slash(request.build_absolute_uri().split('?')[0])        # removes query params to get url
+        comments_url = remove_end_slash(request.build_absolute_uri().split('?')[0])        # removes query params to get url
         post_url = f"/posts/{post_id}/comments"
 
         if not is_our_backend(author_obj.host):
             remote_comments_res = handle_remote_comments_get(author_obj, page, size, comments_url, post_url)
+
             if type(remote_comments_res) == str:
                 return response.Response(f"Error: {remote_comments_res}", status=status.HTTP_404_NOT_FOUND)
             else:
@@ -129,8 +132,12 @@ class CommentsApiView(GenericAPIView):
 class CommentApiView(GenericAPIView):
     def get(self, request, author_id, post_id, comment_id):
         author_obj = fetch_author(author_id)
+        if type(author_obj) == str:
+            return response.Response(f"Error: {author_obj}", status=status.HTTP_404_NOT_FOUND)
         
         res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments/{comment_id}")
+        if type(res) == str:
+            return response.Response(f"Error: {res}", status=status.HTTP_404_NOT_FOUND)
         if res:
             return response.Response(res, status=status.HTTP_200_OK)
 
@@ -166,12 +173,15 @@ def handle_remote_comments_get(authorObj, page, size, comments_url, post_url):
         previous = build_pagination_query(comments_url, page-1, size)
     try:
         res = check_remote_fetch(authorObj, build_pagination_query(post_url, page, size))
+        if type(res) == str:
+            return res
 
     except Exception as e:
         return e
     try:
         next_res = check_remote_fetch(authorObj, build_pagination_query(post_url, page+1, size))
-
+        if type(next_res) == str:
+            raise ValueError(next_res)
         if next_res:
             if (next_res.get("items") != None and len(next_res["items"]) > 0) or \
              (next_res.get("comments") != None and len(next_res["comments"]) > 0):

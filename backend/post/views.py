@@ -36,8 +36,12 @@ class PostApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = fetch_author(author_id)
+            if type(authorObj) == str:
+                raise ValueError(authorObj)
 
             res = check_remote_fetch(authorObj, f"/posts/{post_id}")
+            if type(res) == str:
+                raise ValueError(res)
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
 
@@ -135,6 +139,8 @@ class PostsApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = fetch_author(author_id)
+            if type(authorObj) == str:
+                raise ValueError(authorObj)
 
             page = None
             size = None
@@ -144,7 +150,7 @@ class PostsApiView(GenericAPIView):
                 size = int(request.GET["size"])
             next = None
             previous = None
-            posts_url = add_end_slash(request.build_absolute_uri().split('?')[0])
+            posts_url = request.build_absolute_uri().split('?')[0]
 
             if not is_our_backend(authorObj.host):
                 remote_posts_res = handle_remote_posts_get(authorObj, page, size, posts_url)
@@ -163,7 +169,6 @@ class PostsApiView(GenericAPIView):
             postsPaginated = self.paginate_queryset(postsQuerySet)
             paginatedRes = self.get_paginated_response(postsPaginated).data
             next = paginatedRes.get("next")
-            print(next)
             previous = paginatedRes.get("previous")
             page = paginatedRes.get("page")
             size = paginatedRes.get("size")
@@ -313,22 +318,31 @@ class AllPostsApiView(GenericAPIView):
                 # Get all the nodes posts
                 res = []
                 for node in Node.objects.all():
-                    if node.team == 16:
-                        # team 16 has /posts/ endpoint luckily. 
-                        res = authenticated_GET(f"{node.host}posts/", node)
-                        if res.status_code == 200:
-                            remote_posts = res.json().get("items")
-                            posts_list.extend(remote_posts)
-                    else:
-                        auth_res = authenticated_GET(f"{node.host}authors/", node)
-                        if auth_res.status_code == 200:
-                            remote_authors = auth_res.json().get("items")
-                            # Got remote authors, now for each author fetch their public posts
-                            for remote_author in remote_authors:
-                                posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
-                                if posts_res.status_code == 200:
-                                    remote_posts = posts_res.json().get("items")
-                                    posts_list.extend(remote_posts)
+                    try:
+                        if node.team == 16:
+                            # team 16 has /posts/ endpoint luckily. 
+                            res = authenticated_GET(f"{node.host}posts/", node)
+                            if res.status_code == 200:
+                                remote_posts = res.json().get("items")
+                                posts_list.extend(remote_posts)
+                        else:
+                            auth_res = authenticated_GET(f"{node.host}authors/", node)
+                            if auth_res.status_code == 200:
+                                remote_authors = auth_res.json().get("items")
+                                # Got remote authors, now for each author fetch their public posts
+                                for remote_author in remote_authors:
+                                    try:
+                                        if "localhost" not in remote_author.get("host"):
+                                            posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
+                                            if posts_res.status_code == 200:
+                                                remote_posts = posts_res.json().get("items")
+                                                posts_list.extend(remote_posts)
+                                    except Exception as e:
+                                        print(f"Something went wrong trying to retrieve author {remote_author.get('displayName')}:{remote_author.get('host')} posts.")
+                                        continue
+                    except Exception as e:
+                        print(f"Something went wrong trying to fetch to node {node.host}. {e}")
+                        continue
 
                 result = {
                     "type":"posts",
@@ -418,12 +432,16 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         # Page > 1, means that there's a previous page, don't need to fetch
         previous = build_pagination_query(posts_url, page-1, size)
     try:
-        res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page, size))
+        res = check_remote_fetch(authorObj, build_pagination_query("/posts", page, size))
+        if type(res) == str:
+            return res
 
     except Exception as e:
         return e
     try:
-        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page+1, size))
+        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts", page+1, size))
+        if type(next_res) == str:
+            raise ValueError(next_res)
 
         if next_res and len(next_res["items"]) > 0:
             # success fetching next page, means that it exists

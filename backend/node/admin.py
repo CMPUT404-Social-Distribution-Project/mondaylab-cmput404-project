@@ -58,6 +58,8 @@ def create_node_posts(modeladmin, request, queryset):
                             try: 
                                 remote_post_uuid = get_post_uuid_from_id(remote_post["id"])
                                 remote_post = validate_remote_post(remote_post)
+                                if type(remote_post) == str:
+                                    raise ValueError(remote_post)
                                 remote_post = create_remote_post(remote_post, remote_author)
                             except Exception as e:
                                 print(f"Could not create remote post {remote_post.get('title')} from host {node.host} locally.", e)

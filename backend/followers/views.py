@@ -22,8 +22,12 @@ class FollowersApiView(GenericAPIView):
     def get(self, request, author_id):
         try:
             current_author = fetch_author(author_id)
+            if type(current_author) == str:
+                raise ValueError(current_author)
 
             res = check_remote_fetch(current_author, "/followers/")
+            if type(res) == str:
+                raise ValueError(res)
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
 
@@ -60,6 +64,8 @@ class FollowersForeignApiView(GenericAPIView):
             current_author = Author.objects.get(uuid = author_id)
 
             res = check_remote_fetch(current_author, f"/followers/{foreign_author_id}")
+            if type(res) == str:
+                raise ValueError(res)
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
 

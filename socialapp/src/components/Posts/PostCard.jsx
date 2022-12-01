@@ -20,10 +20,12 @@ import {
   extractPostUUID,
   authorHostIsOurs,
   isValidHTTPUrl,
+  urlContainsOurHost
 } from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
 import remarkGfm from "remark-gfm";
 import PulseLoader from "react-spinners/PulseLoader";
+import { Buffer } from 'buffer';
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -47,6 +49,7 @@ export default function PostCard(props) {
   const [open, openComments] = useState(false);
   const [followers, setFollowers] = useState(props.loggedInAuthorsFollowers);
   const [loadingComments, setLoadingComments] = useState(false);
+  const [postImage, setPostImage] = useState(props.post.image);
 
   // if the post is an image post, don't show it's content,
   // since it contains a base64 string. Which is very long.
@@ -146,7 +149,25 @@ export default function PostCard(props) {
           }
         });
     };
+
+    const fetchImage = async () => {
+      await api
+        .get(`${props.post.image}`, {responseType: "arraybuffer"})
+        .then((res) => {
+          console.log(res.data)
+          const data = `data:${res.headers['content-type']};base64,${Buffer.from(res.data, "binary").toString('base64')}`;
+          setPostImage(data)
+          console.log(data)
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+    }
     fetchPostAuthorData();
+
+    if (props.post.image && urlContainsOurHost(props.post.image)) {
+      fetchImage();
+    }
   }, [useLocation().state]);
 
   useEffect(() => {
@@ -423,8 +444,8 @@ export default function PostCard(props) {
       </Card.Header>
       <Card.Body>
         <Card.Title>{props.post.title}</Card.Title>
-        {(props.post.image && (
-          <img className="post-image" src={props.post.image} alt="postImage" />
+        {(postImage && (
+          <img className="post-image" src={postImage} alt="postImage" />
         )) ||
           (!authorHostIsOurs(props.post.author.host) &&
             props.post.contentType.startsWith("image") &&

@@ -57,7 +57,7 @@ export default function EditPost(props) {
   const setVisibility = (option) => {
     setPost({ ...post, visibility: option });
     if (imagePost) {
-      setImagePost({ ...imagePost, visiblity: option });
+      setImagePost({ ...imagePost, visibility: option });
     }
     if (option === "PUBLIC") {
       setEveActive(true);
@@ -130,7 +130,7 @@ export default function EditPost(props) {
     // No image
     if (!imagePost) {
         await api
-          .post(`${baseURL}/authors/${user_id}/posts/`, post)
+          .post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, post)
           .then((response) => {
             sendPost(response);
             })
@@ -149,7 +149,7 @@ export default function EditPost(props) {
               ...post,
               image: `${baseURL}/authors/${user_id}/posts/${response.data.uuid}/image`,
             };
-            return api.post(`${baseURL}/authors/${user_id}/posts/`, new_post);
+            return api.post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, new_post);
           })
           .then((response) => {
             sendPost(response);
@@ -221,7 +221,7 @@ export default function EditPost(props) {
           contentType: file.type + ";base64",
           content: reader.result,
           categories: "",
-          visibility: "PUBLIC",
+          visibility: post.visibility,
           unlisted: true,
         });
       };
