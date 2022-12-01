@@ -150,7 +150,7 @@ class PostsApiView(GenericAPIView):
                 size = int(request.GET["size"])
             next = None
             previous = None
-            posts_url = add_end_slash(request.build_absolute_uri().split('?')[0])
+            posts_url = request.build_absolute_uri().split('?')[0]
 
             if not is_our_backend(authorObj.host):
                 remote_posts_res = handle_remote_posts_get(authorObj, page, size, posts_url)
@@ -169,7 +169,6 @@ class PostsApiView(GenericAPIView):
             postsPaginated = self.paginate_queryset(postsQuerySet)
             paginatedRes = self.get_paginated_response(postsPaginated).data
             next = paginatedRes.get("next")
-            print(next)
             previous = paginatedRes.get("previous")
             page = paginatedRes.get("page")
             size = paginatedRes.get("size")
@@ -433,14 +432,14 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         # Page > 1, means that there's a previous page, don't need to fetch
         previous = build_pagination_query(posts_url, page-1, size)
     try:
-        res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page, size))
+        res = check_remote_fetch(authorObj, build_pagination_query("/posts", page, size))
         if type(res) == str:
-            raise ValueError(res)
+            return res
 
     except Exception as e:
         return e
     try:
-        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts/", page+1, size))
+        next_res = check_remote_fetch(authorObj, build_pagination_query("/posts", page+1, size))
         if type(next_res) == str:
             raise ValueError(next_res)
 
