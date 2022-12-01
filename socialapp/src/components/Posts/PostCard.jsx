@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Dropdown, InputGroup, Form, Button, Container } from "react-bootstrap";
+import { Dropdown, Form, Button } from "react-bootstrap";
 import { BiDotsVerticalRounded } from "react-icons/bi";
 import { MdModeEdit, MdDelete, MdShare } from "react-icons/md";
 import { IoUnlink } from "react-icons/io5";
@@ -26,6 +26,7 @@ import ProfilePicture from "../ProfilePicture";
 import remarkGfm from "remark-gfm";
 import PulseLoader from "react-spinners/PulseLoader";
 import { Buffer } from 'buffer';
+import { toast } from 'react-toastify';
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -209,7 +210,7 @@ export default function PostCard(props) {
         refreshState();
       })
       .catch((error) => {
-        alert(`Something went wrong posting! \n Error: ${error}`);
+        toast.error("Something went wrong deleting your post!")
         console.log(error);
       });
   };
@@ -239,7 +240,8 @@ export default function PostCard(props) {
         console.log("success send comments to inbox");
       })
       .catch((error) => {
-        alert("Failed to send comment to inbox of post's author");
+        toast.error("Failed to send comment to inbox of post's author");
+        console.log(error);
       });
   };
 
@@ -272,8 +274,7 @@ export default function PostCard(props) {
         refreshState();
       })
       .catch((error) => {
-        alert(`Something went wrong posting! \n Error: ${error}`);
-        console.log(error);
+        toast.error("Something went wrong posting your comment!");
       });
   };
 
@@ -417,6 +418,7 @@ export default function PostCard(props) {
       />
     );
   }
+
 
   return (
     <Card className="post-card">

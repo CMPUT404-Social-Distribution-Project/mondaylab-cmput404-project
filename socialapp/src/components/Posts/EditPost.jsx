@@ -13,6 +13,7 @@ import { FaImage, FaLink, FaSearch } from "react-icons/fa";
 import { search2 } from "../../utils/searchUtil";
 import UserCard from "../UserCard.jsx";
 import { extractAuthorUUID } from "../../utils/utils";
+import { toast } from 'react-toastify';
 
 export default function EditPost(props) {
   const [showURI, setShowURI] = useState(false);
@@ -109,7 +110,7 @@ export default function EditPost(props) {
     } else {
       if (post.visibility === "PRIVATE") {
         if (sendTo === null) {
-          alert("Select an author to send to!");
+          toast.error("Select an author to send to!");
           return;
         }
         const resultPost = response.data;
@@ -135,7 +136,7 @@ export default function EditPost(props) {
             sendPost(response);
             })
           .catch((error) => {
-            alert(`Something went wrong posting! \n Error: ${error.response.data}`);
+            toast.error(`Something went wrong posting! \n Error: ${error.response.data}`);
             console.log(error);
           });
     } else {
@@ -155,7 +156,7 @@ export default function EditPost(props) {
             sendPost(response);
           })
           .catch((error) => {
-            alert(
+            toast.error(
               `Something went wrong posting the image post! \n Error: ${error.response.data}`
             );
             console.log(error.response);
