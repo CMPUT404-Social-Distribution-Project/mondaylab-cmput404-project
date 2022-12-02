@@ -442,7 +442,7 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         if type(next_res) == str:
             raise ValueError(next_res)
 
-        if next_res and len(next_res["items"]) > 0:
+        if next_res and len(next_res["items"]) > 0 and next_res["items"] != res["items"]:
             # success fetching next page, means that it exists
             next = build_pagination_query(posts_url, page+1, size)
     except:

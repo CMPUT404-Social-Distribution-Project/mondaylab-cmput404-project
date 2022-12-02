@@ -131,6 +131,12 @@ def getNodeAuthors(request):
     node_obj = Node.objects.get(team=team_number)
     res = requests.get(f"{node_obj.host}authors/?size=30")
     if res.status_code >= 200:
+        if node_obj.team == 4:
+            # Team 4 is returning our own others and other teams authors...not what we want, remove them.
+            res = res.json() 
+            res["items"] = [author for author in res["items"] if author["host"] in node_obj.host]
+            return response.Response(res, status=status.HTTP_200_OK)
+            
         return response.Response(res.json(), status=status.HTTP_200_OK)
     else:
         return response.Response(f"Could not retrieve team {team_number}", status=status.HTTP_404_NOT_FOUND)
