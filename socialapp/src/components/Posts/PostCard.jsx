@@ -27,6 +27,7 @@ import remarkGfm from "remark-gfm";
 import PulseLoader from "react-spinners/PulseLoader";
 import { Buffer } from 'buffer';
 import { toast } from 'react-toastify';
+import PublishedAgo from "./PublishedAgo";
 
 export default function PostCard(props) {
   const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -429,6 +430,7 @@ export default function PostCard(props) {
             {props.post.author.displayName}
           </div>
         </div>
+        <PublishedAgo published={props.post.published} />
         <FriendsIndicator />
         <PrivateIndicator />
         <UnlistedIndicator />

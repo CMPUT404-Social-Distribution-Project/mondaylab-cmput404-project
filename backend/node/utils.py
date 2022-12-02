@@ -12,7 +12,10 @@ def authenticated_GET(url, node):
     Given the url to send to the specified node,
     sends a GET request to that url with HTTP Basic Auth
     '''
-    res = requests.get(url, auth=(node.username, node.password), timeout=5)
+    try:
+        res = requests.get(url, auth=(node.username, node.password), timeout=5)
+    except Exception as e:
+        print(f"authenticated_GET: Failed to fetch to {url} with {node.username}:{node.password}", e)
     return res
 
 def authenticated_GET_host(endpoint, host, author_url=None):

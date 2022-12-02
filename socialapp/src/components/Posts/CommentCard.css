@@ -13,6 +13,8 @@
 
 .comment-card .comment-author-container {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .comment-card .comment-author-container:hover {
@@ -68,4 +70,9 @@
     transition: color 0.2s ease-in-out, background-color 0.5s ease-in-out;
     background-color: var(--slightly-darker-blue);
     border-radius: 11px;
+}
+
+.comment-card .published-ago {
+    font-size: 0.7rem;
+    white-space: nowrap;
 }

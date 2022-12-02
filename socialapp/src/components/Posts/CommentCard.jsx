@@ -8,6 +8,7 @@ import { extractAuthorUUID } from "../../utils/utils";
 import useAxios from "../../utils/useAxios";
 import ProfilePicture from "../ProfilePicture";
 import ReactMarkdown from "react-markdown";
+import PublishedAgo from "./PublishedAgo";
 
 export default function CommentCard(props) {
   const [liked, setLiked] = useState(props.liked);
@@ -65,6 +66,7 @@ export default function CommentCard(props) {
         <div className="comment-author-container" onClick={routeChange}>
           <ProfilePicture profileImage={props.author.profileImage} />
           <div className="comment-author">{props.author.displayName}</div>
+          <PublishedAgo published={props.comment.published} />
         </div>
         <ReactMarkdown
           className="comment-content"

@@ -222,6 +222,10 @@ def create_remote_author(remote_author):
         Author.objects.filter(uuid=remote_author_uuid):
         return
 
+    if remote_author.get("displayName") == None:
+        # displayName is null? Set it the the uuid
+        remote_author["displayName"] = remote_author_uuid
+
     if display_name_exists(remote_author["displayName"]):
         remote_author["displayName"] = remote_author["displayName"]+':'+remote_author["host"]
 
@@ -230,6 +234,8 @@ def create_remote_author(remote_author):
     if remote_author.get("github") != None and not is_URL(remote_author["github"]):
         # create github url for them
         remote_author["github"] = f"https://github.com/{remote_author['github']}"
+    elif remote_author.get("github") == None:
+        remote_author["github"] = ""
 
     if not is_URL(remote_author["profileImage"]):
         remote_author["profileImage"] = ""
@@ -491,19 +497,23 @@ def fetch_author(author_uuid):
     '''
 
     uuid_in_id = Author.objects.filter(id__contains=author_uuid)
-    uuid = Author.objects.filter(uuid=author_uuid)
     if uuid_in_id.exists():
         return uuid_in_id.first()
-    elif uuid.exists():
-        return uuid.first()
+    if isUUID(author_uuid):
+        uuid = Author.objects.filter(uuid=author_uuid)
+        if uuid.exists():
+            return uuid.first()
 
     nodes = Node.objects.all()
     for node in nodes:
         authors_url = f"{node.host}authors/{author_uuid}"
         res = authenticated_GET(authors_url, node)
         if res.status_code == 200:
+            print(f"fetch_author: Found author at {authors_url}!",res.content)
             create_remote_author(res.json())
             return Author.objects.get(id__contains=author_uuid)
+        else:
+            print(f"Failed to check if author exists at {authors_url}.")
 
     return "Author was not found"
 
