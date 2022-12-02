@@ -135,7 +135,7 @@ export default function Profile() {
           console.log(error);
         });
       setPostsLoading(true);
-      api
+      await api
         .get(`${baseURL}/authors/${author_id}/posts/`)
         .then((response) => {
           console.log(response.data.items);
@@ -146,7 +146,7 @@ export default function Profile() {
         .catch((error) => {
           console.log("Failed to get posts of author. " + error);
         });
-      api
+      await api
         .get(`${baseURL}/authors/${author_id}/followers/`)
         .then((response) => {
           setFollowersArray(response.data);
@@ -154,7 +154,7 @@ export default function Profile() {
         .catch((error) => {
           console.log("Failed to get followers of author. " + error);
         });
-      api
+      await api
         .get(`${baseURL}/authors/${author_id}/friends/`)
         .then((response) => {
           setFriendsArray(response.data);
