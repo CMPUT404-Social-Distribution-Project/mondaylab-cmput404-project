@@ -25,6 +25,7 @@ import {
 } from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
 import { Buffer } from 'buffer';
+import PublishedAgo from "./PublishedAgo";
 
 export default function PostCard(props) {
   const user_id = localStorage.getItem("user_id");
@@ -220,6 +221,7 @@ export default function PostCard(props) {
             {props.post.author.displayName}
           </div>
         </div>
+        <PublishedAgo explore={true} published={props.post.published} />
         <PostOptions />
         {showEditPost && (
           <EditPost

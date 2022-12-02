@@ -16,12 +16,13 @@
     background-color: var(--slightly-darker-blue);
     box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
     border-radius: 11px 11px 0px 0px;
+    --bs-card-cap-padding-x: 0.5rem;
 }
 
 .post-card-explore .post-author {
     display: inline-flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.6rem;
     color: var(--teal);
 }
 
@@ -30,10 +31,8 @@
 }
 
 .post-card-explore .post-author-name {
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    width: 100px;
+    display: inline-block;
+    width: 103px;
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;
@@ -148,4 +147,10 @@
 .post-card-explore .like-icon:active {
     color: var(--orange) !important;
     transform: rotate(10deg);
+}
+
+.post-card-explore .published-ago {
+    scale:0.8;
+    margin-left: auto;
+    margin-top: 0.2rem;
 }
