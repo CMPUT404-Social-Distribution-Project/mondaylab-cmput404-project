@@ -316,7 +316,6 @@ class AllPostsApiView(GenericAPIView):
                 posts_list = post_serializer.data
 
                 # Get all the nodes posts
-                res = []
                 for node in Node.objects.all():
                     try:
                         if node.team == 16:
