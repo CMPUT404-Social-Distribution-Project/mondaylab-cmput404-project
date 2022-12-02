@@ -58,6 +58,7 @@ function TeamSelect(props) {
   return (
     <DropdownButton onSelect={props.onSelect} title={"Team " + props.title} >
       <Dropdown.Item eventKey="2">Team 2</Dropdown.Item>
+      <Dropdown.Item eventKey="3">Team 3</Dropdown.Item>
       <Dropdown.Item eventKey="4">Team 4</Dropdown.Item>
       <Dropdown.Item eventKey="16">Team 16</Dropdown.Item>
     </DropdownButton>
