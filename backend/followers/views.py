@@ -157,7 +157,11 @@ class TrueFriendsApiView(GenericAPIView):
         
         try:
             current_author = Author.objects.get(uuid = author_id)
-            friends_list = get_friends_list(current_author)
+            if is_our_backend(current_author.host):
+                friends_list = get_friends_list(current_author)
+            else:
+                # return empty list for remote authors' true friends
+                friends_list = []
 
             result = {"type": "friends", "items": friends_list}
             return response.Response(result, status=status.HTTP_200_OK)
