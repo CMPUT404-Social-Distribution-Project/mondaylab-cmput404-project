@@ -83,6 +83,7 @@ class PostApiView(GenericAPIView):
         else:
             try: 
                 exist = Post.objects.filter(uuid=post_id).first()
+                authorObj = Author.objects.get(uuid=author_id)
             except Exception as e:
                 return response.Response(f"Error: {e}", status=status.HTTP_404_NOT_FOUND)
             finally:
@@ -90,19 +91,18 @@ class PostApiView(GenericAPIView):
                     return response.Response(f"Error: Post id exist! Use POST method to modify it!", status=status.HTTP_400_BAD_REQUEST)
                 else:
                     try:
+                        post_id = UUID(post_id).hex
+                        request.data["uuid"] = post_id
+                        request.data["author"] = authorObj
                         serialize = self.serializer_class(data=request.data)
                         if serialize.is_valid(raise_exception=True):
-                            # get author obj to be saved in author field of post
-                            authorObj = Author.objects.get(uuid=author_id)
                             # create post ID and origin and source
                             postId = request.build_absolute_uri() + post_id
                             origin = postId
-            
                             serialize.save(
                                 id=postId,
-                                uuid=post_id,
-                                author=authorObj,
                                 count=0,
+                                author=authorObj,
                                 comments=postId+'/comments',
                                 origin=origin,
                                 source=origin,
