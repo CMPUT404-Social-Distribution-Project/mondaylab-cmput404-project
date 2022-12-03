@@ -28,8 +28,8 @@ def authenticated_GET_host(endpoint, host, author_url=None):
     '''
     node = Node.objects.get(host__contains=host)
     custom_header = {}
-    if author_url:
-        custom_header = {'x-request-author': author_url}
+    # if author_url:
+    #     custom_header = {'x-request-author': author_url}
     res = requests.get(f"{node.host}{endpoint}", auth=(node.username, node.password), headers=custom_header)
     return res
 
