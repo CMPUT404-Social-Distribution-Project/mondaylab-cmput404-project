@@ -16,6 +16,8 @@ import ProfilePicture from "../components/ProfilePicture";
 import PulseLoader from "react-spinners/PulseLoader";
 import { confirmAlert } from "react-confirm-alert";
 import { toast } from "react-toastify";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 function ProfilePosts(props) {
   return (
@@ -221,45 +223,68 @@ export default function Profile() {
 
   return (
     <div className="profileContainer">
-      <div className="profileHeader">
-        <div className="profilePicWithFollowButton">
-          <ProfilePicture profileImage={author.profileImage} />
-          <FollowButton authorViewing={author} />
-        </div>
-
-        <div className="profileInfo">
-          <div className="profileName">{author.displayName}</div>
-          <div className="profileStats">
-            <div id="statContainer" className="followers">
-              <span>Followers:</span>
-              {/* Issue with data not becoming fully available due to async operations;
-              So just do 0 until we get the full info */}
-              <div className="infoNum">
-                {typeof followersArray.items === "undefined"
-                  ? 0
-                  : followersArray.items.length}
-              </div>
-            </div>
-            <div id="statContainer" className="friends">
-              <span>Friends:</span>
-              <div className="infoNum">
-                {typeof friendsArray.items === "undefined"
-                  ? 0
-                  : friendsArray.items.length}
-              </div>
-            </div>
-            {!authorHostIsOurs(author.host) ? (
-              <div className="host-indicator">
-                <CgRemote style={{ marginRight: "0.5em" }} />
-                {author.host}
-              </div>
+      <SkeletonTheme
+        baseColor="var(--slightly-darker-blue)"
+        highlightColor="var(--dark-blue)"
+      >
+        <div className="profileHeader">
+          <div className="profilePicWithFollowButton">
+            {author ? (
+              <ProfilePicture profileImage={author.profileImage} />
             ) : (
-              <div className="host-indicator" style={{ background: "none" }} />
+              <Skeleton circle={true} width="4rem" height="4rem" />
+            )}
+            {author ? (
+              <FollowButton authorViewing={author} />
+            ) : (
+              <Skeleton width="4rem" height="1.5rem" />
             )}
           </div>
-          <EditProfileButton className="edit-button" author={author} />
+
+          <div className="profileInfo">
+            <div className="profileName">
+              {author.displayName || <Skeleton style={{lineHeight: "4.3"}} height="4rem" />}
+            </div>
+            {author ? (
+              <div className="profileStats">
+                <div id="statContainer" className="followers">
+                  <span>Followers:</span>
+                  {/* Issue with data not becoming fully available due to async operations;
+                So just do 0 until we get the full info */}
+                  <div className="infoNum">
+                    {typeof followersArray.items === "undefined"
+                      ? 0
+                      : followersArray.items.length}
+                  </div>
+                </div>
+                <div id="statContainer" className="friends">
+                  <span>Friends:</span>
+                  <div className="infoNum">
+                    {typeof friendsArray.items === "undefined"
+                      ? 0
+                      : friendsArray.items.length}
+                  </div>
+                </div>
+                {!authorHostIsOurs(author.host) ? (
+                  <div className="host-indicator">
+                    <CgRemote style={{ marginRight: "0.5em" }} />
+                    {author.host}
+                  </div>
+                ) : (
+                  <div
+                    className="host-indicator"
+                    style={{ background: "none" }}
+                  />
+                )}
+              </div>
+            ) : (
+              <Skeleton style={{marginLeft: "1rem"}} width="25rem" height="1.5rem" />
+            )}
+
+            <EditProfileButton className="edit-button" author={author} />
+          </div>
         </div>
-      </div>
+      </SkeletonTheme>
       <ProfileTabs dir={dir} author_id={author_id} />
       {dir === "posts" || dir === undefined ? (
         <ProfilePosts
