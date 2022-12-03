@@ -22,11 +22,11 @@ class FollowersApiView(GenericAPIView):
     def get(self, request, author_id):
         try:
             current_author = fetch_author(author_id)
-            if type(current_author) == str:
+            if isinstance(fetch_author, str):
                 raise ValueError(current_author)
 
             res = check_remote_fetch(current_author, "/followers/")
-            if type(res) == str:
+            if isinstance(res, str):
                 raise ValueError(res)
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
@@ -64,7 +64,7 @@ class FollowersForeignApiView(GenericAPIView):
             current_author = Author.objects.get(uuid = author_id)
 
             res = check_remote_fetch(current_author, f"/followers/{foreign_author_id}")
-            if type(res) == str:
+            if isinstance(res, str):
                 raise ValueError(res)
             if res:
                 return response.Response(res, status=status.HTTP_200_OK)
@@ -157,7 +157,11 @@ class TrueFriendsApiView(GenericAPIView):
         
         try:
             current_author = Author.objects.get(uuid = author_id)
-            friends_list = get_friends_list(current_author)
+            if is_our_backend(current_author.host):
+                friends_list = get_friends_list(current_author)
+            else:
+                # return empty list for remote authors' true friends
+                friends_list = []
 
             result = {"type": "friends", "items": friends_list}
             return response.Response(result, status=status.HTTP_200_OK)
@@ -182,6 +186,8 @@ def check_true_friend(author_uuid, foreign_id):
             if node_obj.exists():
                 node_obj = node_obj.first()
                 res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}", node_obj)
+                if isinstance(res, str):
+                    raise ValueError(res)
                 if res.status_code == 200:
                     print("Checking friends result = ", res.json())
                     result = res.json()

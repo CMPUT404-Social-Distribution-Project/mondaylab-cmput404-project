@@ -508,6 +508,9 @@ def fetch_author(author_uuid):
     for node in nodes:
         authors_url = f"{node.host}authors/{author_uuid}"
         res = authenticated_GET(authors_url, node)
+        if isinstance(res, str):
+            print(f"fetch_author[ERROR]: {res}")
+            continue
         if res.status_code == 200:
             print(f"fetch_author: Found author at {authors_url}!",res.content)
             create_remote_author(res.json())
@@ -525,6 +528,8 @@ def check_remote_fetch(author_obj, endpoint):
     if not is_our_backend(author_obj.host):
         target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
         res = authenticated_GET_host(target, author_obj.host, author_obj.id)
+        if isinstance(res, str):
+            return f"Could not fetch to {author_obj.id}{endpoint}. {res}"
         if res.status_code == 200:
             return res.json()
         else:
