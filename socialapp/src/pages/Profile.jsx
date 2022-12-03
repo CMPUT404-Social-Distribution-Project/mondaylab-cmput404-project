@@ -15,8 +15,7 @@ import { CgRemote } from "react-icons/cg";
 import ProfilePicture from "../components/ProfilePicture";
 import PulseLoader from "react-spinners/PulseLoader";
 import { confirmAlert } from "react-confirm-alert";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
 
 function ProfilePosts(props) {
   return (
@@ -32,7 +31,9 @@ function ProfilePosts(props) {
             />
           ))
         : null}
-      {props.postsLoading && <PulseLoader color="var(--teal)" className="profile-posts-loader" />}
+      {props.postsLoading && (
+        <PulseLoader color="var(--teal)" className="profile-posts-loader" />
+      )}
       {props.nextUrl && (
         <button
           className="load-more-posts-button"
@@ -50,11 +51,19 @@ function ProfileFollowers(props) {
     <div className="followers-container-profile">
       {typeof props.followersArray.items !== "undefined"
         ? props.followersArray.items.map((follower, i) => (
-          <div className="follower-card-and-remove">
-            <UserCard author={follower} key={i} />
-            {props.authorViewingIsLoggedInAuthor ? 
-            <button className="remove-follower-button" onClick={() => props.removeFollower(extractAuthorUUID(follower.id))}>Remove Follower</button> : null}
-          </div>  
+            <div className="follower-card-and-remove">
+              <UserCard author={follower} key={i} />
+              {props.authorViewingIsLoggedInAuthor ? (
+                <button
+                  className="remove-follower-button"
+                  onClick={() =>
+                    props.removeFollower(extractAuthorUUID(follower.id))
+                  }
+                >
+                  Remove Follower
+                </button>
+              ) : null}
+            </div>
           ))
         : null}
     </div>
@@ -183,15 +192,15 @@ export default function Profile() {
 
   const removeFollower = (followerUUID) => {
     api
-    .delete(`${baseURL}/authors/${author_id}/followers/${followerUUID}`)
-    .then((response) => {
-      refreshState();
-      toast.success("Removed follower successfully")
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  }
+      .delete(`${baseURL}/authors/${author_id}/followers/${followerUUID}`)
+      .then((response) => {
+        refreshState();
+        toast.success("Removed follower successfully");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const confirmRemoveFollower = (followerUUID) => {
     confirmAlert({
@@ -208,7 +217,7 @@ export default function Profile() {
         },
       ],
     });
-  }
+  };
 
   return (
     <div className="profileContainer">
@@ -266,7 +275,11 @@ export default function Profile() {
         <></>
       )}
       {dir === "followers" ? (
-        <ProfileFollowers removeFollower={(followerUUID)=>confirmRemoveFollower(followerUUID)} authorViewingIsLoggedInAuthor={loggedInUser.uuid === author_id} followersArray={followersArray} />
+        <ProfileFollowers
+          removeFollower={(followerUUID) => confirmRemoveFollower(followerUUID)}
+          authorViewingIsLoggedInAuthor={loggedInUser.uuid === author_id}
+          followersArray={followersArray}
+        />
       ) : (
         <></>
       )}

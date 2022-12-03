@@ -40,7 +40,7 @@ export default function Post() {
           }
         });
       await api
-        .get(`${baseURL}/authors/${user_id}/followers`)
+        .get(`${baseURL}/authors/${user_id}/followers/`)
         .then((response) => {
           setFollowers(response.data.items);
         })
@@ -72,7 +72,6 @@ export default function Post() {
   return (
     <div className="post-container">
         {post && <PostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} />}
-
     </div>
   );
 }
