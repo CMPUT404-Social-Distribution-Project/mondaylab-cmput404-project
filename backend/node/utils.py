@@ -30,7 +30,10 @@ def authenticated_GET_host(endpoint, host, author_url=None):
     custom_header = {}
     # if author_url:
     #     custom_header = {'x-request-author': author_url}
-    res = requests.get(f"{node.host}{endpoint}", auth=(node.username, node.password), headers=custom_header)
+    try:
+        res = requests.get(f"{node.host}{endpoint}", auth=(node.username, node.password), headers=custom_header, timeout=5)
+    except Exception as e:
+        print(f"authenticated_GET_host: Failed to fetch to {node.host}{endpoint}.", e)
     return res
 
 def authenticated_POST(url, node, data):
