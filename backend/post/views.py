@@ -139,7 +139,7 @@ class PostsApiView(GenericAPIView):
         ''' Gets the post of author given the author's UUID and the post's UUID'''
         try:
             authorObj = fetch_author(author_id)
-            if type(authorObj) == str:
+            if isinstance(authorObj, str):
                 raise ValueError(authorObj)
 
             page = None
@@ -154,7 +154,7 @@ class PostsApiView(GenericAPIView):
 
             if not is_our_backend(authorObj.host):
                 remote_posts_res = handle_remote_posts_get(authorObj, page, size, posts_url)
-                if type(remote_posts_res) == str:
+                if isinstance(remote_posts_res, str):
                     return response.Response(f"Error: {remote_posts_res}", status=status.HTTP_404_NOT_FOUND)
                 else:
                     return response.Response(remote_posts_res, status=status.HTTP_200_OK)
@@ -321,11 +321,15 @@ class AllPostsApiView(GenericAPIView):
                         if node.team == 16:
                             # team 16 has /posts/ endpoint luckily. 
                             res = authenticated_GET(f"{node.host}posts/", node)
+                            if isinstance(res, str):
+                                raise ValueError(f"res: {res}")
                             if res.status_code == 200:
                                 remote_posts = res.json().get("items")
                                 posts_list.extend(remote_posts)
                         else:
                             auth_res = authenticated_GET(f"{node.host}authors/", node)
+                            if isinstance(auth_res, str):
+                                raise ValueError(f"auth_res: {auth_res}")
                             if auth_res.status_code == 200:
                                 remote_authors = auth_res.json().get("items")
                                 # Got remote authors, now for each author fetch their public posts
@@ -333,6 +337,8 @@ class AllPostsApiView(GenericAPIView):
                                     try:
                                         if "localhost" not in remote_author.get("host"):
                                             posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
+                                            if isinstance(posts_res, str):
+                                                raise ValueError(f"posts_res: {posts_res}")
                                             if posts_res.status_code == 200:
                                                 remote_posts = posts_res.json().get("items")
                                                 posts_list.extend(remote_posts)
@@ -432,14 +438,14 @@ def handle_remote_posts_get(authorObj, page, size, posts_url):
         previous = build_pagination_query(posts_url, page-1, size)
     try:
         res = check_remote_fetch(authorObj, build_pagination_query("/posts", page, size))
-        if type(res) == str:
+        if isinstance(res, str):
             return res
 
     except Exception as e:
         return e
     try:
         next_res = check_remote_fetch(authorObj, build_pagination_query("/posts", page+1, size))
-        if type(next_res) == str:
+        if isinstance(next_res, str):
             raise ValueError(next_res)
 
         if next_res and len(next_res["items"]) > 0 and next_res["items"] != res["items"]:
