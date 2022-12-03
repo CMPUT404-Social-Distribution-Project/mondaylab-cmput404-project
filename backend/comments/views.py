@@ -185,8 +185,8 @@ def handle_remote_comments_get(authorObj, page, size, comments_url, post_url):
         if type(next_res) == str:
             raise ValueError(next_res)
         if next_res:
-            if (next_res.get("items") != None and len(next_res["items"]) > 0) or \
-             (next_res.get("comments") != None and len(next_res["comments"]) > 0):
+            if (next_res.get("items") != None and len(next_res["items"]) > 0 and next_res["items"] != res["items"]) or \
+             (next_res.get("comments") != None and len(next_res["comments"]) > 0 and next_res["comments"] != res["comments"]):
                 # success fetching next page, means that it exists
                 next = build_pagination_query(comments_url, page+1, size)
 
