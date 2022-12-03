@@ -156,10 +156,8 @@ export default function PostCard(props) {
       await api
         .get(`${props.post.image}`, {responseType: "arraybuffer"})
         .then((res) => {
-          console.log(res.data)
           const data = `data:${res.headers['content-type']};base64,${Buffer.from(res.data, "binary").toString('base64')}`;
           setPostImage(data)
-          console.log(data)
         })
         .catch((err) => {
           console.log(err);
