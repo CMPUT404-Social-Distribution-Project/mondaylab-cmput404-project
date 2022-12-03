@@ -15,8 +15,9 @@ import { CgRemote } from "react-icons/cg";
 import ProfilePicture from "../components/ProfilePicture";
 import PulseLoader from "react-spinners/PulseLoader";
 import { confirmAlert } from "react-confirm-alert";
-import { toast } from 'react-toastify';
-
+import { toast } from "react-toastify";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 function ProfilePosts(props) {
   return (
@@ -32,7 +33,9 @@ function ProfilePosts(props) {
             />
           ))
         : null}
-      {props.postsLoading && <PulseLoader color="var(--teal)" className="profile-posts-loader" />}
+      {props.postsLoading && (
+        <PulseLoader color="var(--teal)" className="profile-posts-loader" />
+      )}
       {props.nextUrl && (
         <button
           className="load-more-posts-button"
@@ -50,11 +53,19 @@ function ProfileFollowers(props) {
     <div className="followers-container-profile">
       {typeof props.followersArray.items !== "undefined"
         ? props.followersArray.items.map((follower, i) => (
-          <div className="follower-card-and-remove">
-            <UserCard author={follower} key={i} />
-            {props.authorViewingIsLoggedInAuthor ? 
-            <button className="remove-follower-button" onClick={() => props.removeFollower(extractAuthorUUID(follower.id))}>Remove Follower</button> : null}
-          </div>  
+            <div className="follower-card-and-remove">
+              <UserCard author={follower} key={i} />
+              {props.authorViewingIsLoggedInAuthor ? (
+                <button
+                  className="remove-follower-button"
+                  onClick={() =>
+                    props.removeFollower(extractAuthorUUID(follower.id))
+                  }
+                >
+                  Remove Follower
+                </button>
+              ) : null}
+            </div>
           ))
         : null}
     </div>
@@ -183,15 +194,15 @@ export default function Profile() {
 
   const removeFollower = (followerUUID) => {
     api
-    .delete(`${baseURL}/authors/${author_id}/followers/${followerUUID}`)
-    .then((response) => {
-      refreshState();
-      toast.success("Removed follower successfully")
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-  }
+      .delete(`${baseURL}/authors/${author_id}/followers/${followerUUID}`)
+      .then((response) => {
+        refreshState();
+        toast.success("Removed follower successfully");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const confirmRemoveFollower = (followerUUID) => {
     confirmAlert({
@@ -208,49 +219,72 @@ export default function Profile() {
         },
       ],
     });
-  }
+  };
 
   return (
     <div className="profileContainer">
-      <div className="profileHeader">
-        <div className="profilePicWithFollowButton">
-          <ProfilePicture profileImage={author.profileImage} />
-          <FollowButton authorViewing={author} />
-        </div>
-
-        <div className="profileInfo">
-          <div className="profileName">{author.displayName}</div>
-          <div className="profileStats">
-            <div id="statContainer" className="followers">
-              <span>Followers:</span>
-              {/* Issue with data not becoming fully available due to async operations;
-              So just do 0 until we get the full info */}
-              <div className="infoNum">
-                {typeof followersArray.items === "undefined"
-                  ? 0
-                  : followersArray.items.length}
-              </div>
-            </div>
-            <div id="statContainer" className="friends">
-              <span>Friends:</span>
-              <div className="infoNum">
-                {typeof friendsArray.items === "undefined"
-                  ? 0
-                  : friendsArray.items.length}
-              </div>
-            </div>
-            {!authorHostIsOurs(author.host) ? (
-              <div className="host-indicator">
-                <CgRemote style={{ marginRight: "0.5em" }} />
-                {author.host}
-              </div>
+      <SkeletonTheme
+        baseColor="var(--slightly-darker-blue)"
+        highlightColor="var(--dark-blue)"
+      >
+        <div className="profileHeader">
+          <div className="profilePicWithFollowButton">
+            {author ? (
+              <ProfilePicture profileImage={author.profileImage} />
             ) : (
-              <div className="host-indicator" style={{ background: "none" }} />
+              <Skeleton circle={true} width="4rem" height="4rem" />
+            )}
+            {author ? (
+              <FollowButton authorViewing={author} />
+            ) : (
+              <Skeleton width="4rem" height="1.5rem" />
             )}
           </div>
-          <EditProfileButton className="edit-button" author={author} />
+
+          <div className="profileInfo">
+            <div className="profileName">
+              {author.displayName || <Skeleton style={{lineHeight: "4.3"}} height="4rem" />}
+            </div>
+            {author ? (
+              <div className="profileStats">
+                <div id="statContainer" className="followers">
+                  <span>Followers:</span>
+                  {/* Issue with data not becoming fully available due to async operations;
+                So just do 0 until we get the full info */}
+                  <div className="infoNum">
+                    {typeof followersArray.items === "undefined"
+                      ? 0
+                      : followersArray.items.length}
+                  </div>
+                </div>
+                <div id="statContainer" className="friends">
+                  <span>Friends:</span>
+                  <div className="infoNum">
+                    {typeof friendsArray.items === "undefined"
+                      ? 0
+                      : friendsArray.items.length}
+                  </div>
+                </div>
+                {!authorHostIsOurs(author.host) ? (
+                  <div className="host-indicator">
+                    <CgRemote style={{ marginRight: "0.5em" }} />
+                    {author.host}
+                  </div>
+                ) : (
+                  <div
+                    className="host-indicator"
+                    style={{ background: "none" }}
+                  />
+                )}
+              </div>
+            ) : (
+              <Skeleton style={{marginLeft: "1rem"}} width="25rem" height="1.5rem" />
+            )}
+
+            <EditProfileButton className="edit-button" author={author} />
+          </div>
         </div>
-      </div>
+      </SkeletonTheme>
       <ProfileTabs dir={dir} author_id={author_id} />
       {dir === "posts" || dir === undefined ? (
         <ProfilePosts
@@ -266,7 +300,11 @@ export default function Profile() {
         <></>
       )}
       {dir === "followers" ? (
-        <ProfileFollowers removeFollower={(followerUUID)=>confirmRemoveFollower(followerUUID)} authorViewingIsLoggedInAuthor={loggedInUser.uuid === author_id} followersArray={followersArray} />
+        <ProfileFollowers
+          removeFollower={(followerUUID) => confirmRemoveFollower(followerUUID)}
+          authorViewingIsLoggedInAuthor={loggedInUser.uuid === author_id}
+          followersArray={followersArray}
+        />
       ) : (
         <></>
       )}

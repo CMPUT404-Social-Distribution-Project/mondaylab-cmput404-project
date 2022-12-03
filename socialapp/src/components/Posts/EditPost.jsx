@@ -34,7 +34,7 @@ export default function EditPost(props) {
   const user_id = localStorage.getItem("user_id");
   const [imagePost, setImagePost] = useState(null);
   const [uri, setURI] = useState("");
-  const propsPost = props.post;
+  const propsPost = structuredClone(props.post);
   delete propsPost.commentSrc; // causing issue with updating.
   const [post, setPost] = useState(propsPost);
   const [showLinkForm, setShowLinkForm] = useState(() =>
@@ -109,10 +109,6 @@ export default function EditPost(props) {
       props.onHide();
     } else {
       if (post.visibility === "PRIVATE") {
-        if (sendTo === null) {
-          toast.error("Select an author to send to!");
-          return;
-        }
         const resultPost = response.data;
         api
           .post(`${baseURL}/authors/${extractAuthorUUID(sendTo.id)}/inbox/`, resultPost)
@@ -128,17 +124,21 @@ export default function EditPost(props) {
   }
 
   const handleSubmitPost = async () => {
+    if (post.visibility === "PRIVATE" && sendTo === null) {
+      toast.error("Select an author to send to!");
+      return;
+    }
     // No image
     if (!imagePost) {
-        await api
-          .post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, post)
-          .then((response) => {
-            sendPost(response);
-            })
-          .catch((error) => {
-            toast.error(`Something went wrong posting! \n Error: ${error.response.data}`);
-            console.log(error);
-          });
+      await api
+        .post(`${baseURL}/authors/${user_id}/posts/${props.post.uuid}`, post)
+        .then((response) => {
+          sendPost(response);
+          })
+        .catch((error) => {
+          toast.error(`Something went wrong posting! \n Error: ${error.response.data}`);
+          console.log(error);
+        });
     } else {
         // there is an image, then we create an unlisted image post
         await api
@@ -166,7 +166,8 @@ export default function EditPost(props) {
 
   // check if the post is the same; if so don't send.
   const postIsSame = () => {
-    if (propsPost === post) {
+    if (imagePost === null && JSON.stringify(propsPost) === JSON.stringify(post)) {
+      console.log("Post is the same, not posting.", propsPost, post);
       props.onHide();
     } else {
       handleSubmitPost();
@@ -174,7 +175,6 @@ export default function EditPost(props) {
   };
 
   const [file, setFile] = useState();
-  console.log("Editpost", props.post.image)
   const [imagePreview, setImagePreview] = useState(() => props.post.image === null ? "" : props.post.image);
   const [base64, setBase64] = useState("");
   const [name, setFileName] = useState();
