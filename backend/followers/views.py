@@ -184,7 +184,11 @@ def check_true_friend(author_uuid, foreign_id):
                 res = authenticated_GET(f"{remove_end_slash(foreign_author.id)}/followers/{author_uuid}", node_obj)
                 if res.status_code == 200:
                     print("Checking friends result = ", res.json())
-                    current_following_foreign = res.json()
+                    result = res.json()
+                    if result.get("isFollowing") != None:
+                        current_following_foreign = result.get("isFollowing")
+                    else:
+                        current_following_foreign = True
 
         if foreign_following_current and current_following_foreign:
             return True
