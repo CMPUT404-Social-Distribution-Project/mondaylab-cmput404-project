@@ -25,6 +25,7 @@ import {
 } from "../../utils/utils";
 import ProfilePicture from "../ProfilePicture";
 import { Buffer } from 'buffer';
+import { toast } from 'react-toastify';
 import PublishedAgo from "./PublishedAgo";
 
 export default function PostCard(props) {
@@ -125,23 +126,32 @@ export default function PostCard(props) {
     }
   });
 
-  const sendPostToAuthorInbox = (author, post) => {
-    api
-      .post(`${baseURL}/authors/${extractAuthorUUID(author.id)}/inbox/`, post)
-      .then((response) => {
-        console.log("Success sending to author's inbox", response);
-      })
-      .catch((error) => {
-        console.log("Failed to send post to inbox of author", error.response);
-      });
-  };
-
   const sharePost = (post) => {
     if (post.visibility === "PUBLIC" || post.visibility === "FRIENDS") {
+      let successes = 0;
+      let requests = [];
       for (let index = 0; index < followers.length; index++) {
         const follower = followers[index];
-        sendPostToAuthorInbox(follower, post);
+        requests.push(api.post(`${baseURL}/authors/${extractAuthorUUID(follower.id)}/inbox/`, post));
       }
+      Promise.allSettled(requests)
+      .then((results) => {
+        results.forEach((response) => {
+          if (response.status === "fulfilled") {
+            successes++;
+          }
+        })
+        toast(`Successfully sent post to ${successes} of ${followers.length} followers.`, {
+          theme: "dark",
+          hideProgressBar: false,
+          autoClose: 2000
+        })
+      })
+      .catch((errors) => {
+        errors.forEach((err) => {
+          console.log(err);
+        })
+      })
     }
   };
 

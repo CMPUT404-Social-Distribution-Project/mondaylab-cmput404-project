@@ -109,10 +109,6 @@ export default function CreatePost(props) {
       props.onHide();
     } else {
       if (post.visibility === "PRIVATE") {
-        if (sendTo === null) {
-          toast.error("Select an author to send to!");
-          return;
-        }
         const resultPost = response.data;
         api
           .post(`${baseURL}/authors/${extractAuthorUUID(sendTo.id)}/inbox/`, resultPost)
@@ -128,6 +124,10 @@ export default function CreatePost(props) {
   }
 
   const handleSubmitPost = async () => {
+    if (post.visibility === "PRIVATE" && sendTo === null) {
+      toast.error("Select an author to send to!");
+      return;
+    }
     // No image
     if (!imagePost) {
         await api

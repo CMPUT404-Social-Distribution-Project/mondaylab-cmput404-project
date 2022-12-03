@@ -50,6 +50,10 @@ $theme-colors: (
   --darker-blue: #191d26;
   --even-darker-blue: #0e1016;
   --white-teal: #ECFAF8;
+  --toastify-toast-width: 500px !important;
+  --toastify-color-dark: var(--darker-blue) !important;
+  --toastify-font-family: "Readex Pro Light" !important;
+  --toastify-color-progress-dark: var(--orange) !important;
 }
 
 $font-family-sans-serif: system-ui, -apple-system, "Readex Pro" !default;
