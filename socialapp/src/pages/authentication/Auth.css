@@ -50,8 +50,6 @@
   color: var(--orange) !important;
 }
 
-
-
 .form {
   scale: 0.9;
   width: 420px;
@@ -93,7 +91,7 @@ label {
   color: var(--orange);
   position: absolute;
   font-size: 0.6rem;
-  padding-top: 0.5rem;
+  padding-top: 0.3rem;
   align-self: right;
 }
 
@@ -139,5 +137,8 @@ label {
 .form-control:focus {
   background-color: var(--darker-blue);
   color: var(--white-teal);
-  
+}
+
+.Auth-form-container .text-field {
+  margin-top: 2rem !important;
 }
