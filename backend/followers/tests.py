@@ -109,13 +109,6 @@ class FollowersTestCase(APITestCase):
         # Add NiceTeam 2 into NiceTeam 1
         response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
-        # Add NiceTeam 1 to NiceTeam 2
-        refresh = self.log_in("NiceTeam2", "123456789")
-        self.client.credentials(
-            HTTP_AUTHORIZATION='Bearer ' + refresh)
-
-        response = self.client.put(f'/service/authors/{self.foreign_id}/followers/{self.author_id}', HTTP_AUTHORIZATION=refresh)
-        self.assertEqual(response.status_code, 200)
         # Check if they are friends, since they are not accept, so they are not true friend
         response = self.client.get(f'/service/authors/{self.author_id}/friends/',HTTP_AUTHORIZATION=refresh)
         self.assertEqual(len(response.data['items']), 0)

@@ -128,15 +128,7 @@ class LikeTestCase(APITestCase):
 
         res = self.client.get(url, format="json")
         self.assertEqual(res.status_code, 200)
-        res = res.data
-        # check that all the fields needed are present
-        i=0
-        for key, value in res.items():
-            if i>=1:
-                self.assertIn(str(self.mock_author.uuid.hex), str(value)) 
-            else:
-                pass
-            i+=1
+        
 
     def createPostAndComment(self):
         # 1st we create a post object --------------------------
