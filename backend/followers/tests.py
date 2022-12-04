@@ -22,7 +22,7 @@ class FollowersTestCase(APITestCase):
         URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
         DELETE [local]: remove FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID
         """
-        refresh = self.log_in("jackie2", "123456789")
+        refresh = self.log_in("NiceTeam2", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # First add follower, then delete it
@@ -31,7 +31,7 @@ class FollowersTestCase(APITestCase):
         response = self.client.delete(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
         # After delete, it only have 1
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         response = self.client.get(f'/service/authors/{self.author_id}/followers/',HTTP_AUTHORIZATION=refresh)
@@ -42,8 +42,8 @@ class FollowersTestCase(APITestCase):
         """
         GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers
         """
-        # First log in as jackie1, current user is jackie, then add jackie2 and jackie3 into jackie1's follower
-        refresh = self.log_in("jackie1", "123456789")
+        # First log in as NiceTeam1, current user is NiceTeam, then add NiceTeam2 and NiceTeam3 into NiceTeam1's follower
+        refresh = self.log_in("NiceTeam1", "123456789")
         # First to get empty list
         response = self.client.get(f'/service/authors/{self.author_id}/followers/', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
@@ -61,7 +61,7 @@ class FollowersTestCase(APITestCase):
         PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
         GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # First put, then get to check if correct
@@ -70,22 +70,22 @@ class FollowersTestCase(APITestCase):
 
         response = self.client.get(f'/service/authors/{self.author_id}/followers/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
-    def test_true_friends_get(self):
+    def test_true_friends_get1(self):
         """
         URL: ://service/authors/{AUTHOR_ID}/friends/
         GET [local, remote] get a list of friends
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # First put, then get to check if correct
         response = self.client.get(f'/service/authors/{self.author_id}/friends/', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.data['items'], [])
-        # Add jackie 2 into jackie 1
+        # Add NiceTeam 2 into NiceTeam 1
         response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
-        # Add jackie 1 to jackie 2
-        refresh = self.log_in("jackie2", "123456789")
+        # Add NiceTeam 1 to NiceTeam 2
+        refresh = self.log_in("NiceTeam2", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
 
@@ -95,31 +95,26 @@ class FollowersTestCase(APITestCase):
         response = self.client.get(f'/service/authors/{self.author_id}/friends/',HTTP_AUTHORIZATION=refresh)
         self.assertEqual(len(response.data['items']), 1)
 
-    def test_true_friends_get(self):
+    def test_true_friends_get2(self):
         """
         URL: ://service/authors/{AUTHOR_ID}/friends/{FOREIGN_AUTHOR_ID}
         GET [local, remote] check if FOREIGN_AUTHOR_ID is a friend of AUTHOR_ID
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # First put, then get to check if correct
         response = self.client.get(f'/service/authors/{self.author_id}/friends/', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.data['items'], [])
-        # Add jackie 2 into jackie 1
+        # Add NiceTeam 2 into NiceTeam 1
         response = self.client.put(f'/service/authors/{self.author_id}/followers/{self.foreign_id}', HTTP_AUTHORIZATION=refresh)
         self.assertEqual(response.status_code, 200)
-        # Add jackie 1 to jackie 2
-        refresh = self.log_in("jackie2", "123456789")
-        self.client.credentials(
-            HTTP_AUTHORIZATION='Bearer ' + refresh)
+        # Check if they are friends, since they are not accept, so they are not true friend
+        response = self.client.get(f'/service/authors/{self.author_id}/friends/',HTTP_AUTHORIZATION=refresh)
+        self.assertEqual(len(response.data['items']), 0)
+        response = self.client.get(f'/service/authors/{self.author_id}/friends/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
 
-        response = self.client.put(f'/service/authors/{self.foreign_id}/followers/{self.author_id}', HTTP_AUTHORIZATION=refresh)
-        self.assertEqual(response.status_code, 200)
-        # Check if they are friends
-        response = self.client.get(f'/service/authors/{self.foreign_id}/friends/{self.author_id}',HTTP_AUTHORIZATION=refresh)
-
-        self.assertEqual(response.data, True)
+        self.assertEqual(response.data, False)
 
     def add_followers(self, mock_author2,mock_author3):
         # Add followers to current authors
@@ -128,15 +123,15 @@ class FollowersTestCase(APITestCase):
 
     def create_authors(self):
         # Create mock authors
-        self.credentials1 = {'displayName': 'jackie1','password': '123456789'}
-        self.credentials2 = {'displayName': 'jackie2','password': '123456789'}
-        self.credentials3 = {'displayName': 'jackie3','password': '123456789'}
+        self.credentials1 = {'displayName': 'NiceTeam1','password': '123456789'}
+        self.credentials2 = {'displayName': 'NiceTeam2','password': '123456789'}
+        self.credentials3 = {'displayName': 'NiceTeam3','password': '123456789'}
         self.client.post(f'/service/auth/register/', self.credentials1 , format="json")
         self.client.post(f'/service/auth/register/', self.credentials2 , format="json")
         self.client.post(f'/service/auth/register/', self.credentials3 , format="json")
-        mock_author1 = Author.objects.get(displayName="jackie1")
-        mock_author2 = Author.objects.get(displayName="jackie2")
-        mock_author3 = Author.objects.get(displayName="jackie3")
+        mock_author1 = Author.objects.get(displayName="NiceTeam1")
+        mock_author2 = Author.objects.get(displayName="NiceTeam2")
+        mock_author3 = Author.objects.get(displayName="NiceTeam3")
 
         return mock_author1, mock_author2, mock_author3
 
@@ -159,7 +154,7 @@ class FollowersTestCase(APITestCase):
         author_id = mock_author1.uuid
         foreign_id= mock_author2.uuid
         foreign_id2= mock_author3.uuid
-        return author_id,foreign_id,foreign_id2
+        return author_id.hex,foreign_id.hex,foreign_id2.hex
 
 
     def mock_author(self, name):
@@ -173,7 +168,7 @@ class FollowersTestCase(APITestCase):
                 "id": "http://127.0.0.1:8000/authors/60d9c89d-b59e-4969-841b-df0bc2c674fa",
                 "uuid": "60d9c89d-b59e-4969-841b-df0bc2c674fa",
                 "host": "http://127.0.0.1:8000/",
-                "displayName": "jackie1",
+                "displayName": "NiceTeam1",
                 "url": "http://127.0.0.1:8000/authors/60d9c89d-b59e-4969-841b-df0bc2c674fa",
                 "github": "",
                 "profileImage": "",
@@ -182,7 +177,7 @@ class FollowersTestCase(APITestCase):
                 "id": "http://127.0.0.1:8000/authors/60d9c89d-b59e-4969-841b-df0bc2c674fb",
                 "uuid": "60d9c89d-b59e-4969-841b-df0bc2c674fb",
                 "host": "http://127.0.0.1:8000/",
-                "displayName": "jackie2",
+                "displayName": "NiceTeam2",
                 "url": "http://127.0.0.1:8000/authors/60d9c89d-b59e-4969-841b-df0bc2c674fb",
                 "github": "",
                 "profileImage": "",

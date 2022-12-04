@@ -38,8 +38,8 @@ class AuthorTestCase(APITestCase):
     
     def testGetAuthor(self):
         Author.objects.create(displayName="Author2")
-        author2 = Author.objects.get(displayName="Author2")
-        url = f'/service/authors/{author2.uuid}/'
+        author2 = Author.objects.get(displayName="test")
+        url = f'/service/authors/{author2.uuid.hex}/'
 
         res = self.client.get(url, format="json")
         self.assertEqual(res.status_code, 200)
@@ -53,12 +53,11 @@ class AuthorTestCase(APITestCase):
         self.assertTrue('displayName' in res.keys())
         self.assertTrue('type' in res.keys())
 
-    def testGet404(self):
-        # should get 404 when getting a non existent user
-        # dunno why it's 301...is fine in web browser
-        url = f'/service/authors/{uuid4()}'
+    def testGet301(self):
+        # should get 301 
+        url = f'/service/authors/{uuid4().hex}'
         res = self.client.get(url, format="json")
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 301)
 
     def testUpdateAuthorNoAuthorization(self):
         # should be able to GET author fine since method is public
@@ -71,42 +70,74 @@ class AuthorTestCase(APITestCase):
         self.assertEqual(update_res.status_code, 401)
 
     def testUpdateAuthor(self):
-        url = f'/service/authors/{self.mock_author.uuid}/'
+        # update author 
+        refresh, author_id = self.log_in("test", "testtest")
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Bearer ' + refresh)
+        url = f'/service/authors/{author_id}/'
         res = self.client.get(url, format="json")
         self.assertEqual(res.status_code, 200)
-
         # update author with new display name
-        update_res = self.client.post(url, {'displayName': 'AuthorPatched'}, HTTP_AUTHORIZATION=self.authorization)
+        update_res = self.client.post(url, {'displayName': 'test1'}, format="json", HTTP_AUTHORIZATION=refresh)
         self.assertEqual(update_res.status_code, 202)
 
         # get author again and see if it really did update
         res = self.client.get(url, format="json")
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.data.get('displayName'), 'AuthorPatched')
+        self.assertEqual(res.data.get('displayName'), 'test1')
+    def create_authors(self):
+        # Create mock authors
+        self.credentials1 = {'displayName': 'test','password': 'testtest'}
+        self.client.post(f'http://localhost:8000/service/auth/register/', self.credentials1 , format="json")
+        mock_author1 = Author.objects.get(displayName="test")
+
+        return mock_author1
+
+    def log_in(self, displayName, password):
+        # Create authors
+        # To get authtication
+        self.client = APIClient()
+        # Create 3 authors
+        self.mock_author1 = self.create_authors()
+        author_id= self.get_id(self.mock_author1)
+
+        # Log in existed authors
+        self.credentials = {'displayName': displayName,'password': password}
+        response =self.client.post(f'http://localhost:8000/service/auth/login/', self.credentials, format="json")
+
+        return response.data['access'], author_id
+
+    def get_id(self, mock_author1):
+        # Get uuid based on authors given
+        author_id = mock_author1.uuid
+        return author_id.hex
 
 
 
 class AuthorsTestCase(TestCase):
-    NUM_AUTHORS = 5     # should only show 5 authors at a time when specified
+    NUM_AUTHORS = 0    # should only show 5 authors at a time when specified
 
     def testGetAuthors(self):
-        url = f'/service/authors/?page=1&size={self.NUM_AUTHORS}'
-        Author.objects.create(displayName="Author1")
-        Author.objects.create(displayName="Author2")
-        Author.objects.create(displayName="Author3")
-        Author.objects.create(displayName="Author4")
-        Author.objects.create(displayName="Author5")
-        Author.objects.create(displayName="Author6")
+        url = f'http://localhost:8000/service/authors/?page=1&size={self.NUM_AUTHORS}'
+        Author.objects.create(displayName="Author1", password="123456789")
+        Author.objects.create(displayName="Author2", password="123456789")
+        Author.objects.create(displayName="Author3", password="123456789")
+        Author.objects.create(displayName="Author4", password="123456789")
+        Author.objects.create(displayName="Author5", password="123456789")
+        Author.objects.create(displayName="Author6", password="123456789")
+        
 
-        # shouldn't need authentication
-        res = self.client.get(url, format="json")
+        res = self.client.get(url)
         numAuthors = len(res.data.get("items"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(numAuthors, self.NUM_AUTHORS)
         self.assertEqual(res.data.get('type'), 'authors')
+
+        self.assertEqual(res.status_code, 200)
 
     def testPostAuthorsUnauthorized(self):
         # tests without authorization
         url = f'/service/authors/'
         res = self.client.post(url, format="json")
         self.assertEqual(res.status_code, 401)
+

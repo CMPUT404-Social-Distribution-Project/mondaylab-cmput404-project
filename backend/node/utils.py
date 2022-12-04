@@ -3,8 +3,8 @@ from .models import Node
 
 # NOTE: Used for querying with objects. E.g. Author.objects.get(host__in=our_hosts) returns authors from our host.
 # TODO: Add "https://cs404-project.herokuapp.com/service/" later
-our_hosts_api = ["http://localhost:8000/service/", ]
-our_hosts = ["http://localhost:8000/", ]
+our_hosts_api = ["http://localhost:8000/service/","http://testserver/service/" ]
+our_hosts = ["http://localhost:8000/", "http://testserver"]
 
 
 def authenticated_GET(url, node):
@@ -53,5 +53,4 @@ def getNodeRemoteAuthors(node):
     if (res.status_code == 200):
         return res.json()["items"]
     else:
-        print(f"getNodeRemoteAuthors: Failed with res {res.status_code}:{res.content}")
         return []
