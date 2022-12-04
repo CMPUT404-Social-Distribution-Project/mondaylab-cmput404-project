@@ -439,8 +439,6 @@ def get_author(author_id):
         return None
 
 def get_like_type(object_field):
-
-    print("in get_link_type")
     if "posts" in object_field and "comments" in object_field:
         return "comment"
     elif "post" in object_field:
