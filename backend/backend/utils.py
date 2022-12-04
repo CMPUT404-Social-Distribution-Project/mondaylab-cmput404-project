@@ -17,7 +17,7 @@ from node.utils import authenticated_GET, authenticated_POST, authenticated_GET_
 from uuid import uuid4
 
 our_frontends = ["http://localhost:3000"]
-our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
+our_backends = ["http://localhost:8000", "http://testserver"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
 
@@ -477,7 +477,6 @@ def send_to_remote_inbox(remote_author_obj, data):
         res = authenticated_POST(f"{remove_end_slash(remote_author_obj.id)}/inbox/", node_obj, data)
         if res.status_code != 200:
             print(f"Failed to send data to inbox of remote author {remote_author_obj.id}")
-            print(res.content)
     else:
         print(f"Could not send to remote inbox, author '{remote_author_obj.displayName}' is not part of an accepted node")
 

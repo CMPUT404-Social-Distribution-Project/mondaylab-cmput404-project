@@ -22,7 +22,7 @@ export default function GithubPage() {
   const routeChange = (githubName) => {
     window.open(`https://github.com/${githubName}`);
   };
-  const itemsPerPage=6;
+  const itemsPerPage = 6;
   const [myItemOffset, setMyItemOffset] = useState(0);
   const myEndOffset = myItemOffset + itemsPerPage;
   const myGithubItems = myGithubActivities.slice(myItemOffset, myEndOffset);
@@ -79,7 +79,7 @@ User can see all githubs from all authors */
             author.github.match("[^/]+(?!.*/)")
           ) {
             let name = author.github.split("com/")[1];
-            setGithubName(name);
+            //setGithubName(name);
             axios
               .get(`https://api.github.com/users/${name}/events`)
               .then((response) => {
@@ -146,7 +146,7 @@ User can see all githubs from all authors */
                         className="post-author"
                         onClick={() => routeChange(githubName)}
                       >
-                        <div className="profile-pic-post">
+                        <div className="profile-pic">
                           <img
                             src={activity.actor.avatar_url}
                             alt="profilePic"
@@ -213,14 +213,13 @@ User can see all githubs from all authors */
             {allGithubActivities.length !== 0 ? (
               allGithubItems.map((activity, i) => (
                 <Col>
-                  {" "}
                   <Card className="post-card" key={i}>
                     <Card.Header>
                       <div
                         className="post-author"
-                        onClick={() => routeChange(githubName)}
+                        onClick={() => routeChange(activity.actor.login)}
                       >
-                        <div className="profile-pic-post">
+                        <div className="profile-pic">
                           <img
                             src={activity.actor.avatar_url}
                             alt="profilePic"
