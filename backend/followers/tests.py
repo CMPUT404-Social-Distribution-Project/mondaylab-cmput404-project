@@ -112,7 +112,6 @@ class FollowersTestCase(APITestCase):
         # Check if they are friends, since they are not accept, so they are not true friend
         response = self.client.get(f'/service/authors/{self.author_id}/friends/',HTTP_AUTHORIZATION=refresh)
         self.assertEqual(len(response.data['items']), 0)
-        print(response.data['items'])
         response = self.client.get(f'/service/authors/{self.author_id}/friends/{self.foreign_id}',HTTP_AUTHORIZATION=refresh)
 
         self.assertEqual(response.data, False)

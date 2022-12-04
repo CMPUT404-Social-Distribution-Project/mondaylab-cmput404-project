@@ -477,7 +477,6 @@ def send_to_remote_inbox(remote_author_obj, data):
         res = authenticated_POST(f"{remove_end_slash(remote_author_obj.id)}/inbox/", node_obj, data)
         if res.status_code != 200:
             print(f"Failed to send data to inbox of remote author {remote_author_obj.id}")
-            print(res.content)
     else:
         print(f"Could not send to remote inbox, author '{remote_author_obj.displayName}' is not part of an accepted node")
 

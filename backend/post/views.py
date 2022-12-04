@@ -287,7 +287,6 @@ class PostsApiView(GenericAPIView):
                                     follower_inbox.posts.add(Post.objects.get(id=postId))
                             except Exception as e:
                                 result =f"Failed to send post {postId} to inbox of friend"
-                                print(result)
                         
                     return response.Response(serialize.data, status=status.HTTP_201_CREATED)
 

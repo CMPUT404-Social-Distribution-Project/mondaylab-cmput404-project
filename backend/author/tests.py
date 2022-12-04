@@ -39,7 +39,6 @@ class AuthorTestCase(APITestCase):
     def testGetAuthor(self):
         Author.objects.create(displayName="Author2")
         author2 = Author.objects.get(displayName="test")
-        print(author2.uuid.hex)
         url = f'/service/authors/{author2.uuid.hex}/'
 
         res = self.client.get(url, format="json")

@@ -57,5 +57,4 @@ def getNodeRemoteAuthors(node):
     if (res.status_code == 200):
         return res.json()["items"]
     else:
-        print(f"getNodeRemoteAuthors: Failed with res {res.status_code}:{res.content}")
         return []
