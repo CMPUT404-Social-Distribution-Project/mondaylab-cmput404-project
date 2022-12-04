@@ -33,6 +33,24 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-height: 13.3rem;
+    height: auto;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    position: absolute;
+    top: 9rem;
+    z-index: 2;
+    width: 20rem;
+    transform: translateX(-1rem);
+    background-color: var(--slightly-darker-blue);
+    padding: 0.5rem;
+    border-bottom-left-radius: 11px;
+    border-bottom-right-radius: 11px;
+    gap: 0.2rem;
+}
+
+.authors-explore-container .userCard {
+    width: 100%;
 }
 
 .search-bar-explore:focus {

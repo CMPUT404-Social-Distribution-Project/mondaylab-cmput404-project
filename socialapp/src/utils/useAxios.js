@@ -9,7 +9,7 @@ import axios from "axios"
 const useAxios = () => {
   // Use this function when you want to use a method that requires 
   // authorization. See FollowButton.jsx for an example use.
-  const { authTokens, setUser, setAuthTokens, baseURL } = useContext(AuthContext);
+  const { authTokens, setUser, setAuthTokens, baseURL, logoutUser } = useContext(AuthContext);
 
   const axiosInstance = axios.create({
     baseURL,
@@ -28,6 +28,10 @@ const useAxios = () => {
     const response = await axios.post(`${baseURL}/auth/refresh/`, {
       refresh: authTokens.refresh
     });
+
+    if (response.status === 401) {
+      logoutUser();
+    }
 
     localStorage.setItem("authTokens", JSON.stringify(response.data));
 

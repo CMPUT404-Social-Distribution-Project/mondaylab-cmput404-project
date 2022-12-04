@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import "./pages.css";
 // import * as Yup from "yup";
 import useAxios from "../utils/useAxios.js";
@@ -18,42 +18,6 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import PulseLoader from 'react-spinners/PulseLoader';
 import { toast } from 'react-toastify';
 
-function RenderAuthors(props) {
-  // given the list of authors from the query, creates the user cards
-  if (props.authors) {
-    return (
-      <div className="authors-explore-container">
-        {typeof props.authors.items !== "undefined" ? (
-          props.authors.items.length !== 0 ? (
-            props.authors.items.map((author) => <UserCard author={author} key={author.id}/>)
-          ) : (
-            <Card style={{ backgroundColor: "var(--darker-blue)" }}>
-              <h5 style={{ marginLeft: "15px" }}>
-                No match result for authors!
-              </h5>
-            </Card>
-          )
-        ) : null}
-      </div>
-    );
-  }
-  return <></>;
-}
-
-function RenderRemoteAuthors(props) {
-  // given the list of authors from the query, creates the user cards
-  if (props.authors !== "undefined" && props.authors.length > 0) {
-    return (
-        <Card className="remote-authors-container" style={{ backgroundColor: "var(--darker-blue)" }}>
-          <Card.Body>
-            <h5>Remote Authors</h5>
-          {props.authors.map((author) => <UserCard author={author} key={author.id}/>)}
-          </Card.Body>
-        </Card>
-    );
-  }
-}
-
 function TeamSelect(props) {
   return (
     <DropdownButton onSelect={props.onSelect} title={"Team " + props.title} >
@@ -66,9 +30,6 @@ function TeamSelect(props) {
 }
 
 export default function Explore() {
-  // const validate = Yup.object().shape({
-  //   search: Yup.string(),
-  // });
   const [authors, setAuthors] = useState(null);
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
@@ -86,7 +47,56 @@ export default function Explore() {
   const [teamSelected, setTeamSelected] = useState(() => storedTeamSelected ? storedTeamSelected : "2");
   const [postsLoading, setPostsLoading] = useState(false);
   const [remoteAuthorsLoading, setRemoteAuthorsLoading] = useState(false);
+  const [showSearchedAuthors, setShowSearchedAuthors] = useState(false);
+  
+  /**
+ * Hook that alerts clicks outside of the passed ref
+ * Ref: https://stackoverflow.com/questions/32553158/detect-click-outside-react-component
+ * Answer by: Ben Bud
+ */
+function useOutsideAlerter(ref) {
+  useEffect(() => {
+    /**
+     * Alert if clicked on outside of element
+     */
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setShowSearchedAuthors(false);
+      }
+    }
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [ref]);
+}
 
+
+function RenderAuthors(props) {
+  const wrapperRef = useRef(null);
+  useOutsideAlerter(wrapperRef);
+  // given the list of authors from the query, creates the user cards
+  if (showSearchedAuthors && props.authors) {
+    return (
+      <div ref={wrapperRef} className="authors-explore-container">
+        {typeof props.authors.items !== "undefined" ? (
+          props.authors.items.length !== 0 ? (
+            props.authors.items.map((author) => <UserCard author={author} key={author.id}/>)
+          ) : (
+            <Card style={{ backgroundColor: "var(--darker-blue)" }}>
+              <h5 style={{ marginLeft: "15px" }}>
+                No match result for authors!
+              </h5>
+            </Card>
+          )
+        ) : null}
+      </div>
+    );
+  }
+  return <></>;
+}
 
   useEffect(() => {
     const fetchData = async () => {
@@ -151,9 +161,10 @@ export default function Explore() {
   const search = async (val) => {
     setLoading(true);
     const res = await search2(
-      `${baseURL}/authors?search=${val}` // TODO: need to search with pagination
+      `${baseURL}/authors?size=10&search=${val}` // TODO: need to search with pagination
     );
     setAuthors(res);
+    setShowSearchedAuthors(true);
 
     setLoading(false);
   };
@@ -213,18 +224,21 @@ export default function Explore() {
           <h1>Explore</h1>
         </Col>
         <Col className="search-col">
-          <FaSearch className="FaSearch" />
-          <input
-            className="search-bar-explore"
-            value={value}
-            onChange={(e) => onChangeHandler(e)}
-            placeholder="Search for an author/post"
-          />
+
+              <FaSearch className="FaSearch" />
+              <input
+                className="search-bar-explore"
+                value={value}
+                onChange={(e) => onChangeHandler(e)}
+                placeholder="Search for an author/post"
+              />
+
+            {value !== "" ? <RenderAuthors authors={authors} /> : null}
+  
         </Col>
         <Col className="empty-rec" />
       </Row>
       <div className="searchResult">
-        {value !== "" ? <RenderAuthors authors={authors} /> : null}
       </div>
 
       {/* Columns start at 50% wide on mobile and bump up to 33.3% wide on desktop */}
