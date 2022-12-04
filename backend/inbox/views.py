@@ -428,7 +428,7 @@ class InboxDeleteFRApiView(GenericAPIView):
 
 def get_author(author_id):
 
-    print("in get_author")
+
     """
     Given author id, check if the author exists in database
     """
