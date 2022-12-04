@@ -1,11 +1,10 @@
 import React, { useContext, useState } from "react";
 import "./SideNavBar.css";
 import { FaHome, FaInbox, FaSearch, FaSignOutAlt } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdPublic } from "react-icons/md";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import CreatePost from "../Posts/CreatePost";
-
 
 export default function Sidebar() {
     const { logoutUser } = useContext(AuthContext) || {};
@@ -59,6 +58,15 @@ export default function Sidebar() {
                     onClick={() => navigate("/explore", {state: {refresh:true}})}
                 >
                     <FaSearch style={{ color: location.pathname === "/explore" ? "var(--orange)" : "var(--white-teal)" }}/>
+                </div>
+            </li>
+            <li className="side-nav-item">
+                <div
+                    className="side-nav-link"
+                    title="Remote Posts"
+                    onClick={() => navigate("/remote_public_posts", {state: {refresh:true}})}
+                >
+                    <MdPublic style={{ color: location.pathname === "/remote_public_posts" ? "var(--orange)" : "var(--white-teal)" }}/>
                 </div>
             </li>
             <hr className="solid" />

@@ -11,15 +11,13 @@ from uuid import uuid4, UUID
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Q
 from backend.utils import (is_URL, isAuthorized, is_friends, is_our_backend, send_to_remote_inbox, 
-is_our_frontend, check_remote_fetch, fetch_author, add_end_slash, build_pagination_query)
+check_remote_fetch, fetch_author, build_pagination_query)
 from comments.serializers import CommentsSerializer
 from backend.pagination import CustomPaginationCommentsSrc, CustomPagination
 import base64, requests
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
-from node.utils import our_hosts, authenticated_GET
-from node.models import Node
-from operator import itemgetter
+from node.utils import our_hosts
 
 class PostApiView(GenericAPIView):
     """
@@ -308,56 +306,8 @@ class AllPostsApiView(GenericAPIView):
         Gets all public posts.
         '''
         try:
-
-            if request.META.get("HTTP_ORIGIN") != None and is_our_frontend(request.META.get("HTTP_ORIGIN")):
-                # Get all posts, including remote ones
-                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts).order_by('-published')
-                post_serializer = PostSerializer(posts_list, many=True)
-                posts_list = post_serializer.data
-
-                # Get all the nodes posts
-                for node in Node.objects.all():
-                    try:
-                        if node.team == 16:
-                            # team 16 has /posts/ endpoint luckily. 
-                            res = authenticated_GET(f"{node.host}posts/", node)
-                            if isinstance(res, str):
-                                raise ValueError(f"res: {res}")
-                            if res.status_code == 200:
-                                remote_posts = res.json().get("items")
-                                posts_list.extend(remote_posts)
-                        else:
-                            auth_res = authenticated_GET(f"{node.host}authors/", node)
-                            if isinstance(auth_res, str):
-                                raise ValueError(f"auth_res: {auth_res}")
-                            if auth_res.status_code == 200:
-                                remote_authors = auth_res.json().get("items")
-                                # Got remote authors, now for each author fetch their public posts
-                                for remote_author in remote_authors:
-                                    try:
-                                        if "localhost" not in remote_author.get("host"):
-                                            posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
-                                            if isinstance(posts_res, str):
-                                                raise ValueError(f"posts_res: {posts_res}")
-                                            if posts_res.status_code == 200:
-                                                remote_posts = posts_res.json().get("items")
-                                                posts_list.extend(remote_posts)
-                                    except Exception as e:
-                                        print(f"Something went wrong trying to retrieve author {remote_author.get('displayName')}:{remote_author.get('host')} posts.")
-                                        continue
-                    except Exception as e:
-                        print(f"Something went wrong trying to fetch to node {node.host}. {e}")
-                        continue
-
-                result = {
-                    "type":"posts",
-                    "items": sorted(posts_list, key=itemgetter('published'), reverse=True)
-                }
-                return response.Response(result, status=status.HTTP_200_OK)
-                
-            else:
-                # Remote is requesting our posts, only include posts from our host
-                posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts).order_by('-published')
+            # Remote is requesting our posts, only include posts from our host
+            posts_list = Post.objects.filter(visibility='PUBLIC', unlisted=False, author__host__in=our_hosts).order_by('-published')
 
             posts_paginated = self.paginate_queryset(posts_list)
             post_serializer = PostSerializer(posts_paginated, many=True)

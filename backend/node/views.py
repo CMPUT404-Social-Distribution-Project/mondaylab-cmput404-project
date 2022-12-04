@@ -7,6 +7,11 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 import requests
 import base64
+from post.models import Post
+from post.serializers import PostSerializer
+from node.utils import authenticated_GET, our_hosts
+from backend.utils import is_our_frontend
+from operator import itemgetter
 
 credentialForConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 credentialForDelete = {"", "", "", ""}
@@ -137,13 +142,49 @@ def getNodeAuthors(request):
         return response.Response(f"Could not retrieve team {team_number}", status=status.HTTP_404_NOT_FOUND)
 
 
-"""
-NOTE, I moved this inside  AcceptConnectionRemote() api
-sever a connection between this server and a remote host
-usage:
-     [local]  DELETE /service/node/remotehostname
-"""
-@api_view(['DELETE'])
-def removeNode(request, ):
-    
-    pass
+@api_view(['GET'])
+def getNodePosts(request):
+    if request.META.get("HTTP_ORIGIN") != None and is_our_frontend(request.META.get("HTTP_ORIGIN")):
+        posts_list = []
+
+        # Get all the nodes posts
+        for node in Node.objects.all():
+            try:
+                if node.team == 16:
+                    # team 16 has /posts/ endpoint luckily. 
+                    res = authenticated_GET(f"{node.host}posts/", node)
+                    if isinstance(res, str):
+                        raise ValueError(f"res: {res}")
+                    if res.status_code == 200:
+                        remote_posts = res.json().get("items")
+                        posts_list.extend(remote_posts)
+                else:
+                    auth_res = authenticated_GET(f"{node.host}authors/", node)
+                    if isinstance(auth_res, str):
+                        raise ValueError(f"auth_res: {auth_res}")
+                    if auth_res.status_code == 200:
+                        remote_authors = auth_res.json().get("items")
+                        # Got remote authors, now for each author fetch their public posts
+                        for remote_author in remote_authors:
+                            try:
+                                if "localhost" not in remote_author.get("host"):
+                                    posts_res = authenticated_GET(f"{remote_author['id']}/posts/", node)
+                                    if isinstance(posts_res, str):
+                                        raise ValueError(f"posts_res: {posts_res}")
+                                    if posts_res.status_code == 200:
+                                        remote_posts = posts_res.json().get("items")
+                                        posts_list.extend(remote_posts)
+                            except Exception as e:
+                                print(f"Something went wrong trying to retrieve author {remote_author.get('displayName')}:{remote_author.get('host')} posts.")
+                                continue
+            except Exception as e:
+                print(f"Something went wrong trying to fetch to node {node.host}. {e}")
+                continue
+
+        result = {
+            "type":"posts",
+            "items": sorted(posts_list, key=itemgetter('published'), reverse=True)
+        }
+        return response.Response(result, status=status.HTTP_200_OK)
+    else:
+        return response.Response("Not our frontend.", status=status.HTTP_401_UNAUTHORIZED)
