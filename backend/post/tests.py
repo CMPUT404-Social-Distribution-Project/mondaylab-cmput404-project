@@ -28,15 +28,15 @@ class PostTestCase(APITestCase):
         # To get authtication
     def create_authors(self):
         # Create mock authors
-        self.credentials1 = {'displayName': 'jackie1','password': '123456789'}
-        self.credentials2 = {'displayName': 'jackie2','password': '123456789'}
-        self.credentials3 = {'displayName': 'jackie3','password': '123456789'}
+        self.credentials1 = {'displayName': 'NiceTeam1','password': '123456789'}
+        self.credentials2 = {'displayName': 'NiceTeam2','password': '123456789'}
+        self.credentials3 = {'displayName': 'NiceTeam3','password': '123456789'}
         self.client.post(f'http://localhost:8000/service/auth/register/', self.credentials1 , format="json")
         self.client.post(f'http://localhost:8000/service/auth/register/', self.credentials2 , format="json")
         self.client.post(f'http://localhost:8000/service/auth/register/', self.credentials3 , format="json")
-        mock_author1 = Author.objects.get(displayName="jackie1")
-        mock_author2 = Author.objects.get(displayName="jackie2")
-        mock_author3 = Author.objects.get(displayName="jackie3")
+        mock_author1 = Author.objects.get(displayName="NiceTeam1")
+        mock_author2 = Author.objects.get(displayName="NiceTeam2")
+        mock_author3 = Author.objects.get(displayName="NiceTeam3")
 
         return mock_author1, mock_author2, mock_author3
 
@@ -63,15 +63,15 @@ class PostTestCase(APITestCase):
     def mock_author(self):
         # create mock authors
         try: 
-            Author.objects.create(displayName="jackie", password="123456789")
+            Author.objects.create(displayName="NiceTeam", password="123456789")
             
-            author =Author.objects.get(displayName="jackie")
+            author =Author.objects.get(displayName="NiceTeam")
         except:
             author= {
                 "id": " http://testsever/service/authors/60d9c89db59e4969841bdf0bc2c674fa",
                 "uuid": "60d9c89db59e4969841bdf0bc2c674fa",
                 "host": " /",
-                "displayName": "jackie1",
+                "displayName": "NiceTeam1",
                 "url": "http://testsever/service/authors/60d9c89db59e4969841bdf0bc2c674fa",
                 "github": "",
                 "profileImage": "",
@@ -155,7 +155,7 @@ class PostTestCase(APITestCase):
         """
         POST [local] create a new post but generate a new id
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         request = self.mock_post_1
@@ -177,7 +177,7 @@ class PostTestCase(APITestCase):
         self.assertEqual(self.mock_post_2['visibility'], response.data['visibility'])
         self.assertEqual(self.mock_post_2['unlisted'], response.data['unlisted'])
         self.assertEqual(self.mock_post_2['categories'], response.data['categories'])
-        newNode = Node(host="http://testserver/", username='jackie1', password="123456789", team="2")
+        newNode = Node(host="http://testserver/", username='NiceTeam1', password="123456789", team="2")
         newNode.save()
         Node.objects.create(
             host="http://localhost:8000/",
@@ -186,7 +186,7 @@ class PostTestCase(APITestCase):
             team=1111
         )
         self.host='localhost:8000/'
-        credentials = f'jackie1:123456789'
+        credentials = f'NiceTeam1:123456789'
         credential_bytes = credentials.encode('ascii')
         base64_bytes = b64encode(credential_bytes)
         base64_credentials = base64_bytes.decode('ascii')
@@ -204,7 +204,7 @@ class PostTestCase(APITestCase):
          GET [local, remote] get the recent posts from author AUTHOR_ID (paginated)
         """
         #Create post in test_post_post, this step test if we can get the post
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         response2 = self.client.get(f'http://localhost:8000/service/authors/{self.author_id}/posts/', HTTP_AUTHORIZATION=refresh)
@@ -236,7 +236,7 @@ class PostTestCase(APITestCase):
         """
         GET [local, remote] get the public post whose id is POST_ID with pagination
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         request = self.mock_post_1
@@ -253,7 +253,7 @@ class PostTestCase(APITestCase):
         """
         PUT [local] create a post where its id is POST_ID
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         post_id = uuid4()
@@ -273,7 +273,7 @@ class PostTestCase(APITestCase):
         """
         DELETE [local] remove the post whose id is POST_ID
         """    
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # Create post to delete

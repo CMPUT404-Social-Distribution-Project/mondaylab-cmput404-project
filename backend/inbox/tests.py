@@ -16,7 +16,7 @@ class InboxTestCase(APITestCase):
         URL: ://service/authors/{AUTHOR_ID}/inbox
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # No items
@@ -45,7 +45,7 @@ class InboxTestCase(APITestCase):
         URL: ://service/authors/{AUTHOR_ID}/inbox/all
         GET [local]: get a list of items sent to AUTHOR_ID, inlcuding posts, likes, followers, comments
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # No items
@@ -79,7 +79,7 @@ class InboxTestCase(APITestCase):
         POST [local, remote]: send a post to the author
         if the type is “post” then add that post to AUTHOR_ID’s inbox
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         post_id = uuid.uuid4().hex
@@ -95,7 +95,7 @@ class InboxTestCase(APITestCase):
         POST [local, remote]: send a post to the author
         if the type is “follow” then add that follow is added to AUTHOR_ID’s inbox to approve later
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         send = self.mock_follower_request(self.foreign_id, self.author_id)
@@ -110,7 +110,7 @@ class InboxTestCase(APITestCase):
         POST [local, remote]: send a post to the author
         if the type is “like” then add that like to AUTHOR_ID’s inbox
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         send = self.mock_like(self.author_id)
@@ -125,7 +125,7 @@ class InboxTestCase(APITestCase):
         POST [local, remote]: send a post to the author
         if the type is “comment” then add that comment to AUTHOR_ID’s inbox  
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         post_id = uuid.uuid4().hex
@@ -145,7 +145,7 @@ class InboxTestCase(APITestCase):
         URL: ://service/authors/{AUTHOR_ID}/inbox/all
         GET [local]: get a list of items sent to AUTHOR_ID, inlcuding posts, likes, followers, comments
         """
-        refresh = self.log_in("jackie1", "123456789")
+        refresh = self.log_in("NiceTeam1", "123456789")
         self.client.credentials(
             HTTP_AUTHORIZATION='Bearer ' + refresh)
         # No items
@@ -284,15 +284,15 @@ class InboxTestCase(APITestCase):
 
     def create_authors(self):
         # Create mock authors
-        self.credentials1 = {'displayName': 'jackie1','password': '123456789'}
-        self.credentials2 = {'displayName': 'jackie2','password': '123456789'}
-        self.credentials3 = {'displayName': 'jackie3','password': '123456789'}
+        self.credentials1 = {'displayName': 'NiceTeam1','password': '123456789'}
+        self.credentials2 = {'displayName': 'NiceTeam2','password': '123456789'}
+        self.credentials3 = {'displayName': 'NiceTeam3','password': '123456789'}
         self.client.post(f'/service/auth/register/', self.credentials1 , format="json")
         self.client.post(f'/service/auth/register/', self.credentials2 , format="json")
         self.client.post(f'/service/auth/register/', self.credentials3 , format="json")
-        mock_author1 = Author.objects.get(displayName="jackie1")
-        mock_author2 = Author.objects.get(displayName="jackie2")
-        mock_author3 = Author.objects.get(displayName="jackie3")
+        mock_author1 = Author.objects.get(displayName="NiceTeam1")
+        mock_author2 = Author.objects.get(displayName="NiceTeam2")
+        mock_author3 = Author.objects.get(displayName="NiceTeam3")
 
         return mock_author1, mock_author2, mock_author3
 
@@ -329,7 +329,7 @@ class InboxTestCase(APITestCase):
                 "id": "http://testserver/service/authors/60d9c89db59e4969841bdf0bc2c674fa",
                 "uuid": "60d9c89db59e4969841bdf0bc2c674fa",
                 "host": "http://testserver/",
-                "displayName": "jackie1",
+                "displayName": "NiceTeam1",
                 "url": "http://testserver/service/authors/60d9c89db59e4969841bdf0bc2c674fa",
                 "github": "",
                 "profileImage": "",
@@ -338,7 +338,7 @@ class InboxTestCase(APITestCase):
                 "id": "http://testserver/service/authors/60d9c89db59e4969841bdf0bc2c674fb",
                 "uuid": "60d9c89db59e4969841bdf0bc2c674fb",
                 "host": "http://testserver/",
-                "displayName": "jackie2",
+                "displayName": "NiceTeam2",
                 "url": "http://testserver/service/authors/60d9c89db59e4969841bdf0bc2c674fb",
                 "github": "",
                 "profileImage": "",
