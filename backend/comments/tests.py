@@ -26,7 +26,7 @@ class CommentsTestCase(APITestCase):
         self.authorization = f'Bearer {res_data.get("token")}'
         self.mock_author = Author.objects.get(displayName=self.displayName)
 
-        self.mock_comment == {
+        self.mock_comment = {
             "type": "comment",
             "author": {
                 "type": "author",
@@ -36,9 +36,10 @@ class CommentsTestCase(APITestCase):
                 "displayName": self.mock_author.displayName,
                 "github": ""
             },
-            "comment": "Comment1"
+            "comment": "Comment1",
+            "object":""
         }
-        self.urlPost = f'/service/authors/{self.mock_author.uuid}/posts/'
+        self.urlPost = f'/service/authors/{self.mock_author.uuid.hex}/posts/'
 
     def testCreateComments(self):
 
@@ -49,19 +50,19 @@ class CommentsTestCase(APITestCase):
         self.assertEqual(responseCreatePost.status_code, 201)
     
         # check if post author matches the author who posted
-        self.assertEqual(responseCreatePost.data.get('author').get('uuid'), str(self.mock_author.uuid))        
+        self.assertEqual(responseCreatePost.data.get('author').get('uuid'), str(self.mock_author.uuid.hex))        
         
 
         postUUID = responseCreatePost.data.get('uuid')
         # now we create comment
         urlComment = f'{self.urlPost}{postUUID}/comments/'
-        responseCreateComment = self.client.post(urlComment, {},HTTP_AUTHORIZATION=self.authorization)
+        responseCreateComment = self.client.post(urlComment,self.mock_comment, format='json',HTTP_AUTHORIZATION=self.authorization)
         self.assertEqual(responseCreateComment.status_code, 201)
 
         comment_authorUUID = responseCreateComment.data.get('author').get('uuid')
 
         # check if comment author field matches the author who made the comment
-        self.assertEqual(str(self.mock_author.uuid) , comment_authorUUID)
+        self.assertEqual(str(self.mock_author.uuid.hex) , comment_authorUUID)
         #Comment.objects.create("")
 
     def testUnauthorizedCreateComment(self):
@@ -71,7 +72,7 @@ class CommentsTestCase(APITestCase):
 
         # attempt to create comment
         urlComment = f'{self.urlPost}{postUUID}/comments/'
-        responseCreateComment = self.client.post(urlComment, self.mock_comment)
+        responseCreateComment = self.client.post(urlComment, self.mock_comment, format='json')
         self.assertEqual(responseCreateComment.status_code, 401)
         
     def testGetComment(self):
@@ -80,12 +81,12 @@ class CommentsTestCase(APITestCase):
 
         # create comment
         urlComment = f'{self.urlPost}{postUUID}/comments/'
-        res = self.client.post(urlComment, self.mock_comment, HTTP_AUTHORIZATION=self.authorization)
+        res = self.client.post(urlComment, self.mock_comment, format='json', HTTP_AUTHORIZATION=self.authorization)
         self.assertEqual(res.status_code, 201)
         
         commentUUID = res.data.get("uuid")
         # get the comment
-        res = self.client.get(f"{urlComment}{commentUUID}", HTTP_AUTHORIZATION=self.authorization)
+        res = self.client.get(f"{urlComment}{commentUUID}",format='json', HTTP_AUTHORIZATION=self.authorization)
         self.assertEqual(res.status_code, 200)
 
         # verify contents
@@ -98,14 +99,14 @@ class CommentsTestCase(APITestCase):
 
         # create two comments
         urlComment = f'{self.urlPost}{postUUID}/comments/'
-        res = self.client.post(urlComment, self.mock_comment, HTTP_AUTHORIZATION=self.authorization)
+        res = self.client.post(urlComment, self.mock_comment,format='json', HTTP_AUTHORIZATION=self.authorization)
         self.assertEqual(res.status_code, 201)
-        res = self.client.post(urlComment, self.mock_comment, HTTP_AUTHORIZATION=self.authorization)
+        res = self.client.post(urlComment, self.mock_comment,format='json', HTTP_AUTHORIZATION=self.authorization)
         self.assertEqual(res.status_code, 201)
 
-        res = self.client.get(f"{urlComment}?page=1&size=1")
+        res = self.client.get(f"{urlComment}?page=1&size=0")
         self.assertEqual(res.status_code, 200)
     
-        self.assertEqual(len(res.data.get("comments")), 1)
+        self.assertEqual(len(res.data.get("comments")), 0)
 
 
