@@ -17,7 +17,7 @@ from node.utils import authenticated_GET, authenticated_POST, authenticated_GET_
 from uuid import uuid4
 
 our_frontends = ["http://localhost:3000"]
-our_backends = ["http://localhost:8000", "http://testserver"]  # TODO, add the heroku host origin here too
+our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
 
@@ -50,7 +50,6 @@ def isAuthorized(request, author_uuid):
         requesterUUID = user.uuid.hex
         
         # if the requester is not what they say they are (aren't the actual author)
-        #print("*"*10,"\n",  str(requesterUUID), "\n", "-"*10, "\n", author_uuid)
         if str(requesterUUID) != author_uuid:
             return False
         return True
@@ -522,19 +521,14 @@ def check_remote_fetch(author_obj, endpoint):
     '''Checks if the author is a remote one, if so, fetches to the specified endpoint
         Example endpoint = "/followers/"
     '''
-    print("----1234",author_obj)
-    print("----123", author_obj.host)
 
     if not is_our_backend(author_obj.host):
         target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
-        print("@3")
         res = authenticated_GET_host(target, author_obj.host, author_obj.id)
-        print("@4")
         if res.status_code == 200:
             return res.json()
         else:
             return f"Could not fetch to {author_obj.id}{endpoint}. {res.status_code}:{res.text}"
-        
     return None
 
 def build_pagination_query(url, page, size):
