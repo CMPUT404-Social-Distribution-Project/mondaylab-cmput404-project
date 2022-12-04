@@ -88,8 +88,9 @@ class FollowersForeignApiView(GenericAPIView):
             try:
                 current_author = Author.objects.get(uuid = author_id)
                 foreign_author = Author.objects.get(uuid = foreign_author_id)
-
                 current_author.followers.add(foreign_author)
+                
+
                 followers = current_author.followers.all().order_by('displayName')
                 followers_serializer = self.serializer_class(followers, many=True)
                 result = {
@@ -98,10 +99,15 @@ class FollowersForeignApiView(GenericAPIView):
                 }
                 
                 # remove request from inbox if it exists
-                inbox = Inbox.objects.filter(author=current_author).first()
-                follow_request = inbox.follow_requests.filter(actor__uuid= foreign_author_id).first()
-                if inbox and follow_request:
-                    inbox.follow_requests.remove(follow_request)
+                # when the inbox is not exsit, it will give error
+                # Handle a special case.
+                try:
+                    inbox = Inbox.objects.filter(author=current_author).first()
+                    follow_request = inbox.follow_requests.filter(actor__uuid= foreign_author_id).first()
+                    if inbox and follow_request:
+                        inbox.follow_requests.remove(follow_request)
+                except:
+                    pass
      
                 return response.Response(result, status=status.HTTP_200_OK)
 
