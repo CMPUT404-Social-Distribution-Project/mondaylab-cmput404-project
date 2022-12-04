@@ -17,7 +17,7 @@ from node.utils import authenticated_GET, authenticated_POST, authenticated_GET_
 from uuid import uuid4
 
 our_frontends = ["http://localhost:3000"]
-our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
+our_backends = ["http://localhost:8000", "http://testserver"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
 
