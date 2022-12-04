@@ -53,7 +53,6 @@ class InboxApiView(GenericAPIView):
     
     def get(self, request, author_id):
     
-        print("in GET")
         """
         GET [local]: if authenticated get a list of posts sent to AUTHOR_ID (paginated)
         """
@@ -93,7 +92,7 @@ class InboxApiView(GenericAPIView):
         """
         try:
             author = fetch_author(author_id)
-            if type(author) == str:
+            if isinstance(author, str):
                 raise ValueError(author)
             if not is_our_backend(author.host):
                 # The author is not from our backend, try and send the data to their inbox instead
@@ -105,11 +104,10 @@ class InboxApiView(GenericAPIView):
                     request.data
                 )
                 if res.status_code >= 200 and res.status_code < 300:
-                    print(f"Success sending data to inbox of remote author {node_author_inbox_url}")
                     return response.Response(f"Sent data to {node_author_inbox_url} inbox of remote author", status=status.HTTP_200_OK)
                 else:
-                    print(f"Failed to send data to remote author '{author.displayName}' to {node_author_inbox_url}")
-                    print(f"{res.status_code}:{res.text}")
+                   
+                    
                     return response.Response(f"{res.status_code}: {res.text}. Failed to send data to remote author ' \
                     {author.displayName}' to {node_author_inbox_url}", status=status.HTTP_404_NOT_FOUND)
 
@@ -160,7 +158,7 @@ class InboxApiView(GenericAPIView):
         elif request.data['type'].lower() == "post":
             try:
                 request_post_data = validate_remote_post(request.data)
-                if type(request_post_data) == str:
+                if isinstance(request_post_data, str):
                     raise ValueError(request_post_data)
                 request_post_author = get_or_create_author(request_post_data["author"])
                 
@@ -378,7 +376,7 @@ class InboxAllApiView(GenericAPIView):
                 else:
                     comments_serializers_data=[]
                     
-                print("HEREEEE")
+               
                 result = {
                     'type': 'inbox',
                     'author': author.url,
@@ -388,7 +386,7 @@ class InboxAllApiView(GenericAPIView):
                     comments_serializers_data
                     
                 }
-                print(result)
+                
                 return response.Response(result, status=status.HTTP_200_OK) 
 
             except Exception as e:
@@ -396,7 +394,7 @@ class InboxAllApiView(GenericAPIView):
                 return response.Response(result, status=status.HTTP_404_NOT_FOUND)
 
 class InboxDeleteFRApiView(GenericAPIView):
-    print("here!-!")
+    
     '''
     URL: ://service/authors/{AUTHOR_ID}/inbox/{FOREIGN_AUTHOR_ID}
     DELETE [local]: deletes the follow request(s) from the 
@@ -428,7 +426,7 @@ class InboxDeleteFRApiView(GenericAPIView):
 
 def get_author(author_id):
 
-    print("in get_author")
+
     """
     Given author id, check if the author exists in database
     """
@@ -439,8 +437,6 @@ def get_author(author_id):
         return None
 
 def get_like_type(object_field):
-
-    print("in get_link_type")
     if "posts" in object_field and "comments" in object_field:
         return "comment"
     elif "post" in object_field:

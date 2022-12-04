@@ -30,7 +30,8 @@ import { toast } from 'react-toastify';
 import PublishedAgo from "./PublishedAgo";
 
 export default function PostCard(props) {
-  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  let loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  loggedInUser['username'] = loggedInUser.displayName;
   const post_user_uuid = extractAuthorUUID(props.post.author.id);
   const post_id = extractPostUUID(props.post.id);
   const { baseURL } = useContext(AuthContext); // our api url http://127.0.0.1/service
@@ -81,6 +82,12 @@ export default function PostCard(props) {
       summary: `${loggedInUser.displayName} Likes your post.`,
       author: loggedInUser,
       object: props.post.id,
+      data: {
+        // team 4 uses this..
+        id: props.post.id,      
+        author: loggedInUser,
+        ...props.post,
+      }
     };
     api
       .post(`${baseURL}/authors/${post_user_uuid}/inbox/`, postLike)
@@ -272,13 +279,12 @@ export default function PostCard(props) {
       .then((response) => {
         commentObject["type"] = response.data.type;
         commentObject["comment"] = response.data.comment;
-        commentObject["author"] = response.data.author;
+        commentObject["author"] = loggedInUser;
         commentObject["id"] = response.data.id;
         commentObject["contentType"] = response.data.contentType;
         commentObject["published"] = response.data.published;
         commentObject["uuid"] = response.data.uuid;
         commentObject["object"] = props.post.id;
-        console.log("Comment obj is", response.data);
 
         sendCommentToInbox(post_user_uuid, commentObject);
 

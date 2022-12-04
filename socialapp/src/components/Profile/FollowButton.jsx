@@ -58,6 +58,8 @@ export default function FollowButton(props) {
           summary: `${currentAuthor.displayName} wants to follow ${props.authorViewing.displayName}`,
           actor: currentAuthor,
           object: props.authorViewing,
+          id: props.authorViewing.id,
+          username: currentAuthor.displayName
         }
         )
         .then((response) => {

@@ -28,13 +28,13 @@ class LikesPostApiView(GenericAPIView):
     def get(self, request, author_id, post_id):
         try:
             author_obj = fetch_author(author_id)
-            if type(author_obj) == str:
+            if isinstance(author_obj, str):
                 raise ValueError(author_obj)
             res = check_remote_fetch(author_obj, f"/posts/{post_id}/likes")
-            if type(res) == str:
+            if isinstance(res, str):
                 raise ValueError(res)
             if res != None:
-                if type(res) == type([]):
+                if isinstance(res, list):
                     res = {"type": "likes", "items": res}
                 return response.Response(res, status=status.HTTP_200_OK)
 
@@ -96,13 +96,13 @@ class LikesCommentApiView(GenericAPIView):
         # to get all likes with this comment, check if post_id, comment_id is in the field('object')
         try:
             author_obj = fetch_author(author_id)
-            if type(author_obj) == str:
+            if isinstance(author_obj, str):
                 raise ValueError(author_obj)
             res = check_remote_fetch(author_obj, f"/posts/{post_id}/comments/{comment_id}/likes/")
-            if type(res) == str:
+            if isinstance(res, str):
                 raise ValueError(res)
             if res != None:
-                if type(res) == type([]):
+                if isinstance(res, list):
                     res = {"type": "likes", "items": res}
                 return response.Response(res, status=status.HTTP_200_OK)
                 

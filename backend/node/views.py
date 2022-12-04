@@ -6,12 +6,7 @@ from rest_framework import response, status
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 import requests
-from rest_framework import authentication
 import base64
-from .utils import authenticated_GET, getRemoteAuthors, our_hosts
-import json
-from author.models import Author
-from author.serializers import AuthorSerializer
 
 credentialForConnect = {"username" : "hello", "password" : "world"}  # credential to connect
 credentialForDelete = {"", "", "", ""}

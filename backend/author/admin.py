@@ -47,9 +47,10 @@ def get_posts_of_authors_followers(modeladmin, request, queryset):
                 try:
                     node = Node.objects.get(host__contains=follower.host)
                     res = authenticated_GET(f"{follower.id}/posts/", node)
+                    if isinstance(res, str):
+                        raise ValueError(res)
                     if res.status_code == 200:
                         remote_posts = res.json().get("items")
-                        print(remote_posts)
                         posts_list.extend(remote_posts)
                 except Exception as e:
                     print(f"Something went wrong trying to fetch to node {node.host}. {e}")

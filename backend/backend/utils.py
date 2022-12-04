@@ -17,7 +17,7 @@ from node.utils import authenticated_GET, authenticated_POST, authenticated_GET_
 from uuid import uuid4
 
 our_frontends = ["http://localhost:3000"]
-our_backends = ["http://localhost:8000"]  # TODO, add the heroku host origin here too
+our_backends = ["http://localhost:8000", "http://testserver"]  # TODO, add the heroku host origin here too
 author_required_fields = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
 
 
@@ -477,7 +477,6 @@ def send_to_remote_inbox(remote_author_obj, data):
         res = authenticated_POST(f"{remove_end_slash(remote_author_obj.id)}/inbox/", node_obj, data)
         if res.status_code != 200:
             print(f"Failed to send data to inbox of remote author {remote_author_obj.id}")
-            print(res.content)
     else:
         print(f"Could not send to remote inbox, author '{remote_author_obj.displayName}' is not part of an accepted node")
 
@@ -508,6 +507,9 @@ def fetch_author(author_uuid):
     for node in nodes:
         authors_url = f"{node.host}authors/{author_uuid}"
         res = authenticated_GET(authors_url, node)
+        if isinstance(res, str):
+            print(f"fetch_author[ERROR]: {res}")
+            continue
         if res.status_code == 200:
             print(f"fetch_author: Found author at {authors_url}!",res.content)
             create_remote_author(res.json())
@@ -525,6 +527,8 @@ def check_remote_fetch(author_obj, endpoint):
     if not is_our_backend(author_obj.host):
         target = f"authors/{get_author_uuid_from_id(author_obj.id)}{endpoint}"
         res = authenticated_GET_host(target, author_obj.host, author_obj.id)
+        if isinstance(res, str):
+            return f"Could not fetch to {author_obj.id}{endpoint}. {res}"
         if res.status_code == 200:
             return res.json()
         else:
