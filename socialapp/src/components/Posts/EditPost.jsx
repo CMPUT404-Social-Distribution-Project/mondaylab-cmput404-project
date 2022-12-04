@@ -256,7 +256,7 @@ export default function EditPost(props) {
   const search = async (val) => {
     setLoading(true);
     const res = await search2(
-      `${baseURL}/authors?search=${val}&size=3`
+      `${baseURL}/authors?search=${val}&size=10`
     );
     setAuthors(res);
 

@@ -214,9 +214,13 @@
 
 .private-search-container .private-search-authors {
     grid-column: 1 / -1;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+    max-height: 10rem;
 }
 .create-post-modal .userCard {
     width: 100%;
+    background-color: var(--slightly-darker-blue);
 }
 
 .private-search-container .private-search-input {
