@@ -17,7 +17,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import PulseLoader from 'react-spinners/PulseLoader';
 import { toast } from 'react-toastify';
-
+import ReactPaginate from "react-paginate";
 function TeamSelect(props) {
   return (
     <DropdownButton onSelect={props.onSelect} title={"Team " + props.title} >
@@ -34,6 +34,7 @@ export default function Explore() {
   const [loading, setLoading] = useState(false);
   const [value, setValue] = useState("");
   const [postsArray, setPostsArray] = useState([]);
+  const [postsArrayP, setPostsArrayP] = useState([]);
   const [searchPostsArray, setSearchPostsArray] = useState([]);
   const [displaySearch, setDisplaySearch] = useState(false);
   const api = useAxios();
@@ -48,6 +49,8 @@ export default function Explore() {
   const [postsLoading, setPostsLoading] = useState(false);
   const [remoteAuthorsLoading, setRemoteAuthorsLoading] = useState(false);
   const [showSearchedAuthors, setShowSearchedAuthors] = useState(false);
+  const [pageCount, setPageCount]= useState(1);
+  const [stopIncreasePageCount, setStopIncreasePageCount]=useState(false);
   
   /**
  * Hook that alerts clicks outside of the passed ref
@@ -102,9 +105,13 @@ function RenderAuthors(props) {
     const fetchData = async () => {
       setPostsLoading(true);
       api
-      .get(`${baseURL}/posts/`)
+      .get(`${baseURL}/posts/?page=1&size=10`)
       .then((response) => {
-        setPostsArray(response.data.items);
+        setPostsArrayP(response.data.items);
+        console.log("---1",`${baseURL}/posts/?page=1&size=5` )
+        console.log("---2", response.data.items.length, response)
+        if (response.data.items.length!=0){setPageCount(pageCount+1)}
+        console.log("===1", pageCount)
         setPostsLoading(false);
       })
       .catch((error) => {
@@ -157,6 +164,21 @@ function RenderAuthors(props) {
   useEffect(() => {
 
   }, []);
+
+
+  /*setPostsLoading(true);
+      api
+      .get(`${baseURL}/posts/`)
+      .then((response) => {
+        setPostsArray(response.data.items);
+        setPostsLoading(false);
+      })
+      .catch((error) => {
+        setPostsLoading(false);
+        toast.error("Failed to fetch all public posts.");
+        console.log("Failed to fetch all public posts.", error);
+      });*/ 
+  const [pagenum, setPageNum]=useState(0)
 
   const search = async (val) => {
     setLoading(true);
@@ -216,6 +238,29 @@ function RenderAuthors(props) {
     localStorage.setItem("teamSelected", e);
   }
 
+  const loadPost = (event) => {
+    setPostsLoading(true);
+    api
+    .get(`${baseURL}/posts/?page=${event.selected+1}&size=10`)
+    .then((response) => {
+      setPostsArrayP(response.data.items);
+      if (response.data.items.length!=0 && stopIncreasePageCount===false){setPageCount(pageCount+1)}else{setStopIncreasePageCount(true)}
+      console.log("---11",`${baseURL}/posts/?page=${event.selected+1}&size=10` )
+      console.log("---22",pageCount, "---",  response)
+      setPostsLoading(false);
+    })
+    .catch((error) => {
+      setPostsLoading(false);
+      toast.error("Failed to fetch all public posts.");
+      console.log("Failed to fetch all public posts.", error);
+    });
+        setLoading(false);
+    console.log(
+      `User requested page number ${event.selected+1}`
+    );
+
+  };
+
   return (
     <div className="explore-page-container">
       {/* Stack the columns on mobile by making one full-width and the other half-width */}
@@ -264,7 +309,7 @@ function RenderAuthors(props) {
               <>
                 <h5>Current public posts</h5>
                 {postsLoading ? <PulseLoader className="public-posts-loader" color="var(--teal)" /> : <div className="all-posts-container">
-                  {postsArray.map((post) => (
+                  {postsArrayP.map((post) => (
                       <ExplorePostCard loggedInAuthorsLiked={liked} loggedInAuthorsFollowers={followers} loggedInAuthorsFriends={friends} post={post} key={post.id} />
                   ))}
                 </div>}
@@ -288,6 +333,27 @@ function RenderAuthors(props) {
         {/* <RenderRemoteAuthors authors={remoteAuthors}/> */}
 
       </div>
+      <div style={{ marginLeft: "40%" }}>
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel="next >"
+              onPageChange={loadPost}
+              pageRangeDisplayed={5}
+              pageCount={pageCount}
+              marginPagesDisplayed={2}
+              previousLabel="< previous"
+              pageClassName="page-item"
+              pageLinkClassName="page-link"
+              previousClassName="page-item"
+              previousLinkClassName="page-link"
+              nextClassName="page-item"
+              nextLinkClassName="page-link"
+              breakClassName="page-item"
+              breakLinkClassName="page-link"
+              containerClassName="pagination"
+              activeClassName="active"
+            />
+          </div>
       
 
     </div>
