@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import StreamHome from './pages/StreamHome';
 import Inbox from './pages/Inbox';
 import Explore from './pages/Explore';
+import RemotePublicPosts from './pages/RemotePublicPosts'
 import Profile from './pages/Profile';
 import { AuthProvider } from "./context/AuthContext";
 import Main from "./Main";
@@ -29,6 +30,7 @@ root.render(
               <Route path='stream/github' element={<GithubPage/>} />
               <Route path='inbox' element={<Inbox/>} />
               <Route path='explore' element={<Explore/>} />
+              <Route path='remote_public_posts' element={<RemotePublicPosts/>} />
               <Route path='authors/:author_id' element={<Profile/>} />
               <Route path='authors/:author_id/:dir/' element={<Profile/>} />
               <Route path='authors/:author_id/posts/:post_id' element={<Post/>} />
