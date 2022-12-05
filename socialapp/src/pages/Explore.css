@@ -118,6 +118,7 @@
 .public-posts-container {
     display: flex;
     flex-direction: column;
+    padding-bottom: 4rem;
 }
 
 .public-posts-loader {
@@ -132,5 +133,29 @@
 .remote-authors-loader {
     margin-top: 2rem;
     align-self: center;
+}
+
+.pagination-container {
+    align-self: center;
+    display: flex;
+    gap: 0.5rem;
+    position: absolute;
+    bottom: 1rem;
+}
+
+.pagination-next, .pagination-prev {
+    background-color: var(--dark-blue);
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.8rem;
+    color: var(--teal);
+    border-radius: 2rem;
+}
+
+.pagination-next:hover, .pagination-prev:hover {
+    background-color: var(--slightly-darker-blue);
+    color: var(--teal-alt);
+    cursor: pointer;
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
 }
 
