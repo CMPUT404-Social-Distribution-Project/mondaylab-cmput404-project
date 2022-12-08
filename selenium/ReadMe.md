@@ -27,3 +27,4 @@
 - send follow request and accept follow request
 - send comment
 - like post
+- share post
