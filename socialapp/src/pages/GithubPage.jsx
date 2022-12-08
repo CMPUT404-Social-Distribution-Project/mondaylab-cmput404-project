@@ -70,7 +70,7 @@ User can only see their own githubs activities */
 User can see all githubs from all authors */
   useEffect(() => {
     api
-      .get(`${baseURL}/authors`)
+      .get(`${baseURL}/authors/?size=100`)
       .then((response) => {
         const authorList = response.data.items;
         for (let author of authorList) {
