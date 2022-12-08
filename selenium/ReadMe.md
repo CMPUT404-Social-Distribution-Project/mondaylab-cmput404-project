@@ -1,7 +1,7 @@
 # To start test
  - Prerequest: you should install Chrome in your Windows or Ubuntu environment
  - self.website2 and self.website1 are different, one is run locally, one is run deployed.
- - since author need to be approved by admin, so I just create two user 'author 1' and 'author 2' for tets.
+ - since author need to be approved by admin, so I just create two user 'author 1' and 'author 2' for test.
  - If you want to test register, you can change self.name1 and slef.name2 inside signup.py 
  - ## test remote
 
