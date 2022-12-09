@@ -1,5 +1,5 @@
 # SocialDistribution: a social media app by Team01 
-![Banner]()
+![Banner](https://github.com/CMPUT404-Social-Distribution-Project/mondaylab-cmput404-project/blob/main/docs/socialdistribution_banner.png)
 
 # Site Links:
 ***Frontend:*** https://superlative-gelato-dcf1b6.netlify.app  
