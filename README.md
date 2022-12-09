@@ -1,5 +1,5 @@
 # SocialDistribution: a social media app by Team01 
-***Created in CMPUT-404 Fall 2022 course***
+![Banner]()
 
 # Site Links:
 ***Frontend:*** https://superlative-gelato-dcf1b6.netlify.app  
